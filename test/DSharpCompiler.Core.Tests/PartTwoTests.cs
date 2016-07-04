@@ -1,27 +1,25 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
 {
-    public class PartOneTests
+    public class PartTwoTests
     {
         [Fact]
-        public void BasicAdditionTest()
+        public void AddtionTest()
         {
-            var code = "3+5";
-            //var code = "\"hello\" public 555 temp.Do() class temp.Do()";
+            var code = "1+1+1";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
             var result = parser.Expression();
-            Assert.Equal(8, result);
+            Assert.Equal(3, result);
         }
 
         [Fact]
-        public void MultiDigitTest()
+        public void MultiplicationTest()
         {
-            var code = "12+3";
+            var code = "5*3";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
@@ -30,25 +28,36 @@ namespace DSharpCompiler.Core.Tests
         }
 
         [Fact]
-        public void WhiteSpaceTest()
+        public void DivisionTest()
         {
-            var code = " 12 + 3";
+            var code = "12/3";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
             var result = parser.Expression();
-            Assert.Equal(15, result);
+            Assert.Equal(4, result);
         }
 
         [Fact]
-        public void SubtractionTest()
+        public void ContinuousOperationsTest()
         {
-            var code = "7-5";
+            var code = "9 - 5 + 3 + 11";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
             var result = parser.Expression();
-            Assert.Equal(2, result);
+            Assert.Equal(18, result);
+        }
+
+        [Fact]
+        public void MultiplicationAndDivisionTest()
+        {
+            var code = "7 * 4 / 2 * 3";
+            var lexer = new LexicalAnalyzer(code);
+            var tokens = lexer.Analayze();
+            var parser = new TokenParser(tokens.ToList());
+            var result = parser.Expression();
+            Assert.Equal(42, result);
         }
     }
 }

@@ -24,7 +24,9 @@ namespace DSharpCompiler.Core
                 new Token { Value = ";" , Type = TokenType.Symbol},
                 new Token { Value = "." , Type = TokenType.Symbol},
                 new Token { Value = "+" , Type = TokenType.Symbol},
-                new Token { Value = "-" , Type = TokenType.Symbol}
+                new Token { Value = "-" , Type = TokenType.Symbol},
+                new Token { Value = "*" , Type = TokenType.Symbol},
+                new Token { Value = "/" , Type = TokenType.Symbol}
             };
         }
 
@@ -68,6 +70,8 @@ namespace DSharpCompiler.Core
 
         public bool IsIdentifier(string value)
         {
+            if (string.IsNullOrEmpty(value))
+                return false;
             var keyTokens = _tokens.Where(t => t.Type == TokenType.Keyword)
                 .Select(t => t.Value);
             var isKeyword = !keyTokens.Contains(value);

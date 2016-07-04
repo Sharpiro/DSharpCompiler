@@ -21,19 +21,23 @@ namespace DSharpCompiler.Core
         {
             _source.Split(new string[] { " " }, StringSplitOptions.None);
             RemoveNewLines();
-            while (_source.Length > 0)
+            while (HasData())
             {
                 var token = Advance();
                 if (token != null)
                     _foundTokens.Add(token);
-
             }
             return _foundTokens;
         }
 
-        private Token Advance()
+        private bool HasData()
         {
             RemoveWhiteSpace();
+            return _source.Length > 0;
+        }
+
+        private Token Advance()
+        {
             var firstLetter = _source.FirstOrDefault();
             var firstWord = GetFirstWord(_source);
 

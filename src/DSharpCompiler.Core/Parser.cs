@@ -21,18 +21,25 @@ namespace DSharpCompiler.Core
         public int Expression()
         {
             var left = _currentToken;
+            var result = int.Parse(left.Value);
             EatToken(TokenType.NumericConstant);
-            var op = _currentToken;
-            EatToken(TokenType.Symbol);
-            var right = _currentToken;
-            EatToken(TokenType.NumericConstant);
-            int result = 0;
-            if (op.Value == "+")
-                result = int.Parse(left.Value) + int.Parse(right.Value);
-            else if (op.Value == "-")
-                result = int.Parse(left.Value) - int.Parse(right.Value);
-            else
-                throw new InvalidOperationException();
+            while (_currentToken != null)
+            {
+                var op = _currentToken;
+                EatToken(TokenType.Symbol);
+                var right = _currentToken;
+                EatToken(TokenType.NumericConstant);
+                if (op.Value == "+")
+                    result = result + int.Parse(right.Value);
+                else if (op.Value == "-")
+                    result = result - int.Parse(right.Value);
+                else if (op.Value == "*")
+                    result = result * int.Parse(right.Value);
+                else if (op.Value == "/")
+                    result = result / int.Parse(right.Value);
+                else
+                    throw new InvalidOperationException();
+            }
             return result;
         }
 
