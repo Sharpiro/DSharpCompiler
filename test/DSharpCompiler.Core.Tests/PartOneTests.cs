@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
@@ -9,12 +8,14 @@ namespace DSharpCompiler.Core.Tests
         [Fact]
         public void BasicAdditionTest()
         {
-            var code = "3+5";
+            var code = "3+2";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var result = parser.Expression();
-            Assert.Equal(8, result);
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
+            Assert.Equal(5, result);
         }
 
         [Fact]
@@ -24,7 +25,9 @@ namespace DSharpCompiler.Core.Tests
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var result = parser.Expression();
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
             Assert.Equal(15, result);
         }
 
@@ -35,7 +38,9 @@ namespace DSharpCompiler.Core.Tests
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var result = parser.Expression();
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
             Assert.Equal(15, result);
         }
 
@@ -46,7 +51,9 @@ namespace DSharpCompiler.Core.Tests
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var result = parser.Expression();
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
             Assert.Equal(2, result);
         }
     }

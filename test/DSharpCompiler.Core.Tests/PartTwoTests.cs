@@ -12,7 +12,9 @@ namespace DSharpCompiler.Core.Tests
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var result = parser.Expression();
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
             Assert.Equal(3, result);
         }
 
@@ -23,7 +25,9 @@ namespace DSharpCompiler.Core.Tests
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var result = parser.Expression();
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
             Assert.Equal(15, result);
         }
 
@@ -34,7 +38,9 @@ namespace DSharpCompiler.Core.Tests
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var result = parser.Expression();
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
             Assert.Equal(4, result);
         }
 
@@ -45,7 +51,9 @@ namespace DSharpCompiler.Core.Tests
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var result = parser.Expression();
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
             Assert.Equal(18, result);
         }
 
@@ -56,7 +64,9 @@ namespace DSharpCompiler.Core.Tests
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var result = parser.Expression();
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
             Assert.Equal(42, result);
         }
     }

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DSharpCompiler.Core
+namespace DSharpCompiler.Core.Models
 {
     public class Tokens : IEnumerable, IEnumerable<Token>
     {
