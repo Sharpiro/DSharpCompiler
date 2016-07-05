@@ -20,26 +20,62 @@ namespace DSharpCompiler.Core
 
         public int Expression()
         {
-            var left = _currentToken;
-            var result = int.Parse(left.Value);
-            EatToken(TokenType.NumericConstant);
-            while (_currentToken != null)
+            var result = Term();
+
+            while (_currentToken != null && _currentToken.Value.In("+", "-"))
             {
-                var op = _currentToken;
-                EatToken(TokenType.Symbol);
-                var right = _currentToken;
-                EatToken(TokenType.NumericConstant);
-                if (op.Value == "+")
-                    result = result + int.Parse(right.Value);
-                else if (op.Value == "-")
-                    result = result - int.Parse(right.Value);
-                else if (op.Value == "*")
-                    result = result * int.Parse(right.Value);
-                else if (op.Value == "/")
-                    result = result / int.Parse(right.Value);
+                if (_currentToken.Value == "+")
+                {
+                    EatToken(TokenType.Symbol);
+                    result += Term();
+                }
+                else if (_currentToken.Value == "-")
+                {
+                    EatToken(TokenType.Symbol);
+                    result -= Term();
+                }
                 else
                     throw new InvalidOperationException();
             }
+            return result;
+        }
+
+        private int Term()
+        {
+            var result = Factor();
+            while (_currentToken != null && _currentToken.Value.In("*", "/"))
+            {
+                if (_currentToken.Value == "*")
+                {
+                    EatToken(TokenType.Symbol);
+                    result *= Factor();
+                }
+                else if (_currentToken.Value == "/")
+                {
+                    EatToken(TokenType.Symbol);
+                    result /= Factor();
+                }
+            }
+            return result;
+        }
+
+        private int Factor()
+        {
+            var token = _currentToken;
+            var result = 0;
+            if (token.Type == TokenType.Symbol)
+            {
+                EatToken(TokenType.Symbol);
+                result = Expression();
+                EatToken(TokenType.Symbol);
+            }
+            else if (token.Type == TokenType.NumericConstant)
+            {
+                EatToken(TokenType.NumericConstant);
+                result = int.Parse(token.Value);
+            }
+            else
+                throw new InvalidOperationException();
             return result;
         }
 
