@@ -4,6 +4,7 @@
 #customs
 *typings
 *appCombined.*
+*.js
 *.map
 
 # User-specific files
@@ -215,3 +216,6 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+
+#nots
+!*systemjs.config.js

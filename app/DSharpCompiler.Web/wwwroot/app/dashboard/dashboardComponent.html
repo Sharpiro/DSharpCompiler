@@ -1,0 +1,18 @@
+﻿<h1>Angular 2 First Look</h1>
+<div class="row" *ngIf="errorMessage">
+    <div class="col-md-12">{{errorMessage}}</div>
+</div>
+<div class="row columns">
+    <div *ngFor="let vehicle of vehicles | async | LowerCasePipe" class="list col-md-12" [ngClass]="{ selected: selectedVehicle === vehicle }">
+        <button (click)="select(vehicle)" class="btn btn-default dashboard">{{vehicle.name}}</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <nested *ngIf="selectedVehicle" [vehicle]="selectedVehicle"></nested>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">{{transformMe | CustomPipe}}</div>
+</div>

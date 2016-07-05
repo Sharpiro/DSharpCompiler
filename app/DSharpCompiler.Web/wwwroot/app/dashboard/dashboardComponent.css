@@ -1,0 +1,19 @@
+﻿/*.list {
+}
+
+    .list.selected {
+        background-color: #ccc;
+        width: 250px;
+    }*/
+
+
+.btn.btn-default.dashboard {
+    width: 200px;
+    height: 70px;
+}
+
+.columns {
+    -moz-columns: 3;
+    -webkit-columns: 3;
+    columns: 3;
+}
