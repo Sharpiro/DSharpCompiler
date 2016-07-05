@@ -12,7 +12,9 @@ namespace DSharpCompiler.Core.Tests
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var result = parser.Expression();
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
             Assert.Equal(17, result);
         }
 
@@ -23,7 +25,9 @@ namespace DSharpCompiler.Core.Tests
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var result = parser.Expression();
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
             Assert.Equal(20, result);
         }
 
@@ -34,8 +38,22 @@ namespace DSharpCompiler.Core.Tests
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var result = parser.Expression();
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
             Assert.Equal(22, result);
+        }
+        [Fact]
+        public void DeepDeepNestingTest()
+        {
+            var code = "7 + 3 * (10 / (12 / (3 + 1) - 1)) / (2 + 3) - 5 - 3 + (8)";
+            var lexer = new LexicalAnalyzer(code);
+            var tokens = lexer.Analayze();
+            var parser = new TokenParser(tokens.ToList());
+            var rootNode = parser.Expression();
+            var interpreter = new Interpreter(rootNode);
+            var result = interpreter.Interpret();
+            Assert.Equal(10, result);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DSharpCompiler.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,51 +19,49 @@ namespace DSharpCompiler.Core
             _currentToken = _tokens.FirstOrDefault();
         }
 
-        public int Expression()
+        public Node Expression()
         {
-            var result = Term();
+            var node = Term();
 
             while (_currentToken != null && _currentToken.Value.In("+", "-"))
             {
-                if (_currentToken.Value == "+")
-                {
-                    EatToken(TokenType.Symbol);
-                    result += Term();
-                }
-                else if (_currentToken.Value == "-")
-                {
-                    EatToken(TokenType.Symbol);
-                    result -= Term();
-                }
-                else
-                    throw new InvalidOperationException();
+                var token = _currentToken;
+                //if (_currentToken.Value == "+")
+                //{
+                //    result += Term();
+                //}
+                //else if (_currentToken.Value == "-")
+                //{
+                //    EatToken(TokenType.Symbol);
+                //    result -= Term();
+                //}
+                //else
+                //    throw new InvalidOperationException();
+                EatToken(TokenType.Symbol);
+                node = new Node { Left = node, Token = token, Right = Term() };
             }
-            return result;
+            return node;
         }
 
-        private int Term()
+        private Node Term()
         {
-            var result = Factor();
+            var node = Factor();
             while (_currentToken != null && _currentToken.Value.In("*", "/"))
             {
-                if (_currentToken.Value == "*")
-                {
-                    EatToken(TokenType.Symbol);
-                    result *= Factor();
-                }
-                else if (_currentToken.Value == "/")
-                {
-                    EatToken(TokenType.Symbol);
-                    result /= Factor();
-                }
+                var token = _currentToken;
+                //if (_currentToken.Value.In("*", "/"))
+                //{
+                //}
+                EatToken(TokenType.Symbol);
+                node = new Node { Left = node, Token = token, Right = Factor() };
             }
-            return result;
+            return node;
         }
 
-        private int Factor()
+        private Node Factor()
         {
             var token = _currentToken;
-            var result = 0;
+            Node result = null;
             if (token.Type == TokenType.Symbol)
             {
                 EatToken(TokenType.Symbol);
@@ -72,7 +71,7 @@ namespace DSharpCompiler.Core
             else if (token.Type == TokenType.NumericConstant)
             {
                 EatToken(TokenType.NumericConstant);
-                result = int.Parse(token.Value);
+                result = new Node { Token = token };
             }
             else
                 throw new InvalidOperationException();

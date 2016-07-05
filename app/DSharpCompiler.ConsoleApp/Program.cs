@@ -16,7 +16,9 @@ namespace DSharpCompiler.ConsoleApp
                 var analyzer = new LexicalAnalyzer(source);
                 var tokens = analyzer.Analayze();
                 var parser = new TokenParser(tokens.ToList());
-                var result = parser.Expression();
+                var rootNode = parser.Expression();
+                var interpreter = new Interpreter(rootNode);
+                var result = interpreter.Interpret();
                 Console.WriteLine(result);
             }
         }
