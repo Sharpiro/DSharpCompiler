@@ -21,31 +21,53 @@ namespace DSharpCompiler.Core
         public int Visit(Node node)
         {
             if (node == null)
-                throw new InvalidOperationException();
-            if (node.Token.Type == TokenType.Symbol)
+                throw new ArgumentNullException(nameof(node));
+            if (node.Type == NodeType.BinaryOp)
             {
-                if (node.Token.Value == "+")
-                {
-                    return Visit(node.Left) + Visit(node.Right);
-                }
-                if (node.Token.Value == "-")
-                {
-                    return Visit(node.Left) - Visit(node.Right);
-                }
-                if (node.Token.Value == "*")
-                {
-                    return Visit(node.Left) * Visit(node.Right);
-                }
-                if (node.Token.Value == "/")
-                {
-                    return Visit(node.Left) / Visit(node.Right);
-                }
-                else
-                    throw new InvalidOperationException();
+                return VisitBinaryOpNode(node);
             }
-            else if (node.Token.Type == TokenType.NumericConstant)
+            else if (node.Type == NodeType.UnaryOp)
+            {
+                return VisitUnaryOpNode(node);
+            }
+            else if (node.Type == NodeType.Number)
             {
                 return int.Parse(node.Token.Value);
+            }
+            else
+                throw new InvalidOperationException();
+        }
+
+        public int VisitBinaryOpNode(Node node)
+        {
+            if (node.Token.Value == "+")
+            {
+                return Visit(node.Left) + Visit(node.Right);
+            }
+            else if (node.Token.Value == "-")
+            {
+                return Visit(node.Left) - Visit(node.Right);
+            }
+            else if (node.Token.Value == "*")
+            {
+                return Visit(node.Left) * Visit(node.Right);
+            }
+            else if (node.Token.Value == "/")
+            {
+                return Visit(node.Left) / Visit(node.Right);
+            }
+            else
+                throw new InvalidOperationException();
+        }
+        public int VisitUnaryOpNode(Node node)
+        {
+            if (node.Token.Value == "+")
+            {
+                return +Visit(node.Right);
+            }
+            else if (node.Token.Value == "-")
+            {
+                return -Visit(node.Right);
             }
             else
                 throw new InvalidOperationException();

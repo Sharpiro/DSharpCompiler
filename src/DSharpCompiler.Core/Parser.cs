@@ -26,19 +26,8 @@ namespace DSharpCompiler.Core
             while (_currentToken != null && _currentToken.Value.In("+", "-"))
             {
                 var token = _currentToken;
-                //if (_currentToken.Value == "+")
-                //{
-                //    result += Term();
-                //}
-                //else if (_currentToken.Value == "-")
-                //{
-                //    EatToken(TokenType.Symbol);
-                //    result -= Term();
-                //}
-                //else
-                //    throw new InvalidOperationException();
                 EatToken(TokenType.Symbol);
-                node = new Node { Left = node, Token = token, Right = Term() };
+                node = new Node { Left = node, Token = token, Right = Term(), Type = NodeType.BinaryOp };
             }
             return node;
         }
@@ -49,11 +38,8 @@ namespace DSharpCompiler.Core
             while (_currentToken != null && _currentToken.Value.In("*", "/"))
             {
                 var token = _currentToken;
-                //if (_currentToken.Value.In("*", "/"))
-                //{
-                //}
                 EatToken(TokenType.Symbol);
-                node = new Node { Left = node, Token = token, Right = Factor() };
+                node = new Node { Left = node, Token = token, Right = Factor(), Type = NodeType.BinaryOp };
             }
             return node;
         }
@@ -61,21 +47,26 @@ namespace DSharpCompiler.Core
         private Node Factor()
         {
             var token = _currentToken;
-            Node result = null;
-            if (token.Type == TokenType.Symbol)
-            {
-                EatToken(TokenType.Symbol);
-                result = Expression();
-                EatToken(TokenType.Symbol);
-            }
-            else if (token.Type == TokenType.NumericConstant)
+            Node node = null;
+            if (token.Type == TokenType.NumericConstant)
             {
                 EatToken(TokenType.NumericConstant);
-                result = new Node { Token = token };
+                node = new Node { Token = token, Type = NodeType.Number };
+            }
+            else if (token.Value.In("+", "-"))
+            {
+                EatToken(TokenType.Symbol);
+                node = new Node { Left = null, Token = token, Right = Factor(), Type = NodeType.UnaryOp };
+            }
+            else if (token.Value == "(")
+            {
+                EatToken(TokenType.Symbol);
+                node = Expression();
+                EatToken(TokenType.Symbol);
             }
             else
                 throw new InvalidOperationException();
-            return result;
+            return node;
         }
 
         private void EatToken(TokenType type)
