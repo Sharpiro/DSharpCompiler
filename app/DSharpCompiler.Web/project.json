@@ -46,10 +46,9 @@
     },
 
     "scripts": {
+        "prepublish": [ "npm install" ],
         "postpublish": [
-            "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%",
-            "npm install",
-            "xcopy \"node_modules\" \"%publish:OutputPath%\\node_modules\\*\" /O /X /E /H /K"
+            "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%"
         ]
     }
 }
