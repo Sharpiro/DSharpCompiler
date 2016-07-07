@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNet.Builder;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -25,7 +24,6 @@ namespace DSharpCompiler.Web
             app.UseDeveloperExceptionPage();
             app.UseMvc(options => options.MapRoute("defaultApi", "api/{controller}/{action}/{id?}"));
             app.UseFileServer();
-            app.UseCustomFileServer(env, "node_modules");
         }
 
         public static void Main(string[] args)

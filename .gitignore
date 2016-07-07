@@ -9,6 +9,7 @@
 *.pubxml
 *.ps1
 *.psm1
+**/libs/*
 
 # User-specific files
 *.suo
@@ -222,3 +223,4 @@ ModelManifest.xml
 
 #nots
 !*systemjs.config.js
+!*gulpfile.js
