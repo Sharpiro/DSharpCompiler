@@ -11,7 +11,7 @@ export class VehicleService implements IVehicleService
     public getVehicles(): Observable<IBaseData[]>
     {
         var obs = this.httpService.get("/api/vehicles/getdata")
-            .map(responese => <IBaseData[]>(responese.json().data));
+            .map(response => <IBaseData[]>(response.json().data));
         return obs;
     }
 
@@ -19,5 +19,13 @@ export class VehicleService implements IVehicleService
     {
         var promise = this.getVehicles().map(vehicles => vehicles.find(vehicle => vehicle.id === id));
         return promise;
+    }
+
+    public compile(source: string): Observable<number>
+    {
+        var body = { source: source };
+        var obs = this.httpService.post("/api/compiler/compile", body)
+            .map(response => response.json().data.output);
+        return obs;
     }
 }

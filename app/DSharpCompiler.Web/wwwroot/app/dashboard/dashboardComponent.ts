@@ -10,36 +10,29 @@ import {CustomPipe, NestedComponent, LowerCasePipe} from "../blocks/blocks"
     directives: [NestedComponent],
     pipes: [CustomPipe, LowerCasePipe],
 })
-export class DashboardComponent implements OnInit, AfterViewInit
+export class DashboardComponent implements OnInit
 {
-    public vehicles: Observable<IBaseData[]>;
-    public selectedVehicle: IBaseData;
-    public transformMe: string;
-    @Output() changed = new EventEmitter<IBaseData>();
-    private errorMessage: any;
-    private isActive = false;
+    private defaultInput = "5 - 2 * 8 - + - (3 + 4) - + 2"
+    private input = this.defaultInput;
+    private output: Observable<any>;
 
     constructor( @Inject("IVehicleServiceToken") private dataService: IVehicleService, private cdrService: ChangeDetectorRef)
     {
-        this.transformMe = "data123";
     }
 
     public ngOnInit(): void
     {
-        componentHandler.upgradeDom();
-        this.isActive = false;
-        this.vehicles = this.dataService.getVehicles();
+        //this.output = this.dataService.compile(this.input);
     }
 
-    public ngAfterViewInit(): void
+    private compile(): void
     {
-        this.isActive = false;
-        this.cdrService.detectChanges();
+        this.output = this.dataService.compile(this.input);
     }
 
-    public select(vehicle: IBaseData): void
+    private reset(): void
     {
-        this.selectedVehicle = vehicle;
-        this.changed.emit(this.selectedVehicle);
+        this.input = this.defaultInput;
+        this.output = undefined;
     }
 }

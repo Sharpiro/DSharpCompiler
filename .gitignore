@@ -6,6 +6,9 @@
 *appCombined.*
 *.js
 *.map
+*.pubxml
+*.ps1
+*.psm1
 
 # User-specific files
 *.suo

@@ -9,14 +9,16 @@ VehicleListComponent, VehicleComponent, SpinnerComponent, SpinnerService} from "
 @Component({
     selector: "my-app",
     directives: [ROUTER_DIRECTIVES, DashboardComponent, SpinnerComponent],
-    providers: [HTTP_PROVIDERS, provide("IVehicleServiceToken", { useClass: StaticVehicleService }),
-        provide(XHRBackend, { useClass: InMemoryBackendService }),
-        provide(SEED_DATA, { useClass: InMemoryDb }),
+    providers: [HTTP_PROVIDERS, provide("IVehicleServiceToken", { useClass: VehicleService }),
+        //provide(XHRBackend, { useClass: InMemoryBackendService }),
+        //provide(SEED_DATA, { useClass: InMemoryDb }),
         SpinnerService],
     templateUrl: "./app/appComponent.html",
     styles: [
         `nav ul {list-style-type: none;}
-        nav ul li {padding: 4px;display:inline-block}`
+        nav ul li {padding: 4px;display:inline-block}
+        bg-color { background-color: #ECECEA }
+`
     ]
 })
 @RouteConfig([

@@ -15,7 +15,7 @@ namespace DSharpCompiler.Web.Api
         }
 
         [HttpPost]
-        public string Compile([FromBody]object postData)
+        public object Compile([FromBody]object postData)
         {
             if (postData == null)
                 throw new ArgumentNullException(nameof(postData));
@@ -26,7 +26,8 @@ namespace DSharpCompiler.Web.Api
             var rootNode = parser.Expression();
             var interpreter = new Interpreter(rootNode);
             var result = interpreter.Interpret();
-            return result.ToString();
+            var response = new { Data = new { Output = result } };
+            return response;
         }
     }
 }

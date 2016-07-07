@@ -33,6 +33,11 @@ export class StaticVehicleService implements IVehicleService
         return promise;
     }
 
+    public compile(source: string): Observable<any>
+    {
+        return null;
+    }
+
     private handleError(error: Response): Observable<any>
     {
         console.error(error);
