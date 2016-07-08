@@ -1,0 +1,25 @@
+﻿.btn.btn-default.dashboard {
+    width: 200px;
+    height: 70px;
+}
+
+.columns {
+    -moz-columns: 3;
+    -webkit-columns: 3;
+    columns: 3;
+}
+
+.centerTextArea {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.buttonPadding {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.buttonSize {
+    width: 100px;
+}

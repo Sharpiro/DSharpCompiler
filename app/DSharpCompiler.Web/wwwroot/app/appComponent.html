@@ -1,0 +1,22 @@
+﻿<nav class="navbar navbar-inverse" role="navigation">
+    <div class="navbar-header" style="padding-left:15px">
+        <button type="button" class="pull-left navbar-toggle" (click)="toggleNav()">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand">D# Compiler</a>
+    </div>
+    <div class="collapse navbar-collapse" [ngClass]="showNavValue">
+        <ul class="nav navbar-nav"  (click)="toggleNav()">
+            <li [ngClass]="isActive('/dashboard')"><a [routerLink]="['Dashboard']" href="">Dashboard</a></li>
+            <li [ngClass]="isActive('/about')"><a [routerLink]="['About']" href="">About</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <router-outlet></router-outlet>
+</div>
+<spinner></spinner>
