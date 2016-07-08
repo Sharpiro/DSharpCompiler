@@ -27,7 +27,7 @@ namespace DSharpCompiler.Core
             {
                 var token = _currentToken;
                 EatToken(TokenType.Symbol);
-                node = new Node { Left = node, Token = token, Right = Term(), Type = NodeType.BinaryOp };
+                node = new BinaryNode(node, token, Term());
             }
             return node;
         }
@@ -39,7 +39,7 @@ namespace DSharpCompiler.Core
             {
                 var token = _currentToken;
                 EatToken(TokenType.Symbol);
-                node = new Node { Left = node, Token = token, Right = Factor(), Type = NodeType.BinaryOp };
+                node = new BinaryNode(node, token, Factor());
             }
             return node;
         }
@@ -51,12 +51,12 @@ namespace DSharpCompiler.Core
             if (token.Type == TokenType.NumericConstant)
             {
                 EatToken(TokenType.NumericConstant);
-                node = new Node { Token = token, Type = NodeType.Number };
+                node = new NumericNode(token);
             }
             else if (token.Value.In("+", "-"))
             {
                 EatToken(TokenType.Symbol);
-                node = new Node { Left = null, Token = token, Right = Factor(), Type = NodeType.UnaryOp };
+                node = new UnaryNode(token, Factor());
             }
             else if (token.Value == "(")
             {

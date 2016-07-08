@@ -30,9 +30,9 @@ namespace DSharpCompiler.Core
             {
                 return VisitUnaryOpNode(node);
             }
-            else if (node.Type == NodeType.Number)
+            else if (node.Type == NodeType.Numeric)
             {
-                return int.Parse(node.Token.Value);
+                return VisitNumericNode(node);
             }
             else
                 throw new InvalidOperationException();
@@ -40,37 +40,45 @@ namespace DSharpCompiler.Core
 
         public int VisitBinaryOpNode(Node node)
         {
-            if (node.Token.Value == "+")
+            var numericNode = node as BinaryNode;
+            if (numericNode.Token.Value == "+")
             {
-                return Visit(node.Left) + Visit(node.Right);
+                return Visit(numericNode.Left) + Visit(numericNode.Right);
             }
-            else if (node.Token.Value == "-")
+            else if (numericNode.Token.Value == "-")
             {
-                return Visit(node.Left) - Visit(node.Right);
+                return Visit(numericNode.Left) - Visit(numericNode.Right);
             }
-            else if (node.Token.Value == "*")
+            else if (numericNode.Token.Value == "*")
             {
-                return Visit(node.Left) * Visit(node.Right);
+                return Visit(numericNode.Left) * Visit(numericNode.Right);
             }
-            else if (node.Token.Value == "/")
+            else if (numericNode.Token.Value == "/")
             {
-                return Visit(node.Left) / Visit(node.Right);
+                return Visit(numericNode.Left) / Visit(numericNode.Right);
             }
             else
                 throw new InvalidOperationException();
         }
         public int VisitUnaryOpNode(Node node)
         {
-            if (node.Token.Value == "+")
+            var unaryNode = node as UnaryNode;
+            if (unaryNode.Token.Value == "+")
             {
-                return +Visit(node.Right);
+                return +Visit(unaryNode.Expression);
             }
-            else if (node.Token.Value == "-")
+            else if (unaryNode.Token.Value == "-")
             {
-                return -Visit(node.Right);
+                return -Visit(unaryNode.Expression);
             }
             else
                 throw new InvalidOperationException();
+        }
+
+        public int VisitNumericNode(Node node)
+        {
+            var numericNode = node as NumericNode;
+            return numericNode.Value;
         }
     }
 }
