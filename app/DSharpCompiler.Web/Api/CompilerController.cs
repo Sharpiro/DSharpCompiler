@@ -23,7 +23,7 @@ namespace DSharpCompiler.Web.Api
             var analyzer = new LexicalAnalyzer(source);
             var tokens = analyzer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Expression();
+            var rootNode = parser.Program();
             var interpreter = new Interpreter(rootNode);
             var result = interpreter.Interpret();
             var response = new { Data = new { Output = result } };

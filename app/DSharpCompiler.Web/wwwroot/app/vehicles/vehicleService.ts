@@ -1,7 +1,7 @@
-﻿import {Injectable} from "@angular/core"
-import {Http} from "@angular/http"
-import {Observable} from "rxjs/Rx"
-import {IVehicleService} from "./vehicles"
+﻿import {Injectable} from "@angular/core";
+import {Http, Response} from "@angular/http";
+import {Observable} from "rxjs/Rx";
+import {IVehicleService} from "./vehicles";
 
 @Injectable()
 export class VehicleService implements IVehicleService
@@ -21,11 +21,16 @@ export class VehicleService implements IVehicleService
         return promise;
     }
 
-    public compile(source: string): Observable<number>
+    public compile(source: string): Observable<string>
     {
         var body = { source: source };
         var obs = this.httpService.post("/api/compiler/compile", body)
-            .map(response => response.json().data.output);
+            .catch(() =>
+            {
+                toastr.error("Compilation Error");
+                return null;
+            })
+            .map((response: Response) => JSON.stringify(response.json().data.output));
         return obs;
     }
 }

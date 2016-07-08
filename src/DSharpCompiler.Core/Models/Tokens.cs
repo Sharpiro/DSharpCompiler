@@ -13,43 +13,49 @@ namespace DSharpCompiler.Core.Models
         {
             _tokens = new List<Token>
             {
-                new Token { Value = "public" , Type = TokenType.Keyword},
-                new Token { Value = "class" , Type = TokenType.Keyword},
-                new Token { Value = "void" , Type = TokenType.Keyword},
-                new Token { Value = "\"" , Type = TokenType.Symbol},
-                new Token { Value = "{" , Type = TokenType.Symbol},
-                new Token { Value = "}" , Type = TokenType.Symbol},
-                new Token { Value = "(" , Type = TokenType.Symbol},
-                new Token { Value = ")" , Type = TokenType.Symbol},
-                new Token { Value = ";" , Type = TokenType.Symbol},
-                new Token { Value = "." , Type = TokenType.Symbol},
-                new Token { Value = "+" , Type = TokenType.Symbol},
-                new Token { Value = "-" , Type = TokenType.Symbol},
-                new Token { Value = "*" , Type = TokenType.Symbol},
-                new Token { Value = "/" , Type = TokenType.Symbol}
+                new Token { Value = "public" , Type = TokenType.Keyword },
+                new Token { Value = "class" , Type = TokenType.Keyword },
+                new Token { Value = "void" , Type = TokenType.Keyword },
+                new Token { Value = "BEGIN" , Type = TokenType.Keyword },
+                new Token { Value = "END" , Type = TokenType.Keyword },
+                new Token { Value = "\"" , Type = TokenType.Symbol },
+                new Token { Value = "{" , Type = TokenType.Symbol },
+                new Token { Value = "}" , Type = TokenType.Symbol },
+                new Token { Value = "(" , Type = TokenType.Symbol },
+                new Token { Value = ")" , Type = TokenType.Symbol },
+                new Token { Value = ";" , Type = TokenType.Symbol },
+                new Token { Value = "." , Type = TokenType.Symbol },
+                new Token { Value = "+" , Type = TokenType.Symbol },
+                new Token { Value = "-" , Type = TokenType.Symbol },
+                new Token { Value = "*" , Type = TokenType.Symbol },
+                new Token { Value = "/" , Type = TokenType.Symbol },
+                new Token { Value = ";" , Type = TokenType.Symbol },
+                new Token { Value = ":=" , Type = TokenType.Symbol }
             };
         }
 
-        public Token GetTokenBySymbol(char symbol)
+        public Token GetTokenBySymbol(string symbol)
         {
-            var token = _tokens.FirstOrDefault(t => t.Value == symbol.ToString());
+            var token = _tokens.FirstOrDefault(t => t.Value == symbol);
             if (token == null)
                 throw new KeyNotFoundException();
             return token;
         }
 
-        public bool IsSymbol(char value)
+        public bool IsSymbol(string value)
         {
+            if (string.IsNullOrEmpty(value))
+                return false;
             var symbols = _tokens.Where(t => t.Type == TokenType.Symbol)
-                .Select(t => Convert.ToChar(t.Value));
+                .Select(t => t.Value);
             var isSymbol = symbols.Contains(value);
             return isSymbol;
         }
 
-        public bool IsQuote(char value)
+        public bool IsQuote(string value)
         {
             var quoteToken = _tokens.Where(t => t.Value == "\"").FirstOrDefault();
-            var isQuote = quoteToken.Value == value.ToString();
+            var isQuote = quoteToken.Value == value;
             return isQuote;
         }
 

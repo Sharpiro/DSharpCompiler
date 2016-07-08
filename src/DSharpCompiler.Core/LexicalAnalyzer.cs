@@ -39,11 +39,15 @@ namespace DSharpCompiler.Core
 
         private Token Advance()
         {
-            var firstLetter = _source.FirstOrDefault();
+            var firstLetter = _source.FirstOrDefault().ToString();
             var firstWord = GetFirstWord(_source);
 
             Token token = null;
-            if (_syntaxTokens.IsSymbol(firstLetter))
+            if (_syntaxTokens.IsSymbol($"{firstLetter}{Peek()}"))
+            {
+                token = _syntaxTokens.GetTokenBySymbol($"{firstLetter}{Peek()}");
+            }
+            else if (_syntaxTokens.IsSymbol(firstLetter))
             {
                 token = _syntaxTokens.GetTokenBySymbol(firstLetter);
                 if (_syntaxTokens.IsQuote(firstLetter))
@@ -72,6 +76,16 @@ namespace DSharpCompiler.Core
             }
             _source = _source.Substring(token.Value.Length);
             return token;
+        }
+
+        private string Peek()
+        {
+            try
+            {
+                return _source.Skip(1)?.FirstOrDefault().ToString();
+            }
+            catch (NullReferenceException) { }
+            return null;
         }
 
         private string GetFirstWord(string subSource)
