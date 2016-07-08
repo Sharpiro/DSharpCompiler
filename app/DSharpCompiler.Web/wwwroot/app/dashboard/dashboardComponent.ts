@@ -12,7 +12,18 @@ import {CustomPipe, NestedComponent, LowerCasePipe} from "../blocks/blocks"
 })
 export class DashboardComponent implements OnInit
 {
-    private defaultInput = "5 - 2 * 8 - + - (3 + 4) - + 2"
+    private defaultInput = 
+        `BEGIN
+            BEGIN
+                number := 2;
+                a := number;
+                b := 10 * a + 10 * number / 4;
+                c := a - - b;
+            END;
+            x := 11;
+            d := 7 + 3 * (10 / (12 / (3 + 1) - 1)) / (2 + 3) - 5 - 3 + (8);
+            e := 5 - - - + - (3 + 4) - +2
+        END.`
     private input = this.defaultInput;
     private output: Observable<any>;
 

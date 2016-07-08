@@ -8,39 +8,42 @@ namespace DSharpCompiler.Core.Tests
         [Fact]
         public void UnaryTest()
         {
-            var code = "2 + + - 2";
+            var code = "BEGIN a := 2 + + - 2 END.";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Expression();
+            var rootNode = parser.Program();
             var interpreter = new Interpreter(rootNode);
-            var result = interpreter.Interpret();
+            var dictionary = interpreter.Interpret();
+            var result = dictionary.FirstOrDefault().Value;
             Assert.Equal(0, result);
         }
 
         [Fact]
         public void NegativeUnaryTest()
         {
-            var code = "5 - - - 2";
+            var code = "BEGIN a := 5 - - - 2 END.";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Expression();
+            var rootNode = parser.Program();
             var interpreter = new Interpreter(rootNode);
-            var result = interpreter.Interpret();
+            var dictionary = interpreter.Interpret();
+            var result = dictionary.FirstOrDefault().Value;
             Assert.Equal(3, result);
         }
 
         [Fact]
         public void UnaryAndPrecedenceTest()
         {
-            var code = "5 - - - + - (3 + 4) - +2";
+            var code = "BEGIN a := 5 - - - + - (3 + 4) - +2 END.";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Expression();
+            var rootNode = parser.Program();
             var interpreter = new Interpreter(rootNode);
-            var result = interpreter.Interpret();
+            var dictionary = interpreter.Interpret();
+            var result = dictionary.FirstOrDefault().Value;
             Assert.Equal(10, result);
         }
 

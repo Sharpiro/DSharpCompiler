@@ -1,28 +1,45 @@
 ﻿using System;
 using DSharpCompiler.Core.Models;
+using System.Collections.Generic;
 
 namespace DSharpCompiler.Core
 {
     public class Interpreter
     {
         private readonly Node _root;
+        private readonly Dictionary<string, object> _globalData;
 
         public Interpreter(Node root)
         {
             _root = root;
+            _globalData = new Dictionary<string, object>();
         }
 
-        public int Interpret()
+        public Dictionary<string, object> Interpret()
         {
-            var result = Visit(_root);
+            Visit(_root);
+            var result = _globalData;
             return result;
         }
 
-        public int Visit(Node node)
+        public int? Visit(Node node)
         {
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
-            if (node.Type == NodeType.BinaryOp)
+
+            if (node.Type == NodeType.Compound)
+            {
+                return VisitCompoundNode(node);
+            }
+            else if (node.Type == NodeType.Assignment)
+            {
+                return VisitAssignmentNode(node);
+            }
+            else if (node.Type == NodeType.Variable)
+            {
+                return VisitVariableNode(node);
+            }
+            else if (node.Type == NodeType.BinaryOp)
             {
                 return VisitBinaryOpNode(node);
             }
@@ -30,47 +47,92 @@ namespace DSharpCompiler.Core
             {
                 return VisitUnaryOpNode(node);
             }
-            else if (node.Type == NodeType.Number)
+            else if (node.Type == NodeType.Numeric)
             {
-                return int.Parse(node.Token.Value);
+                return VisitNumericNode(node);
+            }
+            else if (node.Type == NodeType.Empty)
+            {
+                return VisitEmptyNode(node);
             }
             else
                 throw new InvalidOperationException();
         }
 
-        public int VisitBinaryOpNode(Node node)
+        private int? VisitCompoundNode(Node node)
         {
-            if (node.Token.Value == "+")
+            var compoundNode = node as CompoundNode;
+            foreach (var child in compoundNode.Children)
             {
-                return Visit(node.Left) + Visit(node.Right);
+                Visit(child);
             }
-            else if (node.Token.Value == "-")
+            return null;
+        }
+
+        private int? VisitAssignmentNode(Node node)
+        {
+            var assignmentNode = node as BinaryNode;
+            var left = assignmentNode.Left as VariableNode;
+            var variableName = left.Value;
+            _globalData[variableName] = Visit(assignmentNode.Right).Value;
+            return null;
+        }
+
+        private int? VisitVariableNode(Node node)
+        {
+            var variableNode = node as VariableNode;
+            var value = _globalData[variableNode.Value];
+            if (value == null)
+                throw new NullReferenceException("tried to use a variable that was null");
+            return (int)value;
+        }
+
+        private int? VisitEmptyNode(Node node)
+        {
+            return null;
+        }
+
+        public int? VisitBinaryOpNode(Node node)
+        {
+            var numericNode = node as BinaryNode;
+            if (numericNode.Token.Value == "+")
             {
-                return Visit(node.Left) - Visit(node.Right);
+                return Visit(numericNode.Left).Add(Visit(numericNode.Right));
             }
-            else if (node.Token.Value == "*")
+            else if (numericNode.Token.Value == "-")
             {
-                return Visit(node.Left) * Visit(node.Right);
+                return Visit(numericNode.Left).Subtract(Visit(numericNode.Right));
             }
-            else if (node.Token.Value == "/")
+            else if (numericNode.Token.Value == "*")
             {
-                return Visit(node.Left) / Visit(node.Right);
+                return Visit(numericNode.Left).Multiply(Visit(numericNode.Right));
+            }
+            else if (numericNode.Token.Value == "/")
+            {
+                return Visit(numericNode.Left).Divide(Visit(numericNode.Right));
             }
             else
                 throw new InvalidOperationException();
         }
-        public int VisitUnaryOpNode(Node node)
+        public int? VisitUnaryOpNode(Node node)
         {
-            if (node.Token.Value == "+")
+            var unaryNode = node as UnaryNode;
+            if (unaryNode.Token.Value == "+")
             {
-                return +Visit(node.Right);
+                return +Visit(unaryNode.Expression);
             }
-            else if (node.Token.Value == "-")
+            else if (unaryNode.Token.Value == "-")
             {
-                return -Visit(node.Right);
+                return -Visit(unaryNode.Expression);
             }
             else
                 throw new InvalidOperationException();
+        }
+
+        public int? VisitNumericNode(Node node)
+        {
+            var valueNode = node as NumericNode;
+            return valueNode.Value;
         }
     }
 }

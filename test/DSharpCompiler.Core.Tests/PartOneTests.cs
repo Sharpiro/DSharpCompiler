@@ -8,52 +8,56 @@ namespace DSharpCompiler.Core.Tests
         [Fact]
         public void BasicAdditionTest()
         {
-            var code = "3+2";
+            var code = "BEGIN a := 3 + 2; END.";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Expression();
+            var rootNode = parser.Program();
             var interpreter = new Interpreter(rootNode);
-            var result = interpreter.Interpret();
+            var dictionary = interpreter.Interpret();
+            var result = dictionary.FirstOrDefault().Value;
             Assert.Equal(5, result);
         }
 
         [Fact]
         public void MultiDigitTest()
         {
-            var code = "12+3";
+            var code = "BEGIN a := 12+3; END.";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Expression();
+            var rootNode = parser.Program();
             var interpreter = new Interpreter(rootNode);
-            var result = interpreter.Interpret();
+            var dictionary = interpreter.Interpret();
+            var result = dictionary.FirstOrDefault().Value;
             Assert.Equal(15, result);
         }
 
         [Fact]
         public void WhiteSpaceTest()
         {
-            var code = " 12 + 3";
+            var code = "BEGIN a :=  12 + 3; END.";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Expression();
+            var rootNode = parser.Program();
             var interpreter = new Interpreter(rootNode);
-            var result = interpreter.Interpret();
+            var dictionary = interpreter.Interpret();
+            var result = dictionary.FirstOrDefault().Value;
             Assert.Equal(15, result);
         }
 
         [Fact]
         public void SubtractionTest()
         {
-            var code = "7-5";
+            var code = "BEGIN a := 7-5 END.";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Expression();
+            var rootNode = parser.Program();
             var interpreter = new Interpreter(rootNode);
-            var result = interpreter.Interpret();
+            var dictionary = interpreter.Interpret();
+            var result = dictionary.FirstOrDefault().Value;
             Assert.Equal(2, result);
         }
     }

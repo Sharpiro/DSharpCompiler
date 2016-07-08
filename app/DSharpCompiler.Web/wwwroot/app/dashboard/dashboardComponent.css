@@ -23,3 +23,14 @@
 .buttonSize {
     width: 100px;
 }
+
+.textArea
+{
+    height: 240px;
+}
+
+.disabled
+{
+    cursor: not-allowed;
+    pointer-events: all !important;
+}
