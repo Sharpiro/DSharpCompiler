@@ -11,8 +11,9 @@ namespace DSharpCompiler.Core.Models
     {
         public IEnumerable<Node> Children { get; set; }
 
-        public CompoundNode()
+        public CompoundNode(IEnumerable<Node> children)
         {
+            Children = children;
             Type = NodeType.Compound;
         }
     }
@@ -45,18 +46,43 @@ namespace DSharpCompiler.Core.Models
         }
     }
 
-    public class ValueNode : Node
+    public class NumericNode : Node
+    {
+        public Token Token { get; set; }
+        public int Value { get; private set; }
+
+        public NumericNode(Token token)
+        {
+            Type = NodeType.Numeric;
+            Token = token;
+            Value = int.Parse(Token.Value);
+        }
+    }
+
+    public class VariableNode : Node
     {
         public Token Token { get; set; }
         public string Value { get; private set; }
 
-        public ValueNode(Token token)
+        public VariableNode(Token token)
         {
-            Type = NodeType.Numeric;
+            Type = NodeType.Variable;
             Token = token;
             Value = Token.Value;
         }
     }
 
-    public enum NodeType { None, BinaryOp, UnaryOp, Numeric, Compound }
+    public class EmptyNode : Node
+    {
+        public EmptyNode()
+        {
+            Type = NodeType.Empty;
+        }
+    }
+
+    public enum NodeType
+    {
+        None, BinaryOp, UnaryOp, Numeric, Compound, Variable,
+        Assignment, Empty,
+    }
 }

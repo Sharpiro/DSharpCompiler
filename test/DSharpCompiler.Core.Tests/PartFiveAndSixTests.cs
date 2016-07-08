@@ -8,51 +8,51 @@ namespace DSharpCompiler.Core.Tests
         [Fact]
         public void PrecedenceTest()
         {
-            var code = "14 + 2 * 3 - 6 / 2";
+            var code = "BEGIN a := 14 + 2 * 3 - 6 / 2 END.";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Expression();
+            var rootNode = parser.Program();
             var interpreter = new Interpreter(rootNode);
-            var result = interpreter.Interpret();
+            var result = interpreter.Interpret().FirstOrDefault().Value;
             Assert.Equal(17, result);
         }
 
         [Fact]
         public void ShallowNestingTest()
         {
-            var code = "2 * (7 + 3)";
+            var code = "BEGIN a := 2 * (7 + 3); END.";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Expression();
+            var rootNode = parser.Program();
             var interpreter = new Interpreter(rootNode);
-            var result = interpreter.Interpret();
+            var result = interpreter.Interpret().FirstOrDefault().Value;
             Assert.Equal(20, result);
         }
 
         [Fact]
         public void DeepNestingTest()
         {
-            var code = "7 + 3 * (10 / (12 / (3 + 1) - 1))";
+            var code = "BEGIN a := 7 + 3 * (10 / (12 / (3 + 1) - 1)); END.";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Expression();
+            var rootNode = parser.Program();
             var interpreter = new Interpreter(rootNode);
-            var result = interpreter.Interpret();
+            var result = interpreter.Interpret().FirstOrDefault().Value;
             Assert.Equal(22, result);
         }
         [Fact]
         public void DeepDeepNestingTest()
         {
-            var code = "7 + 3 * (10 / (12 / (3 + 1) - 1)) / (2 + 3) - 5 - 3 + (8)";
+            var code = "BEGIN a := 7 + 3 * (10 / (12 / (3 + 1) - 1)) / (2 + 3) - 5 - 3 + (8) END.";
             var lexer = new LexicalAnalyzer(code);
             var tokens = lexer.Analayze();
             var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Expression();
+            var rootNode = parser.Program();
             var interpreter = new Interpreter(rootNode);
-            var result = interpreter.Interpret();
+            var result = interpreter.Interpret().FirstOrDefault().Value;
             Assert.Equal(10, result);
         }
     }

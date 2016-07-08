@@ -19,7 +19,67 @@ namespace DSharpCompiler.Core
             _currentToken = _tokens.FirstOrDefault();
         }
 
-        public Node Expression()
+        public Node Program()
+        {
+            var node = CompoundStatement();
+            EatToken(TokenType.Symbol);
+            return node;
+        }
+
+        private Node CompoundStatement()
+        {
+            EatToken(TokenType.Keyword);
+            var children = StatementList();
+            var node = new CompoundNode(children);
+            EatToken(TokenType.Keyword);
+            return node;
+        }
+
+        private IEnumerable<Node> StatementList()
+        {
+            var node = Statement();
+
+            var nodes = new List<Node> { node };
+            while (_currentToken.Value == ";")
+            {
+                EatToken(TokenType.Symbol);
+                nodes.Add(Statement());
+            }
+            return nodes;
+        }
+
+        private Node Statement()
+        {
+            Node node = null;
+            if (_currentToken.Value.ToLower() == "begin")
+            {
+                node = CompoundStatement();
+            }
+            else if (_currentToken.Type == TokenType.Identifier)
+            {
+                node = AssignmentStatement();
+            }
+            else
+                node = Empty();
+            return node;
+        }
+
+        private Node AssignmentStatement()
+        {
+            var variable = Variable();
+            var token = _currentToken;
+            EatToken(TokenType.Symbol);
+            var node = new BinaryNode(variable, token, Expression()) { Type = NodeType.Assignment };
+            return node;
+        }
+
+        private Node Empty()
+        {
+            var node = new EmptyNode();
+            return node;
+        }
+
+        private Node Expression()
         {
             var node = Term();
 
@@ -51,7 +111,7 @@ namespace DSharpCompiler.Core
             if (token.Type == TokenType.NumericConstant)
             {
                 EatToken(TokenType.NumericConstant);
-                node = new ValueNode(token);
+                node = new NumericNode(token);
             }
             else if (token.Value.In("+", "-"))
             {
@@ -65,7 +125,14 @@ namespace DSharpCompiler.Core
                 EatToken(TokenType.Symbol);
             }
             else
-                throw new InvalidOperationException();
+                node = Variable();
+            return node;
+        }
+
+        private Node Variable()
+        {
+            var node = new VariableNode(_currentToken);
+            EatToken(TokenType.Identifier);
             return node;
         }
 
