@@ -1,8 +1,20 @@
-﻿namespace DSharpCompiler.Core.Models
+﻿using System.Collections.Generic;
+
+namespace DSharpCompiler.Core.Models
 {
     public class Node
     {
         public NodeType Type { get; set; }
+    }
+
+    public class CompoundNode : Node
+    {
+        public IEnumerable<Node> Children { get; set; }
+
+        public CompoundNode()
+        {
+            Type = NodeType.Compound;
+        }
     }
 
     public class BinaryNode : Node
@@ -33,18 +45,18 @@
         }
     }
 
-    public class NumericNode : Node
+    public class ValueNode : Node
     {
         public Token Token { get; set; }
-        public int Value { get; private set; }
+        public string Value { get; private set; }
 
-        public NumericNode(Token token)
+        public ValueNode(Token token)
         {
             Type = NodeType.Numeric;
             Token = token;
-            Value = int.Parse(Token.Value);
+            Value = Token.Value;
         }
     }
 
-    public enum NodeType { None, BinaryOp, UnaryOp, Numeric }
+    public enum NodeType { None, BinaryOp, UnaryOp, Numeric, Compound }
 }

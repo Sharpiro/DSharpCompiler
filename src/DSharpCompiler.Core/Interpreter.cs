@@ -77,8 +77,8 @@ namespace DSharpCompiler.Core
 
         public int VisitNumericNode(Node node)
         {
-            var numericNode = node as NumericNode;
-            return numericNode.Value;
+            var valueNode = node as ValueNode;
+            return int.Parse(valueNode.Value);
         }
     }
 }

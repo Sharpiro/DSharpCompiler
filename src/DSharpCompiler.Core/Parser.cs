@@ -51,7 +51,7 @@ namespace DSharpCompiler.Core
             if (token.Type == TokenType.NumericConstant)
             {
                 EatToken(TokenType.NumericConstant);
-                node = new NumericNode(token);
+                node = new ValueNode(token);
             }
             else if (token.Value.In("+", "-"))
             {
