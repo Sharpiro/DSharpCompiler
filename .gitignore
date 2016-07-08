@@ -9,7 +9,7 @@
 *.pubxml
 *.ps1
 *.psm1
-**/libs/*
+**/lib/*
 
 # User-specific files
 *.suo
