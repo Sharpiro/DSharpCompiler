@@ -1,0 +1,16 @@
+﻿<h1>Vehicle List Component</h1>
+<div class="row" *ngIf="errorMessage">
+    <div class="col-md-12">{{errorMessage}}</div>
+</div>
+
+<filterText (changed)="filterListComponentChanged($event)"></filterText>
+
+<div class="row columns">
+    <div *ngFor="let vehicle of filteredVehicles | LowerCasePipe" class="list col-md-12" [ngClass]="{ selected: selectedVehicle === vehicle }">
+        <a href="" [routerLink]="['Vehicle', {id: vehicle.id}]" (click)="select(vehicle)" class="btn btn-default dashboard-button">
+            {{vehicle.name}}
+        </a>
+    </div>
+
+    <nested *ngIf="selectedVehicle" [vehicle]="selectedVehicle"></nested>
+</div>

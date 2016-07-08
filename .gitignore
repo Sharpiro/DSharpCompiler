@@ -4,7 +4,12 @@
 #customs
 *typings
 *appCombined.*
+*.js
 *.map
+*.pubxml
+*.ps1
+*.psm1
+**/lib/*
 
 # User-specific files
 *.suo
@@ -215,3 +220,7 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+
+#nots
+!*systemjs.config.js
+!*gulpfile.js
