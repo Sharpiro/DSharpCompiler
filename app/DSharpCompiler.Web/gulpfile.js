@@ -1,6 +1,7 @@
 ﻿
 var path = require('path');
 var gulp = require('gulp');
+var ts = require('gulp-typescript');
 
 var webroot = "./wwwroot/";
 
@@ -36,4 +37,13 @@ gulp.task('copyModules', function () {
         .pipe(gulp.dest(webroot + 'lib'));
 });
 
-gulp.task("default", ["copyModules"])
+gulp.task('transpile', function () {
+    var tsProject = ts.createProject('tsconfig.json');
+    var tsResult = tsProject.src()
+        .pipe(ts(tsProject));
+
+    return tsResult.js.pipe(gulp.dest('wwwroot'));
+});
+
+
+gulp.task("default", ["copyModules", "transpile"])

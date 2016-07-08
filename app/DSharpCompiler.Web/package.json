@@ -2,10 +2,6 @@
   "name": "dsharpcompiler",
   "version": "1.0.0",
   "scripts": {
-    "start": "tsc && concurrently \"npm run tsc:w\" \"npm run lite\" ",
-    "tsc": "tsc",
-    "tsc:w": "tsc -w",
-    "lite": "lite-server",
     "typings": "typings",
     "postinstall": "typings install"
   },
@@ -34,6 +30,7 @@
     "devDependencies": {
         "concurrently": "^2.0.0",
         "gulp": "^3.9.1",
+        "gulp-typescript": "^2.13.6",
         "lite-server": "^2.2.0",
         "typescript": "^1.8.10",
         "typings": "^1.0.4"
