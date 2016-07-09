@@ -1,37 +1,34 @@
-﻿using DSharpCompiler.Core.Models;
+﻿using DSharpCompiler.Core.Common;
+using DSharpCompiler.Core.Common.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DSharpCompiler.Core
+namespace DSharpCompiler.Core.DSharp
 {
-    public class TokenParser
+    public class DSharpParser: ITokenParser
     {
-        private readonly IList<Token> _tokens;
-        private int _currentIndex;
-        private Dictionary<string, string> _variables;
+        private IList<Token> _tokens;
         private Token _currentToken;
+        private int _currentIndex;
 
-        public TokenParser(IList<Token> tokens)
+        public Node Program(IList<Token> tokens)
         {
             _tokens = tokens;
-            _variables = new Dictionary<string, string>();
             _currentToken = _tokens.FirstOrDefault();
-        }
-
-        public Node Program()
-        {
+            _currentIndex = 0;
             var node = CompoundStatement();
-            EatToken(TokenType.Symbol);
             return node;
         }
 
         private Node CompoundStatement()
         {
             EatToken(TokenType.Keyword);
+            EatToken(TokenType.Identifier);
+            EatToken(TokenType.Symbol);
             var children = StatementList();
             var node = new CompoundNode(children);
-            EatToken(TokenType.Keyword);
+            EatToken(TokenType.Symbol);
             return node;
         }
 
@@ -51,7 +48,7 @@ namespace DSharpCompiler.Core
         private Node Statement()
         {
             Node node = null;
-            if (_currentToken.Value.ToLower() == "begin")
+            if (_currentToken.Value == "func")
             {
                 node = CompoundStatement();
             }
@@ -141,16 +138,6 @@ namespace DSharpCompiler.Core
             if (_currentToken == null || _currentToken.Type != type)
                 throw new IndexOutOfRangeException();
             _currentToken = NextToken();
-        }
-
-        private Token PeekToken()
-        {
-            try
-            {
-                return _tokens[_currentIndex + 1];
-            }
-            catch (ArgumentOutOfRangeException) { }
-            return null;
         }
 
         private Token NextToken()

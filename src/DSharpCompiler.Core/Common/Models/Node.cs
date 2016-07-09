@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DSharpCompiler.Core.Models
+namespace DSharpCompiler.Core.Common.Models
 {
     public class Node
     {

@@ -33,7 +33,12 @@ export class StaticVehicleService implements IVehicleService
         return promise;
     }
 
-    public compile(source: string): Observable<any>
+    public compilePascal(source: string): Observable<any>
+    {
+        return null;
+    }
+
+    public compileDSharp(source: string): Observable<any>
     {
         return null;
     }

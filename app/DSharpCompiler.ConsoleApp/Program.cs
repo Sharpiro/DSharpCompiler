@@ -1,4 +1,7 @@
 ﻿using DSharpCompiler.Core;
+using DSharpCompiler.Core.Common;
+using DSharpCompiler.Core.DSharp;
+using DSharpCompiler.Core.Pascal;
 using System;
 using System.Linq;
 
@@ -13,12 +16,12 @@ namespace DSharpCompiler.ConsoleApp
             {
                 Console.WriteLine("Enter source");
                 var source = Console.ReadLine();
-                var analyzer = new LexicalAnalyzer(source);
-                var tokens = analyzer.Analayze();
-                var parser = new TokenParser(tokens.ToList());
-                var rootNode = parser.Program();
-                var interpreter = new Interpreter(rootNode);
-                var result = interpreter.Interpret();
+                var pascalTokens = new PascalTokens();
+                var lexer = new LexicalAnalyzer(pascalTokens);
+                var parser = new DSharpParser();
+                var interpreter = new NodeVisitor();
+                var wrapper = new Interpreter(lexer, parser, interpreter);
+                var result = wrapper.Interpret(source);
                 Console.WriteLine(result);
             }
         }

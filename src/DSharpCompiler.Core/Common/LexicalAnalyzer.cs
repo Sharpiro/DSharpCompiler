@@ -1,34 +1,37 @@
-﻿using DSharpCompiler.Core.Models;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using DSharpCompiler.Core.Common.Models;
 
-namespace DSharpCompiler.Core
+namespace DSharpCompiler.Core.Common
 {
     public class LexicalAnalyzer
     {
-        private Tokens _syntaxTokens;
+        private ILanguageTokens _syntaxTokens;
         private string _source;
-        private List<Token> _foundTokens = new List<Token>();
 
-        public LexicalAnalyzer(string source)
+        public LexicalAnalyzer(ILanguageTokens tokens)
         {
-            _syntaxTokens = new Tokens();
-            _source = source;
+            _syntaxTokens = tokens;
         }
 
-        public IEnumerable<Token> Analayze()
+        public IEnumerable<Token> Analayze(string source)
         {
+            if (string.IsNullOrEmpty(source))
+                throw new ArgumentNullException(nameof(source));
+            _source = source;
+
             _source.Split(new string[] { " " }, StringSplitOptions.None);
             RemoveNewLines();
+            var foundTokens = new List<Token>();
             while (HasData())
             {
                 var token = Advance();
                 if (token != null)
-                    _foundTokens.Add(token);
+                    foundTokens.Add(token);
             }
-            return _foundTokens;
+            return foundTokens;
         }
 
         private bool HasData()

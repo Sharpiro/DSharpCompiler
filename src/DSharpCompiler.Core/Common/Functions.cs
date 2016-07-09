@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DSharpCompiler.Core
+namespace DSharpCompiler.Core.Common
 {
     public static class Functions
     {
