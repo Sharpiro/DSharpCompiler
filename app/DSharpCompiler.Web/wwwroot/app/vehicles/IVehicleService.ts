@@ -5,7 +5,8 @@ export interface IVehicleService
 {
     getVehicles(): Observable<IBaseData[]>;
     getVehicle(id: number): Observable<IBaseData>;
-    compile(source: string): Observable<any>;
+    compilePascal(source: string): Observable<any>;
+    compileDSharp(source: string): Observable<any>;
 }
 
 //export class IVehicleServiceToken { }

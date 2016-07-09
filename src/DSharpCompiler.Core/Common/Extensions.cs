@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace DSharpCompiler.Core
+namespace DSharpCompiler.Core.Common
 {
     public static class Extensions
     {

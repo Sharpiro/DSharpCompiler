@@ -1,23 +1,20 @@
-﻿using System;
+﻿using DSharpCompiler.Core.Common;
+using DSharpCompiler.Core.Common.Models;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DSharpCompiler.Core.Models
+namespace DSharpCompiler.Core.DSharp
 {
-    public class Tokens : IEnumerable, IEnumerable<Token>
+    public class DSharpTokens : IEnumerable, IEnumerable<Token>, ILanguageTokens
     {
         private IEnumerable<Token> _tokens;
 
-        public Tokens()
+        public DSharpTokens()
         {
             _tokens = new List<Token>
             {
-                new Token { Value = "public" , Type = TokenType.Keyword },
-                new Token { Value = "class" , Type = TokenType.Keyword },
-                new Token { Value = "void" , Type = TokenType.Keyword },
-                new Token { Value = "BEGIN" , Type = TokenType.Keyword },
-                new Token { Value = "END" , Type = TokenType.Keyword },
+                new Token { Value = "func" , Type = TokenType.Keyword },
                 new Token { Value = "\"" , Type = TokenType.Symbol },
                 new Token { Value = "{" , Type = TokenType.Symbol },
                 new Token { Value = "}" , Type = TokenType.Symbol },
@@ -30,7 +27,7 @@ namespace DSharpCompiler.Core.Models
                 new Token { Value = "*" , Type = TokenType.Symbol },
                 new Token { Value = "/" , Type = TokenType.Symbol },
                 new Token { Value = ";" , Type = TokenType.Symbol },
-                new Token { Value = ":=" , Type = TokenType.Symbol }
+                new Token { Value = "=" , Type = TokenType.Symbol }
             };
         }
 

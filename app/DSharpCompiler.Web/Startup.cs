@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using DSharpCompiler.Core.Common;
+using DSharpCompiler.Core.DSharp;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,6 +12,11 @@ namespace DSharpCompiler.Web
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient<ILanguageTokens, DSharpTokens>();
+            services.AddTransient<LexicalAnalyzer, LexicalAnalyzer>();
+            services.AddTransient<ITokenParser, DSharpParser>();
+            services.AddTransient<NodeVisitor, NodeVisitor>();
+            services.AddTransient<Interpreter, Interpreter>();
             services.AddMvc();
         }
 

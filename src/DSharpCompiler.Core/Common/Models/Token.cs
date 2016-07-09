@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DSharpCompiler.Core.Models
+namespace DSharpCompiler.Core.Common.Models
 {
     public class Token : IEquatable<Token>
     {

@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using DSharpCompiler.Core.Common;
+using DSharpCompiler.Core.Pascal;
+using System.Linq;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
@@ -9,12 +11,12 @@ namespace DSharpCompiler.Core.Tests
         public void BasicAdditionTest()
         {
             var code = "BEGIN a := 3 + 2; END.";
-            var lexer = new LexicalAnalyzer(code);
-            var tokens = lexer.Analayze();
-            var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Program();
-            var interpreter = new Interpreter(rootNode);
-            var dictionary = interpreter.Interpret();
+            var pascalTokens = new PascalTokens();
+            var lexer = new LexicalAnalyzer(pascalTokens);
+            var parser = new PascalParser();
+            var visitor = new NodeVisitor();
+            var interpreter = new Interpreter(lexer, parser, visitor);
+            var dictionary = interpreter.Interpret(code);
             var result = dictionary.FirstOrDefault().Value;
             Assert.Equal(5, result);
         }
@@ -23,12 +25,12 @@ namespace DSharpCompiler.Core.Tests
         public void MultiDigitTest()
         {
             var code = "BEGIN a := 12+3; END.";
-            var lexer = new LexicalAnalyzer(code);
-            var tokens = lexer.Analayze();
-            var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Program();
-            var interpreter = new Interpreter(rootNode);
-            var dictionary = interpreter.Interpret();
+            var pascalTokens = new PascalTokens();
+            var lexer = new LexicalAnalyzer(pascalTokens);
+            var parser = new PascalParser();
+            var visitor = new NodeVisitor();
+            var interpreter = new Interpreter(lexer, parser, visitor);
+            var dictionary = interpreter.Interpret(code);
             var result = dictionary.FirstOrDefault().Value;
             Assert.Equal(15, result);
         }
@@ -37,12 +39,12 @@ namespace DSharpCompiler.Core.Tests
         public void WhiteSpaceTest()
         {
             var code = "BEGIN a :=  12 + 3; END.";
-            var lexer = new LexicalAnalyzer(code);
-            var tokens = lexer.Analayze();
-            var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Program();
-            var interpreter = new Interpreter(rootNode);
-            var dictionary = interpreter.Interpret();
+            var pascalTokens = new PascalTokens();
+            var lexer = new LexicalAnalyzer(pascalTokens);
+            var parser = new PascalParser();
+            var visitor = new NodeVisitor();
+            var interpreter = new Interpreter(lexer, parser, visitor);
+            var dictionary = interpreter.Interpret(code);
             var result = dictionary.FirstOrDefault().Value;
             Assert.Equal(15, result);
         }
@@ -51,12 +53,12 @@ namespace DSharpCompiler.Core.Tests
         public void SubtractionTest()
         {
             var code = "BEGIN a := 7-5 END.";
-            var lexer = new LexicalAnalyzer(code);
-            var tokens = lexer.Analayze();
-            var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Program();
-            var interpreter = new Interpreter(rootNode);
-            var dictionary = interpreter.Interpret();
+            var pascalTokens = new PascalTokens();
+            var lexer = new LexicalAnalyzer(pascalTokens);
+            var parser = new PascalParser();
+            var visitor = new NodeVisitor();
+            var interpreter = new Interpreter(lexer, parser, visitor);
+            var dictionary = interpreter.Interpret(code);
             var result = dictionary.FirstOrDefault().Value;
             Assert.Equal(2, result);
         }

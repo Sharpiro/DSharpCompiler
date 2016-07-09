@@ -1,0 +1,1 @@
+<Playlist Version="1.0"><Add Test="DSharpCompiler.Core.Tests.DSharpTests.SimpleProgramTest" /><Add Test="DSharpCompiler.Core.Tests.DSharpTests.ComplexProgramTest" /><Add Test="DSharpCompiler.Core.Tests.DSharpTests.DoubleFunctionTest" /></Playlist>

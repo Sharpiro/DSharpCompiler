@@ -21,10 +21,23 @@ export class VehicleService implements IVehicleService
         return promise;
     }
 
-    public compile(source: string): Observable<string>
+    public compilePascal(source: string): Observable<string>
     {
         var body = { source: source };
-        var obs = this.httpService.post("/api/compiler/compile", body)
+        var obs = this.httpService.post("/api/compiler/compilepascal", body)
+            .catch(() =>
+            {
+                toastr.error("Compilation Error");
+                return null;
+            })
+            .map((response: Response) => JSON.stringify(response.json().data.output));
+        return obs;
+    }
+
+    public compileDSharp(source: string): Observable<string>
+    {
+        var body = { source: source };
+        var obs = this.httpService.post("/api/compiler/compiledsharp", body)
             .catch(() =>
             {
                 toastr.error("Compilation Error");

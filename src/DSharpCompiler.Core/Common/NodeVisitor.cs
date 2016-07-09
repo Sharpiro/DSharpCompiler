@@ -1,28 +1,21 @@
-﻿using System;
-using DSharpCompiler.Core.Models;
+﻿using DSharpCompiler.Core.Common.Models;
+using System;
 using System.Collections.Generic;
 
-namespace DSharpCompiler.Core
+namespace DSharpCompiler.Core.Common
 {
-    public class Interpreter
+    public class NodeVisitor
     {
-        private readonly Node _root;
-        private readonly Dictionary<string, object> _globalData;
+        private Dictionary<string, object> _globalData;
 
-        public Interpreter(Node root)
+        public Dictionary<string, object> VisitNodes(Node root)
         {
-            _root = root;
             _globalData = new Dictionary<string, object>();
+            Visit(root);
+            return _globalData;
         }
 
-        public Dictionary<string, object> Interpret()
-        {
-            Visit(_root);
-            var result = _globalData;
-            return result;
-        }
-
-        public int? Visit(Node node)
+        private int? Visit(Node node)
         {
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
@@ -92,7 +85,7 @@ namespace DSharpCompiler.Core
             return null;
         }
 
-        public int? VisitBinaryOpNode(Node node)
+        private int? VisitBinaryOpNode(Node node)
         {
             var numericNode = node as BinaryNode;
             if (numericNode.Token.Value == "+")
@@ -114,7 +107,7 @@ namespace DSharpCompiler.Core
             else
                 throw new InvalidOperationException();
         }
-        public int? VisitUnaryOpNode(Node node)
+        private int? VisitUnaryOpNode(Node node)
         {
             var unaryNode = node as UnaryNode;
             if (unaryNode.Token.Value == "+")
@@ -129,7 +122,7 @@ namespace DSharpCompiler.Core
                 throw new InvalidOperationException();
         }
 
-        public int? VisitNumericNode(Node node)
+        private int? VisitNumericNode(Node node)
         {
             var valueNode = node as NumericNode;
             return valueNode.Value;

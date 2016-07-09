@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using DSharpCompiler.Core.Common;
+using DSharpCompiler.Core.Pascal;
+using System.Linq;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
@@ -6,24 +8,16 @@ namespace DSharpCompiler.Core.Tests
     public class PartNineTests
     {
         [Fact]
-        public void PeekTest()
-        {
-            var code = "BEGIN a := 2; END.";
-            var lexer = new LexicalAnalyzer(code);
-            var tokens = lexer.Analayze();
-            Assert.Equal(7, tokens.Count());
-        }
-
-        [Fact]
         public void SimpleProgramTest()
         {
             var code = "BEGIN a := 2 END.";
-            var lexer = new LexicalAnalyzer(code);
-            var tokens = lexer.Analayze();
-            var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Program();
-            var interpreter = new Interpreter(rootNode);
-            var result = interpreter.Interpret().FirstOrDefault().Value;
+            var pascalTokens = new PascalTokens();
+            var lexer = new LexicalAnalyzer(pascalTokens);
+            var parser = new PascalParser();
+            var visitor = new NodeVisitor();
+            var interpreter = new Interpreter(lexer, parser, visitor);
+            var dictionary = interpreter.Interpret(code);
+            var result = dictionary.FirstOrDefault().Value;
             Assert.Equal(2, result);
         }
 
@@ -40,12 +34,12 @@ namespace DSharpCompiler.Core.Tests
                     END;
                     x := 11
                 END.";
-            var lexer = new LexicalAnalyzer(code);
-            var tokens = lexer.Analayze();
-            var parser = new TokenParser(tokens.ToList());
-            var rootNode = parser.Program();
-            var interpreter = new Interpreter(rootNode);
-            var dictionary = interpreter.Interpret();
+            var pascalTokens = new PascalTokens();
+            var lexer = new LexicalAnalyzer(pascalTokens);
+            var parser = new PascalParser();
+            var visitor = new NodeVisitor();
+            var interpreter = new Interpreter(lexer, parser, visitor);
+            var dictionary = interpreter.Interpret(code);
             var number = dictionary["number"];
             var a = dictionary["a"];
             var b = dictionary["b"];
