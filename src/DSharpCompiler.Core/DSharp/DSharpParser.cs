@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace DSharpCompiler.Core.DSharp
 {
-    public class DSharpParser: ITokenParser
+    public class DSharpParser : ITokenParser
     {
         private IList<Token> _tokens;
         private Token _currentToken;
@@ -17,17 +17,20 @@ namespace DSharpCompiler.Core.DSharp
             _tokens = tokens;
             _currentToken = _tokens.FirstOrDefault();
             _currentIndex = 0;
-            var node = CompoundStatement();
+            //var node = CompoundStatement();
+            var children = StatementList();
+            var node = new CompoundNode(children) { Name = "main" };
             return node;
         }
 
         private Node CompoundStatement()
         {
             EatToken(TokenType.Keyword);
+            var functionName = _currentToken.Value;
             EatToken(TokenType.Identifier);
             EatToken(TokenType.Symbol);
             var children = StatementList();
-            var node = new CompoundNode(children);
+            var node = new CompoundNode(children) { Name = functionName };
             EatToken(TokenType.Symbol);
             return node;
         }
@@ -37,7 +40,7 @@ namespace DSharpCompiler.Core.DSharp
             var node = Statement();
 
             var nodes = new List<Node> { node };
-            while (_currentToken.Value == ";")
+            while (_currentToken?.Value == ";")
             {
                 EatToken(TokenType.Symbol);
                 nodes.Add(Statement());
@@ -48,13 +51,17 @@ namespace DSharpCompiler.Core.DSharp
         private Node Statement()
         {
             Node node = null;
-            if (_currentToken.Value == "func")
+            if (_currentToken?.Value == "func")
             {
                 node = CompoundStatement();
             }
-            else if (_currentToken.Type == TokenType.Identifier)
+            else if (_currentToken?.Type == TokenType.Keyword)
             {
                 node = AssignmentStatement();
+            }
+            else if (_currentToken?.Type == TokenType.Identifier)
+            {
+                node = RoutineStatement();
             }
             else
                 node = Empty();
@@ -63,10 +70,19 @@ namespace DSharpCompiler.Core.DSharp
 
         private Node AssignmentStatement()
         {
+            EatToken(TokenType.Keyword);
             var variable = Variable();
             var token = _currentToken;
             EatToken(TokenType.Symbol);
             var node = new BinaryNode(variable, token, Expression()) { Type = NodeType.Assignment };
+            return node;
+        }
+
+        private Node RoutineStatement()
+        {
+            var token = _currentToken;
+            EatToken(TokenType.Identifier);
+            var node = new RoutineNode(token.Value);
             return node;
         }
 
@@ -109,6 +125,11 @@ namespace DSharpCompiler.Core.DSharp
             {
                 EatToken(TokenType.NumericConstant);
                 node = new NumericNode(token);
+            }
+            else if (token.Type == TokenType.StringConstant)
+            {
+                EatToken(TokenType.StringConstant);
+                node = new StringNode(token);
             }
             else if (token.Value.In("+", "-"))
             {

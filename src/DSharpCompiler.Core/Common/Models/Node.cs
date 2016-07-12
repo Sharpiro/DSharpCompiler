@@ -9,6 +9,7 @@ namespace DSharpCompiler.Core.Common.Models
 
     public class CompoundNode : Node
     {
+        public string Name { get; set; }
         public IEnumerable<Node> Children { get; set; }
 
         public CompoundNode(IEnumerable<Node> children)
@@ -59,6 +60,19 @@ namespace DSharpCompiler.Core.Common.Models
         }
     }
 
+    public class StringNode : Node
+    {
+        public Token Token { get; set; }
+        public string Value { get; private set; }
+
+        public StringNode(Token token)
+        {
+            Type = NodeType.String;
+            Token = token;
+            Value = Token.Value;
+        }
+    }
+
     public class VariableNode : Node
     {
         public Token Token { get; set; }
@@ -72,6 +86,16 @@ namespace DSharpCompiler.Core.Common.Models
         }
     }
 
+    public class RoutineNode : Node
+    {
+        public string RoutineName { get; set; }
+        public RoutineNode(string routineName)
+        {
+            RoutineName = routineName;
+            Type = NodeType.Routine;
+        }
+    }
+
     public class EmptyNode : Node
     {
         public EmptyNode()
@@ -82,7 +106,7 @@ namespace DSharpCompiler.Core.Common.Models
 
     public enum NodeType
     {
-        None, BinaryOp, UnaryOp, Numeric, Compound, Variable,
-        Assignment, Empty,
+        None, BinaryOp, UnaryOp, Numeric, String, Compound, Variable,
+        Assignment, Routine, Empty,
     }
 }

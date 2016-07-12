@@ -15,7 +15,7 @@ namespace DSharpCompiler.Core.Common
             return _globalData;
         }
 
-        private int? Visit(Node node)
+        private object Visit(Node node)
         {
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
@@ -44,6 +44,14 @@ namespace DSharpCompiler.Core.Common
             {
                 return VisitNumericNode(node);
             }
+            else if (node.Type == NodeType.String)
+            {
+                return VisitStringNode(node);
+            }
+            else if (node.Type == NodeType.Routine)
+            {
+                return VisitRoutineNode(node);
+            }
             else if (node.Type == NodeType.Empty)
             {
                 return VisitEmptyNode(node);
@@ -55,10 +63,16 @@ namespace DSharpCompiler.Core.Common
         private int? VisitCompoundNode(Node node)
         {
             var compoundNode = node as CompoundNode;
-            foreach (var child in compoundNode.Children)
+            if (compoundNode.Name == "main" || compoundNode.Name == null)
             {
-                Visit(child);
+                var guid = Guid.NewGuid().ToString();
+                compoundNode.Name = guid;
+                _globalData[compoundNode.Name] = compoundNode;
+                var mainRoutineNode = new RoutineNode(compoundNode.Name);
+                VisitRoutineNode(mainRoutineNode);
             }
+            else
+                _globalData[compoundNode.Name] = compoundNode;
             return null;
         }
 
@@ -67,7 +81,7 @@ namespace DSharpCompiler.Core.Common
             var assignmentNode = node as BinaryNode;
             var left = assignmentNode.Left as VariableNode;
             var variableName = left.Value;
-            _globalData[variableName] = Visit(assignmentNode.Right).Value;
+            _globalData[variableName] = Visit(assignmentNode.Right);
             return null;
         }
 
@@ -87,22 +101,22 @@ namespace DSharpCompiler.Core.Common
 
         private int? VisitBinaryOpNode(Node node)
         {
-            var numericNode = node as BinaryNode;
-            if (numericNode.Token.Value == "+")
+            var binaryNode = node as BinaryNode;
+            if (binaryNode.Token.Value == "+")
             {
-                return Visit(numericNode.Left).Add(Visit(numericNode.Right));
+                return Visit(binaryNode.Left).Add(Visit(binaryNode.Right));
             }
-            else if (numericNode.Token.Value == "-")
+            else if (binaryNode.Token.Value == "-")
             {
-                return Visit(numericNode.Left).Subtract(Visit(numericNode.Right));
+                return Visit(binaryNode.Left).Subtract(Visit(binaryNode.Right));
             }
-            else if (numericNode.Token.Value == "*")
+            else if (binaryNode.Token.Value == "*")
             {
-                return Visit(numericNode.Left).Multiply(Visit(numericNode.Right));
+                return Visit(binaryNode.Left).Multiply(Visit(binaryNode.Right));
             }
-            else if (numericNode.Token.Value == "/")
+            else if (binaryNode.Token.Value == "/")
             {
-                return Visit(numericNode.Left).Divide(Visit(numericNode.Right));
+                return Visit(binaryNode.Left).Divide(Visit(binaryNode.Right));
             }
             else
                 throw new InvalidOperationException();
@@ -112,11 +126,11 @@ namespace DSharpCompiler.Core.Common
             var unaryNode = node as UnaryNode;
             if (unaryNode.Token.Value == "+")
             {
-                return +Visit(unaryNode.Expression);
+                return (int)Visit(unaryNode.Expression);
             }
             else if (unaryNode.Token.Value == "-")
             {
-                return -Visit(unaryNode.Expression);
+                return Visit(unaryNode.Expression).UnaryMinus();
             }
             else
                 throw new InvalidOperationException();
@@ -126,6 +140,23 @@ namespace DSharpCompiler.Core.Common
         {
             var valueNode = node as NumericNode;
             return valueNode.Value;
+        }
+
+        private string VisitStringNode(Node node)
+        {
+            var valueNode = node as StringNode;
+            return valueNode.Value;
+        }
+
+        private int? VisitRoutineNode(Node node)
+        {
+            var routineNode = node as RoutineNode;
+            var compoundNode = _globalData[routineNode.RoutineName] as CompoundNode;
+            foreach (var child in compoundNode.Children)
+            {
+                Visit(child);
+            }
+            return null;
         }
     }
 }

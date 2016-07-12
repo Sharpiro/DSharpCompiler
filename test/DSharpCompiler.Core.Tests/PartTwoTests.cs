@@ -1,6 +1,5 @@
 ﻿using DSharpCompiler.Core.Common;
 using DSharpCompiler.Core.Pascal;
-using System.Linq;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
@@ -17,7 +16,7 @@ namespace DSharpCompiler.Core.Tests
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.FirstOrDefault().Value;
+            var result = dictionary.Get("a");
             Assert.Equal(3, result);
         }
 
@@ -31,7 +30,7 @@ namespace DSharpCompiler.Core.Tests
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.FirstOrDefault().Value;
+            var result = dictionary.Get("a");
             Assert.Equal(15, result);
         }
 
@@ -45,7 +44,7 @@ namespace DSharpCompiler.Core.Tests
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.FirstOrDefault().Value;
+            var result = dictionary.Get("a");
             Assert.Equal(4, result);
         }
 
@@ -59,7 +58,7 @@ namespace DSharpCompiler.Core.Tests
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.FirstOrDefault().Value;
+            var result = dictionary.Get("a");
             Assert.Equal(18, result);
         }
 
@@ -73,7 +72,7 @@ namespace DSharpCompiler.Core.Tests
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.FirstOrDefault().Value;
+            var result = dictionary.Get("a");
             Assert.Equal(42, result);
         }
     }

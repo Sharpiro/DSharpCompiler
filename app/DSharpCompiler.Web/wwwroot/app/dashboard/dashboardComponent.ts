@@ -13,19 +13,18 @@ import {CustomPipe, NestedComponent, LowerCasePipe} from "../blocks/blocks"
 export class DashboardComponent implements OnInit
 {
     private defaultInput =
-    `func main
-    {
-        c = 12;
-        func action
-        {
-            number = 5 - - - + - (3 + 4 * 2) - +2;
-        };
-
-        func actionTwo
-        {
-            b = 10 * number;
-        };
-    };`
+    `let a = 1;
+func doWork
+{
+    let b = 2;
+};
+func doMoreWork
+{
+    let c = "hello world";
+};
+let d = 4;
+doWork;
+doMoreWork;`;
     private input = this.defaultInput;
     private output: Observable<any>;
 
