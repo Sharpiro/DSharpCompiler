@@ -15,6 +15,7 @@ namespace DSharpCompiler.Core.DSharp
             _tokens = new List<Token>
             {
                 new Token { Value = "func" , Type = TokenType.Keyword },
+                new Token { Value = "let" , Type = TokenType.Keyword },
                 new Token { Value = "\"" , Type = TokenType.Symbol },
                 new Token { Value = "{" , Type = TokenType.Symbol },
                 new Token { Value = "}" , Type = TokenType.Symbol },

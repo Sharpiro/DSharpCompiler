@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Linq;
 
 namespace DSharpCompiler.Web.Api
 {
@@ -26,7 +27,7 @@ namespace DSharpCompiler.Web.Api
             if (postData == null)
                 throw new ArgumentNullException(nameof(postData));
             var code = JObject.FromObject(postData).SelectToken("source").Value<string>();
-            var dictionary = _interpreter.Interpret(code);
+            var dictionary = _interpreter.Interpret(code).Where(pair => pair.Key.Length < 5).ToDictionary(pair => pair.Key, y => y.Value);
             var response = new { Data = new { Output = dictionary } };
             return response;
         }
@@ -37,7 +38,7 @@ namespace DSharpCompiler.Web.Api
             if (postData == null)
                 throw new ArgumentNullException(nameof(postData));
             var code = JObject.FromObject(postData).SelectToken("source").Value<string>();
-            var dictionary = _interpreter.Interpret(code);
+            var dictionary = _interpreter.Interpret(code).Where(pair => pair.Key.Length < 5).ToDictionary(pair => pair.Key, y => y.Value);
             var response = new { Data = new { Output = dictionary } };
             return response;
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DSharpCompiler.Core.Common
 {
@@ -25,6 +26,17 @@ namespace DSharpCompiler.Core.Common
                     return true;
             }
             return false;
+        }
+
+        public static object Get<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key) where TValue : class
+        {
+            TValue value = null;
+            try
+            {
+                value = dictionary[key];
+            }
+            catch (Exception) { }
+            return value;
         }
     }
 }

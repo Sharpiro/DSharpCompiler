@@ -17,7 +17,7 @@ namespace DSharpCompiler.Core.Tests
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.FirstOrDefault().Value;
+            var result = dictionary.Get("a");
             Assert.Equal(2, result);
         }
 
