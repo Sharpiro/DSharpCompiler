@@ -17,7 +17,6 @@ namespace DSharpCompiler.Core.DSharp
             _tokens = tokens;
             _currentToken = _tokens.FirstOrDefault();
             _currentIndex = 0;
-            //var node = CompoundStatement();
             var children = StatementList();
             var node = new CompoundNode(children) { Name = "main" };
             return node;
@@ -55,6 +54,10 @@ namespace DSharpCompiler.Core.DSharp
             {
                 node = CompoundStatement();
             }
+            else if (_currentToken?.Value == "return")
+            {
+                node = ReturnStatement();
+            }
             else if (_currentToken?.Type == TokenType.Keyword)
             {
                 node = AssignmentStatement();
@@ -75,6 +78,14 @@ namespace DSharpCompiler.Core.DSharp
             var token = _currentToken;
             EatToken(TokenType.Symbol);
             var node = new BinaryNode(variable, token, Expression()) { Type = NodeType.Assignment };
+            return node;
+        }
+
+        private Node ReturnStatement()
+        {
+            var token = _currentToken;
+            EatToken(TokenType.Keyword);
+            var node = new UnaryNode(token, Expression()) { Type = NodeType.UnaryOp };
             return node;
         }
 

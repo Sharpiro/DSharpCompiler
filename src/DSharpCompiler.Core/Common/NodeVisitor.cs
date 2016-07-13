@@ -85,13 +85,22 @@ namespace DSharpCompiler.Core.Common
             return null;
         }
 
-        private int? VisitVariableNode(Node node)
+        private object VisitVariableNode(Node node)
         {
             var variableNode = node as VariableNode;
             var value = _globalData[variableNode.Value];
             if (value == null)
                 throw new NullReferenceException("tried to use a variable that was null");
-            return (int)value;
+            var valueNode = (CompoundNode)value;
+            if (valueNode != null && valueNode.Type == NodeType.Compound)
+            {
+                var routineNode = new RoutineNode(valueNode.Name);
+                return VisitRoutineNode(routineNode);
+            }
+            else
+            {
+                return (int)value;
+            }
         }
 
         private int? VisitEmptyNode(Node node)
@@ -132,6 +141,10 @@ namespace DSharpCompiler.Core.Common
             {
                 return Visit(unaryNode.Expression).UnaryMinus();
             }
+            else if (unaryNode.Token.Value == "return")
+            {
+                return (int)Visit(unaryNode.Expression);
+            }
             else
                 throw new InvalidOperationException();
         }
@@ -148,15 +161,16 @@ namespace DSharpCompiler.Core.Common
             return valueNode.Value;
         }
 
-        private int? VisitRoutineNode(Node node)
+        private object VisitRoutineNode(Node node)
         {
             var routineNode = node as RoutineNode;
             var compoundNode = _globalData[routineNode.RoutineName] as CompoundNode;
+            object returnValue = null;
             foreach (var child in compoundNode.Children)
             {
-                Visit(child);
+                returnValue = returnValue.Add(Visit(child));
             }
-            return null;
+            return returnValue;
         }
     }
 }

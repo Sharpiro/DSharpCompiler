@@ -27,7 +27,7 @@ namespace DSharpCompiler.Web.Api
             if (postData == null)
                 throw new ArgumentNullException(nameof(postData));
             var code = JObject.FromObject(postData).SelectToken("source").Value<string>();
-            var dictionary = _interpreter.Interpret(code).Where(pair => pair.Key.Length < 5).ToDictionary(pair => pair.Key, y => y.Value);
+            var dictionary = _interpreter.Interpret(code).Where(pair => pair.Value.GetType() == typeof(int)).ToDictionary(pair => pair.Key, y => y.Value);
             var response = new { Data = new { Output = dictionary } };
             return response;
         }
@@ -38,7 +38,7 @@ namespace DSharpCompiler.Web.Api
             if (postData == null)
                 throw new ArgumentNullException(nameof(postData));
             var code = JObject.FromObject(postData).SelectToken("source").Value<string>();
-            var dictionary = _interpreter.Interpret(code).Where(pair => pair.Key.Length < 5).ToDictionary(pair => pair.Key, y => y.Value);
+            var dictionary = _interpreter.Interpret(code).Where(pair => pair.Value.GetType() == typeof(int)).ToDictionary(pair => pair.Key, y => y.Value);
             var response = new { Data = new { Output = dictionary } };
             return response;
         }

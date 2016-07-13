@@ -107,6 +107,6 @@ namespace DSharpCompiler.Core.Common.Models
     public enum NodeType
     {
         None, BinaryOp, UnaryOp, Numeric, String, Compound, Variable,
-        Assignment, Routine, Empty,
+        Assignment, Return, Routine, Empty,
     }
 }
