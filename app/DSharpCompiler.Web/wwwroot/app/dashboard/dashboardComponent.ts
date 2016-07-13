@@ -1,6 +1,6 @@
-﻿import {Component, OnInit, Inject, EventEmitter, Output, AfterViewInit, ChangeDetectorRef} from "@angular/core"
+﻿import {Component, Inject} from "@angular/core"
 import {Observable} from "rxjs/Rx"
-import {IVehicleService} from "../vehicles/vehicles"
+import {ICompilerService} from "../compiler/compiler"
 import {CustomPipe, NestedComponent, LowerCasePipe} from "../blocks/blocks"
 
 @Component({
@@ -10,7 +10,7 @@ import {CustomPipe, NestedComponent, LowerCasePipe} from "../blocks/blocks"
     directives: [NestedComponent],
     pipes: [CustomPipe, LowerCasePipe],
 })
-export class DashboardComponent implements OnInit
+export class DashboardComponent
 {
     private defaultInput =
     `let a = 1;
@@ -28,13 +28,8 @@ doMoreWork;`;
     private input = this.defaultInput;
     private output: Observable<any>;
 
-    constructor( @Inject("IVehicleServiceToken") private dataService: IVehicleService, private cdrService: ChangeDetectorRef)
+    constructor( @Inject("ICompilerServiceToken") private dataService: ICompilerService)
     {
-    }
-
-    public ngOnInit(): void
-    {
-        //this.output = this.dataService.compile(this.input);
     }
 
     private compile(): void

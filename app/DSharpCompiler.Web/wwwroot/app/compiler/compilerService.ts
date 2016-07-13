@@ -1,25 +1,12 @@
 ﻿import {Injectable} from "@angular/core";
 import {Http, Response} from "@angular/http";
 import {Observable} from "rxjs/Rx";
-import {IVehicleService} from "./vehicles";
+import {ICompilerService} from "./compiler";
 
 @Injectable()
-export class VehicleService implements IVehicleService
+export class CompilerService implements ICompilerService
 {
     constructor(private httpService: Http) { }
-
-    public getVehicles(): Observable<IBaseData[]>
-    {
-        var obs = this.httpService.get("/api/vehicles/getdata")
-            .map(response => <IBaseData[]>(response.json().data));
-        return obs;
-    }
-
-    public getVehicle(id: number): Observable<IBaseData>
-    {
-        var promise = this.getVehicles().map(vehicles => vehicles.find(vehicle => vehicle.id === id));
-        return promise;
-    }
 
     public compilePascal(source: string): Observable<string>
     {
