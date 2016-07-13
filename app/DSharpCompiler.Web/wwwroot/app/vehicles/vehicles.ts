@@ -1,6 +1,0 @@
-﻿export * from "./staticVehicleService"
-export * from "./VehicleService"
-export * from "./vehicleComponent"
-export * from "./vehicleListComponent"
-export * from "./vehiclesComponent"
-export * from "./IVehicleService"
