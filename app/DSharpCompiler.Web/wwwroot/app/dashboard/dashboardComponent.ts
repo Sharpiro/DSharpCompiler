@@ -1,30 +1,28 @@
 ﻿import {Component, Inject} from "@angular/core"
 import {Observable} from "rxjs/Rx"
 import {ICompilerService} from "../compiler/compiler"
-import {CustomPipe, NestedComponent, LowerCasePipe} from "../blocks/blocks"
+import {CustomPipe, LowerCasePipe} from "../blocks/blocks"
 
 @Component({
     selector: "my-app",
     templateUrl: "./app/dashboard/dashboardComponent.html",
     styleUrls: ["./app/dashboard/dashboardComponent.css"],
-    directives: [NestedComponent],
-    pipes: [CustomPipe, LowerCasePipe],
+    pipes: [CustomPipe, LowerCasePipe]
 })
 export class DashboardComponent
 {
     private defaultInput =
-    `let a = 1;
-func doWork
+`func doWork
 {
-    let b = 2;
+    return 2 * 2 + - 3;
 };
 func doMoreWork
 {
-    let c = "hello world";
+    return 2 / (2 + - 4);
 };
-let d = 4;
-doWork;
-doMoreWork;`;
+let a = doWork;
+let b = doMoreWork;
+let c = doWork + doMoreWork;`;
     private input = this.defaultInput;
     private output: Observable<any>;
 

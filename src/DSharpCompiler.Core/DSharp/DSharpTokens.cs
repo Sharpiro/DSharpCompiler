@@ -16,6 +16,7 @@ namespace DSharpCompiler.Core.DSharp
             {
                 new Token { Value = "func" , Type = TokenType.Keyword },
                 new Token { Value = "let" , Type = TokenType.Keyword },
+                new Token { Value = "return" , Type = TokenType.Keyword },
                 new Token { Value = "\"" , Type = TokenType.Symbol },
                 new Token { Value = "{" , Type = TokenType.Symbol },
                 new Token { Value = "}" , Type = TokenType.Symbol },
