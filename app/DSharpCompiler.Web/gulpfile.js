@@ -42,7 +42,7 @@ gulp.task('transpile', function () {
     var tsResult = tsProject.src()
         .pipe(ts(tsProject));
 
-    return tsResult.js.pipe(gulp.dest('wwwroot'));
+    return tsResult.js.pipe(gulp.dest('wwwroot/app'));
 });
 
 
