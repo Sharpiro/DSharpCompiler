@@ -91,15 +91,19 @@ namespace DSharpCompiler.Core.Common
             var value = _globalData[variableNode.Value];
             if (value == null)
                 throw new NullReferenceException("tried to use a variable that was null");
-            var valueNode = (CompoundNode)value;
-            if (valueNode != null && valueNode.Type == NodeType.Compound)
+            if (value.GetType() == typeof(int))
             {
-                var routineNode = new RoutineNode(valueNode.Name);
-                return VisitRoutineNode(routineNode);
+                return value;
+            }
+            else if (value.GetType() == typeof(string))
+            {
+                return value;
             }
             else
             {
-                return (int)value;
+                var valueNode = (CompoundNode)value;
+                var routineNode = new RoutineNode(valueNode.Name);
+                return VisitRoutineNode(routineNode);
             }
         }
 

@@ -126,5 +126,23 @@ namespace DSharpCompiler.Core.Tests
             Assert.Equal("hello world", c);
             Assert.Equal(4, d);
         }
+
+        [Fact]
+        public void StringVariableUseTest()
+        {
+            var code = @"
+                let c = ""hello world"";
+                let d = c";
+            var pascalTokens = new DSharpTokens();
+            var lexer = new LexicalAnalyzer(pascalTokens);
+            var parser = new DSharpParser();
+            var interpreter = new NodeVisitor();
+            var wrapper = new Interpreter(lexer, parser, interpreter);
+            var dictionary = wrapper.Interpret(code);
+            var c = dictionary.Get("c");
+            var d = dictionary.Get("d");
+            Assert.Equal("hello world", c);
+            Assert.Equal(c, d);
+        }
     }
 }
