@@ -10,26 +10,32 @@ namespace DSharpCompiler.Core.Tests
         public void InScopeTest()
         {
             var code = @"
-                let x = 2;
+                let a = 2;
                 func doWork
                 {
-                    let a = ""should be null"";
-                    let y = x + 1;
-                    return y;
+                    let b = ""data"";
+                    let c = a + 1;
+                    return c;
                 };
-                let b = doWork;
-                let x = 5;
-                let c = doWork;";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
+                let d = doWork;
+                let a = 5;
+                let e = doWork;";
+            var tokens = new DSharpTokens();
+            var lexer = new LexicalAnalyzer(tokens);
             var parser = new DSharpParser();
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
-            var a = dictionary.Get("a");
-            var b = dictionary.Get("b");
-            Assert.Equal(null, a);
-            Assert.Equal(2, b);
+            var a = dictionary.GetValue<int>("a");
+            var b = dictionary.GetValue<string>("b");
+            var c = dictionary.GetValue<int?>("c");
+            var d = dictionary.GetValue<int>("d");
+            var e = dictionary.GetValue<int>("e");
+            Assert.Equal(5, a);
+            Assert.Equal(null, b);
+            Assert.Equal(null, c);
+            Assert.Equal(3, d);
+            Assert.Equal(6, e);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace DSharpCompiler.Core.Common
             _visitor = visitor;
         }
 
-        public Dictionary<string, object> Interpret(string source)
+        public SymbolsTable Interpret(string source)
         {
             var tokens = _lexer.Analayze(source);
             var rootNode = _parser.Program(tokens.ToList());
