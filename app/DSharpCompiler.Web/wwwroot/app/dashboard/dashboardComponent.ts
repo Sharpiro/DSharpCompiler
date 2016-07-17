@@ -12,17 +12,16 @@ import {CustomPipe, LowerCasePipe} from "../blocks/blocks"
 export class DashboardComponent
 {
     private defaultInput =
-`func doWork
+`let a = 2;
+func doWork
 {
-    return 2 * 2 + - 3;
+    let b = "data";
+    let c = a * (2 + - 3);
+    return c;
 };
-func doMoreWork
-{
-    return 2 / (2 + - 4);
-};
-let a = doWork;
-let b = doMoreWork;
-let c = doWork + doMoreWork;`;
+let d = doWork;
+let a = 5;
+let c = doWork + 1;`;
     private input = this.defaultInput;
     private output: Observable<any>;
 

@@ -1,18 +1,18 @@
 ﻿using DSharpCompiler.Core.Common.Models;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace DSharpCompiler.Core.Common
 {
     public class NodeVisitor
     {
-        private Dictionary<string, object> _globalData;
+        private SymbolsTable _symbols;
 
-        public Dictionary<string, object> VisitNodes(Node root)
+        public SymbolsTable VisitNodes(Node root)
         {
-            _globalData = new Dictionary<string, object>();
+            _symbols = new SymbolsTable();
             Visit(root);
-            return _globalData;
+            return _symbols;
         }
 
         private object Visit(Node node)
@@ -67,12 +67,12 @@ namespace DSharpCompiler.Core.Common
             {
                 var guid = Guid.NewGuid().ToString();
                 compoundNode.Name = guid;
-                _globalData[compoundNode.Name] = compoundNode;
+                _symbols.Add(compoundNode.Name, new Symbol(compoundNode));
                 var mainRoutineNode = new RoutineNode(compoundNode.Name);
                 VisitRoutineNode(mainRoutineNode);
             }
             else
-                _globalData[compoundNode.Name] = compoundNode;
+                _symbols.Add(compoundNode.Name, new Symbol(compoundNode));
             return null;
         }
 
@@ -81,25 +81,29 @@ namespace DSharpCompiler.Core.Common
             var assignmentNode = node as BinaryNode;
             var left = assignmentNode.Left as VariableNode;
             var variableName = left.Value;
-            _globalData[variableName] = Visit(assignmentNode.Right);
+            _symbols.Add(variableName, new Symbol(Visit(assignmentNode.Right)));
             return null;
         }
 
         private object VisitVariableNode(Node node)
         {
             var variableNode = node as VariableNode;
-            var value = _globalData[variableNode.Value];
-            if (value == null)
+            var symbol = _symbols.Get(variableNode.Value);
+            if (symbol == null)
                 throw new NullReferenceException("tried to use a variable that was null");
-            var valueNode = (CompoundNode)value;
-            if (valueNode != null && valueNode.Type == NodeType.Compound)
+            if (symbol.Type == typeof(int))
             {
-                var routineNode = new RoutineNode(valueNode.Name);
-                return VisitRoutineNode(routineNode);
+                return symbol.Value;
+            }
+            else if (symbol.Type == typeof(string))
+            {
+                return symbol.Value;
             }
             else
             {
-                return (int)value;
+                var valueNode = (CompoundNode)symbol.Value;
+                var routineNode = new RoutineNode(valueNode.Name);
+                return VisitRoutineNode(routineNode);
             }
         }
 
@@ -130,7 +134,7 @@ namespace DSharpCompiler.Core.Common
             else
                 throw new InvalidOperationException();
         }
-        private int? VisitUnaryOpNode(Node node)
+        private object VisitUnaryOpNode(Node node)
         {
             var unaryNode = node as UnaryNode;
             if (unaryNode.Token.Value == "+")
@@ -143,7 +147,7 @@ namespace DSharpCompiler.Core.Common
             }
             else if (unaryNode.Token.Value == "return")
             {
-                return (int)Visit(unaryNode.Expression);
+                return Visit(unaryNode.Expression);
             }
             else
                 throw new InvalidOperationException();
@@ -164,12 +168,15 @@ namespace DSharpCompiler.Core.Common
         private object VisitRoutineNode(Node node)
         {
             var routineNode = node as RoutineNode;
-            var compoundNode = _globalData[routineNode.RoutineName] as CompoundNode;
+            var symbol = _symbols.Get(routineNode.RoutineName);
+            var compoundNode = symbol.Value as CompoundNode;
             object returnValue = null;
-            foreach (var child in compoundNode.Children)
+            _symbols.AddNewScope();
+            foreach (var child in compoundNode.Children.Where(c => c.Type != NodeType.Empty))
             {
-                returnValue = returnValue.Add(Visit(child));
+                returnValue = Visit(child);
             }
+            _symbols.RemoveCurrentScope();
             return returnValue;
         }
     }

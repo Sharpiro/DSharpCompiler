@@ -21,7 +21,7 @@ namespace DSharpCompiler.Core.Tests
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.Get("b");
+            var b = dictionary.GetValue<int>("b");
             Assert.Equal(2, b);
         }
 
@@ -46,9 +46,9 @@ namespace DSharpCompiler.Core.Tests
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
-            var a = dictionary.Get("a");
-            var b = dictionary.Get("b");
-            var c = dictionary.Get("c");
+            var a = dictionary.GetValue<int>("a");
+            var b = dictionary.GetValue<int>("b");
+            var c = dictionary.GetValue<int>("c");
             Assert.Equal(1, a);
             Assert.Equal(-1, b);
             Assert.Equal(0, c);
