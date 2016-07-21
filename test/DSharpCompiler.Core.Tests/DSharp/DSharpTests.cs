@@ -10,12 +10,12 @@ namespace DSharpCompiler.Core.Tests
         public void SimpleProgramTest()
         {
             var code = @"
-                func doWork
+                func doWork()
                 {
                     let a = 2;
                     return a;
                 };
-                let a = doWork;";
+                let a = doWork();";
             var pascalTokens = new DSharpTokens();
             var lexer = new LexicalAnalyzer(pascalTokens);
             var parser = new DSharpParser();
@@ -31,7 +31,7 @@ namespace DSharpCompiler.Core.Tests
         {
             var code = @"
                 let a = 1;
-                func doWork
+                func doWork()
                 {
                     let b = 2;
                 };
@@ -55,17 +55,17 @@ namespace DSharpCompiler.Core.Tests
         {
             var code = @"
                 let a = 1;
-                func doWork
+                func doWork()
                 {
                     let b = 2;
                 };
-                func doMoreWork
+                func doMoreWork()
                 {
                     let c = 3;
                 };
                 let d = 4;
-                doWork;
-                doMoreWork;";
+                doWork();
+                doMoreWork();";
             var pascalTokens = new DSharpTokens();
             var lexer = new LexicalAnalyzer(pascalTokens);
             var parser = new DSharpParser();
@@ -101,18 +101,18 @@ namespace DSharpCompiler.Core.Tests
         {
             var code = @"
                 let a = 1;
-                func doWork
+                func doWork()
                 {
                     let b = 2;
                 };
-                func doMoreWork
+                func doMoreWork()
                 {
                     let f = ""hello world"";
                     return f;
                 };
                 let d = 4;
-                doWork;
-                let c = doMoreWork;";
+                doWork();
+                let c = doMoreWork();";
             var pascalTokens = new DSharpTokens();
             var lexer = new LexicalAnalyzer(pascalTokens);
             var parser = new DSharpParser();

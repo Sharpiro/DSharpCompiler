@@ -10,11 +10,11 @@ namespace DSharpCompiler.Core.Tests
         public void AssignFunctionTest()
         {
             var code = @"
-                func doWork
+                func doWork()
                 {
                     return 2;
                 };
-                let b = doWork;";
+                let b = doWork();";
             var pascalTokens = new DSharpTokens();
             var lexer = new LexicalAnalyzer(pascalTokens);
             var parser = new DSharpParser();
@@ -29,11 +29,11 @@ namespace DSharpCompiler.Core.Tests
         public void ComplexAssignTest()
         {
             var code = @"
-                func doWork
+                func doWork()
                 {
                     return 2 * 2 + - 3;
                 };
-                func doMoreWork
+                func doMoreWork()
                 {
                     return 2 / (2 + - 4);
                 };

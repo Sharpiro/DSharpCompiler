@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DSharpCompiler.Core.Common.Models;
 
 namespace DSharpCompiler.Core.Common
 {
@@ -64,6 +65,18 @@ namespace DSharpCompiler.Core.Common
         IEnumerator<KeyValuePair<string, Symbol>> IEnumerable<KeyValuePair<string, Symbol>>.GetEnumerator()
         {
             return _globalData.GetEnumerator();
+        }
+
+        public void AddNodes(IEnumerable<Node> paramsEnumerable, IEnumerable<object> argsEnumerable)
+        {
+            var parameters = paramsEnumerable.Select(p => p as VariableNode).Where(p => p != null).ToList();
+            var arguments = argsEnumerable.Where(a => a != null).ToList();
+            if (parameters.Count != arguments.Count)
+                throw new InvalidOperationException("mismatch of # of parameters and arguments");
+            for (var i = 0; i < parameters.Count(); i++)
+            {
+                Add(parameters[i].Value, new Symbol(arguments[i]));
+            }
         }
     }
 
