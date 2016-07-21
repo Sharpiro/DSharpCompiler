@@ -24,6 +24,7 @@ namespace DSharpCompiler.Core.DSharp
                 new Token { Value = ")" , Type = TokenType.Symbol },
                 new Token { Value = ";" , Type = TokenType.Symbol },
                 new Token { Value = "." , Type = TokenType.Symbol },
+                new Token { Value = "," , Type = TokenType.Symbol },
                 new Token { Value = "+" , Type = TokenType.Symbol },
                 new Token { Value = "-" , Type = TokenType.Symbol },
                 new Token { Value = "*" , Type = TokenType.Symbol },

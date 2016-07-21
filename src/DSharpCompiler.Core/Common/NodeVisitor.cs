@@ -1,5 +1,6 @@
 ﻿using DSharpCompiler.Core.Common.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DSharpCompiler.Core.Common
@@ -68,7 +69,7 @@ namespace DSharpCompiler.Core.Common
                 var guid = Guid.NewGuid().ToString();
                 compoundNode.Name = guid;
                 _symbols.Add(compoundNode.Name, new Symbol(compoundNode));
-                var mainRoutineNode = new RoutineNode(compoundNode.Name);
+                var mainRoutineNode = new RoutineNode(compoundNode.Name, new List<Node>());
                 VisitRoutineNode(mainRoutineNode);
             }
             else
@@ -102,7 +103,7 @@ namespace DSharpCompiler.Core.Common
             else
             {
                 var valueNode = (CompoundNode)symbol.Value;
-                var routineNode = new RoutineNode(valueNode.Name);
+                var routineNode = new RoutineNode(valueNode.Name, new List<Node>());
                 return VisitRoutineNode(routineNode);
             }
         }
@@ -165,6 +166,16 @@ namespace DSharpCompiler.Core.Common
             return valueNode.Value;
         }
 
+        private IEnumerable<object> VisitArgumentNodes(IEnumerable<Node> nodes)
+        {
+            var args = new List<object>();
+            foreach (var node in nodes)
+            {
+                args.Add(Visit(node));
+            }
+            return args;
+        }
+
         private object VisitRoutineNode(Node node)
         {
             var routineNode = node as RoutineNode;
@@ -172,6 +183,7 @@ namespace DSharpCompiler.Core.Common
             var compoundNode = symbol.Value as CompoundNode;
             object returnValue = null;
             _symbols.AddNewScope();
+            _symbols.AddNodes(compoundNode.Parameters, VisitArgumentNodes(routineNode.Arguments));
             foreach (var child in compoundNode.Children.Where(c => c.Type != NodeType.Empty))
             {
                 returnValue = Visit(child);

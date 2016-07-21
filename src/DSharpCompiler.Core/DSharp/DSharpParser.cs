@@ -18,7 +18,7 @@ namespace DSharpCompiler.Core.DSharp
             _currentToken = _tokens.FirstOrDefault();
             _currentIndex = 0;
             var children = StatementList();
-            var node = new CompoundNode(children) { Name = "main" };
+            var node = new CompoundNode(children, new List<Node>()) { Name = "main" };
             return node;
         }
 
@@ -27,10 +27,39 @@ namespace DSharpCompiler.Core.DSharp
             EatToken(TokenType.Keyword);
             var functionName = _currentToken.Value;
             EatToken(TokenType.Identifier);
+
             EatToken(TokenType.Symbol);
-            var children = StatementList();
-            var node = new CompoundNode(children) { Name = functionName };
+            var parameters = ParameterList();
             EatToken(TokenType.Symbol);
+
+            EatToken(TokenType.Symbol);
+            var statements = StatementList();
+            var node = new CompoundNode(statements, parameters) { Name = functionName };
+            EatToken(TokenType.Symbol);
+            return node;
+        }
+
+        private IEnumerable<Node> ParameterList()
+        {
+            var node = Parameter();
+
+            var nodes = new List<Node> { node };
+            while (_currentToken?.Value == ",")
+            {
+                EatToken(TokenType.Symbol);
+                nodes.Add(Parameter());
+            }
+            return nodes;
+        }
+
+        private Node Parameter()
+        {
+            Node node = null;
+            if (_currentToken.Type == TokenType.Identifier || _currentToken.Type == TokenType.NumericConstant
+                || _currentToken.Type == TokenType.StringConstant)
+                node = Expression();
+            else
+                node = new EmptyNode();
             return node;
         }
 
@@ -93,7 +122,12 @@ namespace DSharpCompiler.Core.DSharp
         {
             var token = _currentToken;
             EatToken(TokenType.Identifier);
-            var node = new RoutineNode(token.Value);
+
+            EatToken(TokenType.Symbol);
+            var arguments = ParameterList();
+            EatToken(TokenType.Symbol);
+
+            var node = new RoutineNode(token.Value, arguments);
             return node;
         }
 
@@ -147,6 +181,10 @@ namespace DSharpCompiler.Core.DSharp
                 EatToken(TokenType.Symbol);
                 node = new UnaryNode(token, Factor());
             }
+            else if (token.Type == TokenType.Identifier && PeekToken()?.Value == "(")
+            {
+                node = RoutineStatement();
+            }
             else if (token.Value == "(")
             {
                 EatToken(TokenType.Symbol);
@@ -178,6 +216,16 @@ namespace DSharpCompiler.Core.DSharp
             {
                 _currentIndex++;
                 return _tokens[_currentIndex];
+            }
+            catch (ArgumentOutOfRangeException) { }
+            return null;
+        }
+
+        private Token PeekToken()
+        {
+            try
+            {
+                return _tokens[_currentIndex + 1];
             }
             catch (ArgumentOutOfRangeException) { }
             return null;
