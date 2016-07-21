@@ -13,15 +13,20 @@ export class DashboardComponent
 {
     private defaultInput =
 `let a = 2;
-func doWork
+func doWork()
 {
     let b = "data";
     let c = a * (2 + - 3);
     return c;
 };
-let d = doWork;
+let d = doWork();
 let a = 5;
-let c = doWork + 1;`;
+let c = doWork() + 1;
+func add(e, f)
+{
+    return e + f;
+};
+let e = add(2, 4);`;
     private input = this.defaultInput;
     private output: Observable<any>;
 

@@ -11,11 +11,13 @@ namespace DSharpCompiler.Core.Common.Models
     {
         public string Name { get; set; }
         public IEnumerable<Node> Children { get; set; }
+        public IEnumerable<Node> Parameters { get; set; }
 
-        public CompoundNode(IEnumerable<Node> children)
+        public CompoundNode(IEnumerable<Node> children, IEnumerable<Node> parameters)
         {
             Children = children;
             Type = NodeType.Compound;
+            Parameters = parameters;
         }
     }
 
@@ -89,10 +91,12 @@ namespace DSharpCompiler.Core.Common.Models
     public class RoutineNode : Node
     {
         public string RoutineName { get; set; }
-        public RoutineNode(string routineName)
+        public IEnumerable<Node> Arguments { get; set; }
+        public RoutineNode(string routineName, IEnumerable<Node> arguments)
         {
             RoutineName = routineName;
             Type = NodeType.Routine;
+            Arguments = arguments;
         }
     }
 

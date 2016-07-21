@@ -11,15 +11,15 @@ namespace DSharpCompiler.Core.Tests
         {
             var code = @"
                 let a = 2;
-                func doWork
+                func doWork()
                 {
                     let b = ""data"";
                     let c = a + 1;
                     return c;
                 };
-                let d = doWork;
+                let d = doWork();
                 let a = 5;
-                let e = doWork;";
+                let e = doWork();";
             var tokens = new DSharpTokens();
             var lexer = new LexicalAnalyzer(tokens);
             var parser = new DSharpParser();

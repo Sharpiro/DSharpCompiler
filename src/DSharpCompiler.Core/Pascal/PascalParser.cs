@@ -26,7 +26,7 @@ namespace DSharpCompiler.Core.Pascal
         {
             EatToken(TokenType.Keyword);
             var children = StatementList();
-            var node = new CompoundNode(children);
+            var node = new CompoundNode(children, new List<Node>());
             EatToken(TokenType.Keyword);
             return node;
         }
