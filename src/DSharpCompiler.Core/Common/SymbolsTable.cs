@@ -31,11 +31,6 @@ namespace DSharpCompiler.Core.Common
             }
         }
 
-        public void AddNewScope()
-        {
-            _currentScopeId++;
-        }
-
         public void RemoveCurrentScope()
         {
             _scopeData = _scopeData
@@ -80,6 +75,24 @@ namespace DSharpCompiler.Core.Common
             return _globalData.GetEnumerator();
         }
 
+        public void AddNewScope()
+        {
+            _currentScopeId++;
+        }
+
+        public void AddParentScopes()
+        {
+            var parentScopes = _scopeData.Where(kvp => kvp.Value.ScopeId == _currentScopeId - 1);
+            var newDict = new Dictionary<string, Symbol>();
+            foreach (var item in parentScopes)
+            {
+                var key = StripScope(item.Key);
+                key = $"{key}-{_currentScopeId}";
+                newDict[key] = item.Value;
+            }
+            _scopeData = _scopeData.Concat(newDict).ToDictionary(d => d.Key, d => d.Value);
+        }
+
         public void AddNodes(IEnumerable<Node> paramsEnumerable, IEnumerable<object> argsEnumerable)
         {
             var parameters = paramsEnumerable.Select(p => p as VariableNode).Where(p => p != null).ToList();
@@ -90,6 +103,11 @@ namespace DSharpCompiler.Core.Common
             {
                 Add(parameters[i].Value, new Symbol(arguments[i]));
             }
+        }
+
+        private string StripScope(string scopedKey)
+        {
+            return scopedKey.Substring(0, scopedKey.Length - 2);
         }
     }
 

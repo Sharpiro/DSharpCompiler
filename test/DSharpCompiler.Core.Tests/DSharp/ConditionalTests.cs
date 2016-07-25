@@ -1,6 +1,7 @@
 ﻿using DSharpCompiler.Core.Common;
 using DSharpCompiler.Core.DSharp;
 using Xunit;
+using System;
 
 namespace DSharpCompiler.Core.Tests
 {
@@ -91,7 +92,7 @@ namespace DSharpCompiler.Core.Tests
                     };
                     return fib(n - 2) + fib(n - 1);
                 };
-                let b = fib(10);";
+                let b = fib(25);";
             var pascalTokens = new DSharpTokens();
             var lexer = new LexicalAnalyzer(pascalTokens);
             var parser = new DSharpParser();
@@ -99,29 +100,52 @@ namespace DSharpCompiler.Core.Tests
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
             var b = dictionary.GetValue<int>("b");
-            Assert.Equal(55, b);
+            Assert.Equal(75025, b);
         }
 
         [Fact]
-        public void BlockTest()
+        public void BlockInTest()
         {
             var code = @"
                 func test(n)
                 {
-                    if (n eq 10)
+                    if (n eq 9)
                     {
                         return n;
                     };
                 };
-                let b = test(10);";
+                let b = test(9);";
             var pascalTokens = new DSharpTokens();
             var lexer = new LexicalAnalyzer(pascalTokens);
             var parser = new DSharpParser();
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
-            Assert.Equal(10, b);
+            var b = dictionary.GetValue<int?>("b");
+            Assert.Equal(9, b);
+        }
+
+        [Fact]
+        public void BlockOutTest()
+        {
+            var code = @"
+                func test(n)
+                {
+                    if (n eq 9)
+                    {
+                        let x = 3;
+                    };
+                    return x;
+                };
+                let b = test(9);";
+            var pascalTokens = new DSharpTokens();
+            var lexer = new LexicalAnalyzer(pascalTokens);
+            var parser = new DSharpParser();
+            var visitor = new NodeVisitor();
+            var interpreter = new Interpreter(lexer, parser, visitor);
+            var expectedMessage = "tried to use a variable that was null";
+            var exception = Assert.Throws<NullReferenceException>(() => interpreter.Interpret(code));
+            Assert.Equal(expectedMessage, exception.Message);
         }
     }
 }

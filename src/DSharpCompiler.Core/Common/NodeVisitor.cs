@@ -207,6 +207,8 @@ namespace DSharpCompiler.Core.Common
             var argumentNodes = VisitArgumentNodes(routineNode.Arguments);
             _symbols.AddNewScope();
             _symbols.AddNodes(compoundNode.Parameters, argumentNodes);
+            if (compoundNode.Type == NodeType.Conditional)
+                _symbols.AddParentScopes();
             foreach (var child in compoundNode.Children.Where(c => c.Type != NodeType.Empty))
             {
                 returnValue = Visit(child);
