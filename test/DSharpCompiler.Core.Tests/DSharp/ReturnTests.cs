@@ -26,6 +26,26 @@ namespace DSharpCompiler.Core.Tests
         }
 
         [Fact]
+        public void ReturnBreakTest()
+        {
+            var code = @"
+                func doWork()
+                {
+                    return 2;
+                    return 4;
+                };
+                let b = doWork();";
+            var pascalTokens = new DSharpTokens();
+            var lexer = new LexicalAnalyzer(pascalTokens);
+            var parser = new DSharpParser();
+            var visitor = new NodeVisitor();
+            var interpreter = new Interpreter(lexer, parser, visitor);
+            var dictionary = interpreter.Interpret(code);
+            var b = dictionary.GetValue<int>("b");
+            Assert.Equal(2, b);
+        }
+
+        [Fact]
         public void ComplexAssignTest()
         {
             var code = @"
