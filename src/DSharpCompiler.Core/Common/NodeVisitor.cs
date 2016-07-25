@@ -1,4 +1,5 @@
 ﻿using DSharpCompiler.Core.Common.Models;
+using DSharpCompiler.Core.DSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,10 @@ namespace DSharpCompiler.Core.Common
             {
                 return VisitCompoundNode(node);
             }
+            if (node.Type == NodeType.Conditional)
+            {
+                return VisitConditionalNode(node);
+            }
             else if (node.Type == NodeType.Assignment)
             {
                 return VisitAssignmentNode(node);
@@ -37,7 +42,7 @@ namespace DSharpCompiler.Core.Common
             {
                 return VisitBinaryOpNode(node);
             }
-            else if (node.Type == NodeType.UnaryOp)
+            else if (node.Type == NodeType.UnaryOp || node.Type == NodeType.Return)
             {
                 return VisitUnaryOpNode(node);
             }
@@ -75,6 +80,23 @@ namespace DSharpCompiler.Core.Common
             else
                 _symbols.Add(compoundNode.Name, new Symbol(compoundNode));
             return null;
+        }
+
+        private object VisitConditionalNode(Node node)
+        {
+            var compoundNode = node as CompoundNode;
+            var exp1 = Visit(compoundNode.Parameters.FirstOrDefault());
+            var exp2 = Visit(compoundNode.Parameters.LastOrDefault());
+            object returnValue = null;
+            if ((int)exp1 == (int)exp2)
+            {
+                var guid = Guid.NewGuid().ToString();
+                compoundNode.Name = guid;
+                _symbols.Add(compoundNode.Name, new Symbol(compoundNode));
+                var mainRoutineNode = new RoutineNode(compoundNode.Name, new List<Node>());
+                returnValue = VisitRoutineNode(mainRoutineNode);
+            }
+            return returnValue;
         }
 
         private int? VisitAssignmentNode(Node node)
@@ -182,11 +204,16 @@ namespace DSharpCompiler.Core.Common
             var symbol = _symbols.Get(routineNode.RoutineName);
             var compoundNode = symbol.Value as CompoundNode;
             object returnValue = null;
+            var argumentNodes = VisitArgumentNodes(routineNode.Arguments);
             _symbols.AddNewScope();
-            _symbols.AddNodes(compoundNode.Parameters, VisitArgumentNodes(routineNode.Arguments));
+            _symbols.AddNodes(compoundNode.Parameters, argumentNodes);
+            if (compoundNode.Type == NodeType.Conditional)
+                _symbols.AddParentScopes();
             foreach (var child in compoundNode.Children.Where(c => c.Type != NodeType.Empty))
             {
                 returnValue = Visit(child);
+                if (returnValue != null)
+                    break;
             }
             _symbols.RemoveCurrentScope();
             return returnValue;

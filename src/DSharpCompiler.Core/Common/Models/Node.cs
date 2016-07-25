@@ -7,10 +7,14 @@ namespace DSharpCompiler.Core.Common.Models
         public NodeType Type { get; set; }
     }
 
-    public class CompoundNode : Node
+    public abstract class ParentNode : Node
     {
         public string Name { get; set; }
         public IEnumerable<Node> Children { get; set; }
+    }
+
+    public class CompoundNode : ParentNode
+    {
         public IEnumerable<Node> Parameters { get; set; }
 
         public CompoundNode(IEnumerable<Node> children, IEnumerable<Node> parameters)
@@ -20,6 +24,19 @@ namespace DSharpCompiler.Core.Common.Models
             Parameters = parameters;
         }
     }
+
+    //public class ConditionalNode : ParentNode
+    //{
+    //    //public Node ExpressionOne { get; set; }
+    //    //public Node ExpressionTwo { get; set; }
+    //    public IEnumerable<Node> Parameters { get; set; }
+
+    //    public ConditionalNode(IEnumerable<Node> children)
+    //    {
+    //        Children = children;
+    //        Type = NodeType.Conditional;
+    //    }
+    //}
 
     public class BinaryNode : Node
     {
@@ -75,6 +92,19 @@ namespace DSharpCompiler.Core.Common.Models
         }
     }
 
+    public class BooleanNode : Node
+    {
+        public Token Token { get; set; }
+        public bool Value { get; private set; }
+
+        public BooleanNode(Token token)
+        {
+            Type = NodeType.Boolean;
+            Token = token;
+            Value = bool.Parse(token.Value);
+        }
+    }
+
     public class VariableNode : Node
     {
         public Token Token { get; set; }
@@ -110,7 +140,7 @@ namespace DSharpCompiler.Core.Common.Models
 
     public enum NodeType
     {
-        None, BinaryOp, UnaryOp, Numeric, String, Compound, Variable,
+        None, BinaryOp, UnaryOp, Numeric, String, Boolean, Compound, Conditional, Variable,
         Assignment, Return, Routine, Empty,
     }
 }
