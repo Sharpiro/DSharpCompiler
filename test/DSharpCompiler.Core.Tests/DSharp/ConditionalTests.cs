@@ -4,15 +4,19 @@ using Xunit;
 
 namespace DSharpCompiler.Core.Tests
 {
-    public class ReturnTests
+    public class ConditionalTests
     {
         [Fact]
-        public void AssignFunctionTest()
+        public void SimpleIsTrueTest()
         {
             var code = @"
                 func doWork()
                 {
-                    return 2;
+                    if (2 eq 2)
+                    {
+                        return 1;
+                    };
+                    return 0;
                 };
                 let b = doWork();";
             var pascalTokens = new DSharpTokens();
@@ -22,17 +26,20 @@ namespace DSharpCompiler.Core.Tests
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
             var b = dictionary.GetValue<int>("b");
-            Assert.Equal(2, b);
+            Assert.Equal(1, b);
         }
 
         [Fact]
-        public void ReturnBreakTest()
+        public void SimpleIsFalseTest()
         {
             var code = @"
                 func doWork()
                 {
-                    return 2;
-                    return 4;
+                    if (2 eq 3)
+                    {
+                        return 1;
+                    };
+                    return 0;
                 };
                 let b = doWork();";
             var pascalTokens = new DSharpTokens();
@@ -42,36 +49,57 @@ namespace DSharpCompiler.Core.Tests
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
             var b = dictionary.GetValue<int>("b");
-            Assert.Equal(2, b);
+            Assert.Equal(0, b);
         }
 
         [Fact]
-        public void ComplexAssignTest()
+        public void VariableTest()
         {
             var code = @"
-                func doWork()
+                func doWork(n)
                 {
-                    return 2 * 2 + - 3;
+                    if (n eq 2)
+                    {
+                        return 1;
+                    };
+                    return 0;
                 };
-                func doMoreWork()
-                {
-                    return 2 / (2 + - 4);
-                };
-                let a = doWork;
-                let b = doMoreWork;
-                let c = doWork + doMoreWork;";
+                let b = doWork(2);";
             var pascalTokens = new DSharpTokens();
             var lexer = new LexicalAnalyzer(pascalTokens);
             var parser = new DSharpParser();
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
-            var a = dictionary.GetValue<int>("a");
             var b = dictionary.GetValue<int>("b");
-            var c = dictionary.GetValue<int>("c");
-            Assert.Equal(1, a);
-            Assert.Equal(-1, b);
-            Assert.Equal(0, c);
+            Assert.Equal(1, b);
+        }
+
+        [Fact]
+        public void RecursionTest()
+        {
+            var code = @"
+                func fib(n)
+                {
+                    if (n eq 0)
+                    {
+                        return n;
+                    };
+                    if (n eq 1)
+                    {
+                        return n;
+                    };
+                    return fib(n - 2) + fib(n - 1);
+                };
+                let b = fib(2);";
+            var pascalTokens = new DSharpTokens();
+            var lexer = new LexicalAnalyzer(pascalTokens);
+            var parser = new DSharpParser();
+            var visitor = new NodeVisitor();
+            var interpreter = new Interpreter(lexer, parser, visitor);
+            var dictionary = interpreter.Interpret(code);
+            var b = dictionary.GetValue<int>("b");
+            Assert.Equal(1, b);
         }
     }
 }

@@ -72,7 +72,8 @@ namespace DSharpCompiler.Core.Common
             var parameters = paramsEnumerable.Select(p => p as VariableNode).Where(p => p != null).ToList();
             var arguments = argsEnumerable.Where(a => a != null).ToList();
             if (parameters.Count != arguments.Count)
-                throw new InvalidOperationException("mismatch of # of parameters and arguments");
+                return;
+            //throw new InvalidOperationException("mismatch of # of parameters and arguments");
             for (var i = 0; i < parameters.Count(); i++)
             {
                 Add(parameters[i].Value, new Symbol(arguments[i]));

@@ -7,6 +7,10 @@
             public const string Func = "func";
             public const string Let = "let";
             public const string Return = "return";
+            public const string If = "if";
+            public const string True = "true";
+            public const string False = "false";
+            public const string ConditionalEquals = "eq";
         }
 
         public static class Symbols

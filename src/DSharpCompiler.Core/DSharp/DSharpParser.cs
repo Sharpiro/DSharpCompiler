@@ -22,23 +22,6 @@ namespace DSharpCompiler.Core.DSharp
             return node;
         }
 
-        private Node CompoundStatement()
-        {
-            EatToken(TokenType.Keyword);
-            var functionName = _currentToken.Value;
-            EatToken(TokenType.Identifier);
-
-            EatToken(TokenType.Symbol);
-            var parameters = ParameterList();
-            EatToken(TokenType.Symbol);
-
-            EatToken(TokenType.Symbol);
-            var statements = StatementList();
-            var node = new CompoundNode(statements, parameters) { Name = functionName };
-            EatToken(TokenType.Symbol);
-            return node;
-        }
-
         private IEnumerable<Node> ParameterList()
         {
             var node = Parameter();
@@ -87,9 +70,13 @@ namespace DSharpCompiler.Core.DSharp
             {
                 node = ReturnStatement();
             }
-            else if (_currentToken?.Type == TokenType.Keyword)
+            else if (_currentToken?.Value == DsharpConstants.Keywords.Let)
             {
                 node = AssignmentStatement();
+            }
+            else if (_currentToken?.Value == DsharpConstants.Keywords.If)
+            {
+                node = ConditionalStatement();
             }
             else if (_currentToken?.Type == TokenType.Identifier)
             {
@@ -99,6 +86,61 @@ namespace DSharpCompiler.Core.DSharp
                 node = Empty();
             return node;
         }
+
+        private Node CompoundStatement()
+        {
+            EatToken(TokenType.Keyword);
+            var functionName = _currentToken.Value;
+            EatToken(TokenType.Identifier);
+
+            EatToken(TokenType.Symbol);
+            var parameters = ParameterList();
+            EatToken(TokenType.Symbol);
+
+            EatToken(TokenType.Symbol);
+            var statements = StatementList();
+            var node = new CompoundNode(statements, parameters) { Name = functionName };
+            EatToken(TokenType.Symbol);
+            return node;
+        }
+
+        private Node ConditionalStatement()
+        {
+            EatToken(TokenType.Keyword);
+            EatToken(TokenType.Symbol);
+
+            //condition
+            //var condition = Condition();
+            var expressionOne = Expression();
+            EatToken(TokenType.Keyword);
+            var expressionTwo = Expression();
+
+            EatToken(TokenType.Symbol);
+            EatToken(TokenType.Symbol);
+            var statements = StatementList();
+            EatToken(TokenType.Symbol);
+
+            var node = new CompoundNode(statements, new List<Node> { expressionOne, expressionTwo })
+            { Type = NodeType.Conditional };
+            return node;
+        }
+
+        //private Node Condition()
+        //{
+        //    Node node = null;
+        //    if (_currentToken.Type == TokenType.Keyword)
+        //    {
+        //        var condition = _currentToken.Value;
+        //        EatToken(TokenType.Keyword);
+        //        node = null;
+        //    }
+        //    else
+        //        throw new InvalidOperationException("Invalid condition provided");
+        //    var expressionOne = Expression();
+        //    EatToken(TokenType.Symbol);
+        //    var expressionTwo = Expression();
+        //    return node;
+        //}
 
         private Node AssignmentStatement()
         {
@@ -114,7 +156,7 @@ namespace DSharpCompiler.Core.DSharp
         {
             var token = _currentToken;
             EatToken(TokenType.Keyword);
-            var node = new UnaryNode(token, Expression()) { Type = NodeType.UnaryOp };
+            var node = new UnaryNode(token, Expression()) { Type = NodeType.Return };
             return node;
         }
 
@@ -177,6 +219,11 @@ namespace DSharpCompiler.Core.DSharp
             {
                 EatToken(TokenType.StringConstant);
                 node = new StringNode(token);
+            }
+            else if (token.Type == TokenType.Keyword)
+            {
+                EatToken(TokenType.Keyword);
+                node = new BooleanNode(token);
             }
             else if (token.Value.In(DsharpConstants.Symbols.Plus, DsharpConstants.Symbols.Minus))
             {
