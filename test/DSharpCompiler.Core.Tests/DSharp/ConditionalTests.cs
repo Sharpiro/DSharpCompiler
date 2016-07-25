@@ -83,15 +83,15 @@ namespace DSharpCompiler.Core.Tests
                 {
                     if (n eq 0)
                     {
-                        return n;
+                        return 0;
                     };
                     if (n eq 1)
                     {
-                        return n;
+                        return 1;
                     };
                     return fib(n - 2) + fib(n - 1);
                 };
-                let b = fib(2);";
+                let b = fib(10);";
             var pascalTokens = new DSharpTokens();
             var lexer = new LexicalAnalyzer(pascalTokens);
             var parser = new DSharpParser();
@@ -99,7 +99,29 @@ namespace DSharpCompiler.Core.Tests
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
             var b = dictionary.GetValue<int>("b");
-            Assert.Equal(1, b);
+            Assert.Equal(55, b);
+        }
+
+        [Fact]
+        public void BlockTest()
+        {
+            var code = @"
+                func test(n)
+                {
+                    if (n eq 10)
+                    {
+                        return n;
+                    };
+                };
+                let b = test(10);";
+            var pascalTokens = new DSharpTokens();
+            var lexer = new LexicalAnalyzer(pascalTokens);
+            var parser = new DSharpParser();
+            var visitor = new NodeVisitor();
+            var interpreter = new Interpreter(lexer, parser, visitor);
+            var dictionary = interpreter.Interpret(code);
+            var b = dictionary.GetValue<int>("b");
+            Assert.Equal(10, b);
         }
     }
 }

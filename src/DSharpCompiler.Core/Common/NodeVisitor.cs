@@ -204,8 +204,9 @@ namespace DSharpCompiler.Core.Common
             var symbol = _symbols.Get(routineNode.RoutineName);
             var compoundNode = symbol.Value as CompoundNode;
             object returnValue = null;
+            var argumentNodes = VisitArgumentNodes(routineNode.Arguments);
             _symbols.AddNewScope();
-            _symbols.AddNodes(compoundNode.Parameters, VisitArgumentNodes(routineNode.Arguments));
+            _symbols.AddNodes(compoundNode.Parameters, argumentNodes);
             foreach (var child in compoundNode.Children.Where(c => c.Type != NodeType.Empty))
             {
                 returnValue = Visit(child);
