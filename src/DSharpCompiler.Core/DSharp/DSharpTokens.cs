@@ -14,23 +14,22 @@ namespace DSharpCompiler.Core.DSharp
         {
             _tokens = new List<Token>
             {
-                new Token { Value = "func" , Type = TokenType.Keyword },
-                new Token { Value = "let" , Type = TokenType.Keyword },
-                new Token { Value = "return" , Type = TokenType.Keyword },
-                new Token { Value = "\"" , Type = TokenType.Symbol },
-                new Token { Value = "{" , Type = TokenType.Symbol },
-                new Token { Value = "}" , Type = TokenType.Symbol },
-                new Token { Value = "(" , Type = TokenType.Symbol },
-                new Token { Value = ")" , Type = TokenType.Symbol },
-                new Token { Value = ";" , Type = TokenType.Symbol },
-                new Token { Value = "." , Type = TokenType.Symbol },
-                new Token { Value = "," , Type = TokenType.Symbol },
-                new Token { Value = "+" , Type = TokenType.Symbol },
-                new Token { Value = "-" , Type = TokenType.Symbol },
-                new Token { Value = "*" , Type = TokenType.Symbol },
-                new Token { Value = "/" , Type = TokenType.Symbol },
-                new Token { Value = ";" , Type = TokenType.Symbol },
-                new Token { Value = "=" , Type = TokenType.Symbol }
+                new Token { Value = DsharpConstants.Keywords.Func, Type = TokenType.Keyword },
+                new Token { Value = DsharpConstants.Keywords.Let , Type = TokenType.Keyword },
+                new Token { Value = DsharpConstants.Keywords.Return , Type = TokenType.Keyword },
+                new Token { Value = DsharpConstants.Symbols.Quote , Type = TokenType.Symbol },
+                new Token { Value = DsharpConstants.Symbols.LeftCurlyBrace , Type = TokenType.Symbol },
+                new Token { Value = DsharpConstants.Symbols.RighCurlyBrace , Type = TokenType.Symbol },
+                new Token { Value = DsharpConstants.Symbols.LeftParenthesis, Type = TokenType.Symbol },
+                new Token { Value = DsharpConstants.Symbols.RightParenthesis , Type = TokenType.Symbol },
+                new Token { Value = DsharpConstants.Symbols.SemiColan , Type = TokenType.Symbol },
+                new Token { Value = DsharpConstants.Symbols.Period, Type = TokenType.Symbol },
+                new Token { Value = DsharpConstants.Symbols.Comma , Type = TokenType.Symbol },
+                new Token { Value = DsharpConstants.Symbols.Plus , Type = TokenType.Symbol },
+                new Token { Value = DsharpConstants.Symbols.Minus , Type = TokenType.Symbol },
+                new Token { Value = DsharpConstants.Symbols.Multiply , Type = TokenType.Symbol },
+                new Token { Value = DsharpConstants.Symbols.Divide , Type = TokenType.Symbol },
+                new Token { Value = DsharpConstants.Symbols.Equal , Type = TokenType.Symbol }
             };
         }
 
@@ -54,7 +53,7 @@ namespace DSharpCompiler.Core.DSharp
 
         public bool IsQuote(string value)
         {
-            var quoteToken = _tokens.Where(t => t.Value == "\"").FirstOrDefault();
+            var quoteToken = _tokens.Where(t => t.Value == DsharpConstants.Symbols.Quote).FirstOrDefault();
             var isQuote = quoteToken.Value == value;
             return isQuote;
         }
