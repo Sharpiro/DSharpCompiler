@@ -101,7 +101,7 @@ namespace DSharpCompiler.Core.Common
                 return;
             for (var i = 0; i < parameters.Count(); i++)
             {
-                Add(parameters[i].Value, new Symbol(arguments[i]));
+                Add((string)parameters[i].Value, new Symbol(arguments[i]));
             }
         }
 

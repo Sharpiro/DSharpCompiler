@@ -11,7 +11,7 @@ namespace DSharpCompiler.Core.Tests
         {
             var code = @"
                 let a = 2;
-                func doWork()
+                func int doWork()
                 {
                     let b = ""data"";
                     let c = a + 1;

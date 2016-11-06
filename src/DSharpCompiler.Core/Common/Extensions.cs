@@ -28,15 +28,11 @@ namespace DSharpCompiler.Core.Common
             return false;
         }
 
-        public static object Get<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key) where TValue : class
+        public static TValue Get<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key) where TValue : class
         {
-            TValue value = null;
-            try
-            {
-                value = dictionary[key];
-            }
-            catch (Exception) { }
-            return value;
+            if (dictionary.ContainsKey(key))
+                return dictionary[key];
+            return null;
         }
     }
 }
