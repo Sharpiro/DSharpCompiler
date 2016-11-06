@@ -10,7 +10,7 @@ namespace DSharpCompiler.Core.Tests
         public void SimpleProgramTest()
         {
             var code = @"
-                func doWork()
+                func void doWork()
                 {
                     let a = 2;
                     return a;
@@ -31,7 +31,7 @@ namespace DSharpCompiler.Core.Tests
         {
             var code = @"
                 let a = 1;
-                func doWork()
+                func void doWork()
                 {
                     let b = 2;
                 };
@@ -55,11 +55,11 @@ namespace DSharpCompiler.Core.Tests
         {
             var code = @"
                 let a = 1;
-                func doWork()
+                func void doWork()
                 {
                     let b = 2;
                 };
-                func doMoreWork()
+                func void doMoreWork()
                 {
                     let c = 3;
                 };
@@ -101,11 +101,11 @@ namespace DSharpCompiler.Core.Tests
         {
             var code = @"
                 let a = 1;
-                func doWork()
+                func void doWork()
                 {
                     let b = 2;
                 };
-                func doMoreWork()
+                func string doMoreWork()
                 {
                     let f = ""hello world"";
                     return f;

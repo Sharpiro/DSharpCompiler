@@ -25,9 +25,9 @@ export class CompilerService implements ICompilerService
     {
         var body = { source: source };
         var obs = this.httpService.post("/api/compiler/compiledsharp", body)
-            .catch(() =>
+            .catch((err) =>
             {
-                toastr.error("Compilation Error");
+                toastr.error(err._body);
                 return null;
             })
             .map((response: Response) => JSON.stringify(response.json().data.output));
