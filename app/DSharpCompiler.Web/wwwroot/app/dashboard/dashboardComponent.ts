@@ -12,7 +12,7 @@ import {CustomPipe, LowerCasePipe} from "../blocks/blocks"
 export class DashboardComponent
 {
     private defaultInput =
-`func fib(n)
+`func int fib(int n)
 {
     if (n eq 0)
     {

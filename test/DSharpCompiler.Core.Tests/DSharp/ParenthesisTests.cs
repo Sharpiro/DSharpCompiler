@@ -10,7 +10,7 @@ namespace DSharpCompiler.Core.Tests
         public void SimpleProgramTest()
         {
             var code = @"
-                func doWork(a)
+                func int doWork(int a)
                 {
                     return a;
                 };
@@ -29,7 +29,7 @@ namespace DSharpCompiler.Core.Tests
         public void AdditionTest()
         {
             var code = @"
-                func add(e, f)
+                func int add(int e, int f)
                 {
                     return e + f;
                 };
@@ -48,7 +48,7 @@ namespace DSharpCompiler.Core.Tests
         public void ScopeTest()
         {
             var code = @"
-                func add(e, f)
+                func int add(int e, int f)
                 {
                     return e + f;
                 };

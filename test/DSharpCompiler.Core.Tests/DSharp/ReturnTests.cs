@@ -1,5 +1,6 @@
 ﻿using DSharpCompiler.Core.Common;
 using DSharpCompiler.Core.DSharp;
+using System;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
@@ -10,7 +11,7 @@ namespace DSharpCompiler.Core.Tests
         public void AssignFunctionTest()
         {
             var code = @"
-                func doWork()
+                func int doWork()
                 {
                     return 2;
                 };
@@ -29,7 +30,7 @@ namespace DSharpCompiler.Core.Tests
         public void ReturnBreakTest()
         {
             var code = @"
-                func doWork()
+                func int doWork()
                 {
                     return 2;
                     return 4;
@@ -40,20 +41,18 @@ namespace DSharpCompiler.Core.Tests
             var parser = new DSharpParser();
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
-            var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
-            Assert.Equal(2, b);
+            Assert.Throws(typeof(InvalidOperationException), () => interpreter.Interpret(code));
         }
 
         [Fact]
         public void ComplexAssignTest()
         {
             var code = @"
-                func doWork()
+                func int doWork()
                 {
                     return 2 * 2 + - 3;
                 };
-                func doMoreWork()
+                func int doMoreWork()
                 {
                     return 2 / (2 + - 4);
                 };

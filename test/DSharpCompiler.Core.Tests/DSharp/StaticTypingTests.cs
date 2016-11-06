@@ -1,24 +1,45 @@
 ﻿using DSharpCompiler.Core.Common;
-using DSharpCompiler.Core.DSharp;
-using Xunit;
-using System;
 using DSharpCompiler.Core.Common.Exceptions;
+using DSharpCompiler.Core.DSharp;
+using System;
+using Xunit;
 
 namespace DSharpCompiler.Core.Tests
 {
-    public class ConditionalTests
+    public class StaticTypingTests
     {
         [Fact]
-        public void SimpleIsTrueTest()
+        public void InvalidReturnTest()
+        {
+            var code = @"
+                func int doWork(int x)
+                {
+                    if (x eq 2)
+                    {
+                        return ""def"";
+                    };
+                    return ""abc"";
+                };
+                let b = doWork(2);";
+            var pascalTokens = new DSharpTokens();
+            var lexer = new LexicalAnalyzer(pascalTokens);
+            var parser = new DSharpParser();
+            var visitor = new NodeVisitor();
+            var interpreter = new Interpreter(lexer, parser, visitor);
+            Assert.Throws(typeof(TypeMismatchException), () => interpreter.Interpret(code));
+        }
+
+        [Fact]
+        public void InvalidReturnTest2()
         {
             var code = @"
                 func int doWork()
                 {
                     if (2 eq 2)
                     {
-                        return 1;
+                        return ""abc"";
                     };
-                    return 2;
+                    return 123;
                 };
                 let b = doWork();";
             var pascalTokens = new DSharpTokens();
@@ -26,22 +47,20 @@ namespace DSharpCompiler.Core.Tests
             var parser = new DSharpParser();
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
-            var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<object>("b");
-            Assert.Equal(1, b);
+            Assert.Throws(typeof(TypeMismatchException), () => interpreter.Interpret(code));
         }
 
         [Fact]
-        public void SimpleIsFalseTest()
+        public void InvalidReturnTest3()
         {
             var code = @"
                 func int doWork()
                 {
-                    if (2 eq 3)
+                    if (2 eq 2)
                     {
-                        return 1;
+                        return 123;
                     };
-                    return 0;
+                    return ""abc"";
                 };
                 let b = doWork();";
             var pascalTokens = new DSharpTokens();
@@ -49,22 +68,20 @@ namespace DSharpCompiler.Core.Tests
             var parser = new DSharpParser();
             var visitor = new NodeVisitor();
             var interpreter = new Interpreter(lexer, parser, visitor);
-            var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
-            Assert.Equal(0, b);
+            Assert.Throws(typeof(TypeMismatchException), () => interpreter.Interpret(code));
         }
 
         [Fact]
-        public void VariableTest()
+        public void ValidReturnTest()
         {
             var code = @"
-                func int doWork(int n)
+                func int doWork(int x)
                 {
-                    if (n eq 2)
+                    if (x eq 2)
                     {
-                        return 1;
+                        return 123;
                     };
-                    return 0;
+                    return 456;
                 };
                 let b = doWork(2);";
             var pascalTokens = new DSharpTokens();
@@ -74,26 +91,22 @@ namespace DSharpCompiler.Core.Tests
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
             var b = dictionary.GetValue<int>("b");
-            Assert.Equal(1, b);
+            Assert.Equal(123, b);
         }
 
         [Fact]
-        public void RecursionTest()
+        public void ValidReturnTest2()
         {
             var code = @"
-                func int fib(int n)
+                func int doWork()
                 {
-                    if (n eq 0)
+                    if (2 eq 1)
                     {
-                        return 0;
+                        return 123;
                     };
-                    if (n eq 1)
-                    {
-                        return 1;
-                    };
-                    return fib(n - 2) + fib(n - 1);
+                    return 456;
                 };
-                let b = fib(25);";
+                let b = doWork();";
             var pascalTokens = new DSharpTokens();
             var lexer = new LexicalAnalyzer(pascalTokens);
             var parser = new DSharpParser();
@@ -101,53 +114,24 @@ namespace DSharpCompiler.Core.Tests
             var interpreter = new Interpreter(lexer, parser, visitor);
             var dictionary = interpreter.Interpret(code);
             var b = dictionary.GetValue<int>("b");
-            Assert.Equal(75025, b);
+            Assert.Equal(456, b);
         }
 
         [Fact]
-        public void BlockInTest()
+        public void BinaryNodeTypeMismatchTest()
         {
             var code = @"
-                func int test(int n)
+                func int add(int e, int f)
                 {
-                    if (n eq 9)
-                    {
-                        return n;
-                    };
-                    return 0;
+                    return e + ""abcd"";
                 };
-                let b = test(9);";
+                let e = add(2, 4);";
             var pascalTokens = new DSharpTokens();
             var lexer = new LexicalAnalyzer(pascalTokens);
             var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
-            var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int?>("b");
-            Assert.Equal(9, b);
-        }
-
-        [Fact]
-        public void BlockOutTest()
-        {
-            var code = @"
-                func int test(int n)
-                {
-                    if (n eq 9)
-                    {
-                        let x = 3;
-                    };
-                    return x;
-                };
-                let b = test(9);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
-            var expectedMessage = "tried to use a variable that was null";
-            var exception = Assert.Throws<VariableNotFoundException>(() => interpreter.Interpret(code));
-            Assert.Equal(expectedMessage, exception.Message);
+            var nodeVisitor = new NodeVisitor();
+            var interpreter = new Interpreter(lexer, parser, nodeVisitor);
+            Assert.Throws(typeof(TypeMismatchException), () => interpreter.Interpret(code));
         }
     }
 }

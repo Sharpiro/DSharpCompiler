@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace DSharpCompiler.Core.Pascal
 {
-    public class PascalParser: ITokenParser
+    public class PascalParser : ITokenParser
     {
         private IList<Token> _tokens;
         private int _currentIndex;
@@ -65,7 +65,7 @@ namespace DSharpCompiler.Core.Pascal
             var variable = Variable();
             var token = _currentToken;
             EatToken(TokenType.Symbol);
-            var node = new BinaryNode(variable, token, Expression()) { Type = NodeType.Assignment };
+            var node = new BinaryNode(variable, token, Expression()) { NodeType = NodeType.Assignment };
             return node;
         }
 
@@ -107,7 +107,7 @@ namespace DSharpCompiler.Core.Pascal
             if (token.Type == TokenType.NumericConstant)
             {
                 EatToken(TokenType.NumericConstant);
-                node = new NumericNode(token);
+                node = new VariableNode(token, NodeType.Numeric) { ValueType = typeof(int) };
             }
             else if (token.Value.In("+", "-"))
             {
@@ -127,7 +127,7 @@ namespace DSharpCompiler.Core.Pascal
 
         private Node Variable()
         {
-            var node = new VariableNode(_currentToken);
+            var node = new VariableNode(_currentToken, NodeType.Variable);
             EatToken(TokenType.Identifier);
             return node;
         }
