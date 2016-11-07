@@ -4,6 +4,7 @@ using DSharpCompiler.Core.Common.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace DSharpCompiler.Core.DSharp
 {
@@ -17,7 +18,7 @@ namespace DSharpCompiler.Core.DSharp
             ["string"] = typeof(string),
             ["int"] = typeof(int),
             ["void"] = typeof(void),
-            ["dSharpAdder"] = typeof(DSharpAdder)
+            ["dSharpFunctions"] = typeof(DSharpFunctions)
         };
 
         public Node Program(IList<Token> tokens)
@@ -218,20 +219,38 @@ namespace DSharpCompiler.Core.DSharp
 
         private Node RoutineStatement()
         {
-            var routineName = _currentToken.Value;
+            string routineName;
+            var returnType = GetRoutineType(out routineName);
+
+            EatToken(TokenType.Symbol);
+            var arguments = ArgumentList(returnType);
+            EatToken(TokenType.Symbol);
+
+            var node = new RoutineNode(routineName, arguments) { ValueType = returnType };
+            return node;
+        }
+
+        private Type GetRoutineType(out string routineName)
+        {
+            routineName = _currentToken.Value;
             EatToken(TokenType.Identifier);
 
             var returnType = _typeDictionary.Get(routineName);
             if (returnType == null)
                 throw new TypeNotFoundException($"Could not find type: {returnType}");
 
-            EatToken(TokenType.Symbol);
-            var arguments = ArgumentList(returnType);
-            EatToken(TokenType.Symbol);
+            if (_currentToken.Value != ".")
+                return returnType;
 
+            EatToken(TokenType.Symbol);
+            var subRoutine = _currentToken.Value;
+            EatToken(TokenType.Identifier);
 
-            var node = new RoutineNode(routineName, arguments) { ValueType = returnType };
-            return node;
+            routineName = $"{routineName}.{subRoutine}";
+            returnType = returnType.GetRuntimeMethods()
+                .Single(m => m.Name.Equals(subRoutine, StringComparison.OrdinalIgnoreCase)).ReturnType;
+
+            return returnType;
         }
 
         private Node Empty()
