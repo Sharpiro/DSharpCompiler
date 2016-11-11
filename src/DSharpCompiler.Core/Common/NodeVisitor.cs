@@ -9,6 +9,12 @@ namespace DSharpCompiler.Core.Common
     public class NodeVisitor
     {
         private SymbolsTable _symbols;
+        private readonly TypesTable _typesTable;
+
+        public NodeVisitor(TypesTable typesTable)
+        {
+            _typesTable = typesTable;
+        }
 
         public SymbolsTable VisitNodes(Node root)
         {
@@ -202,6 +208,8 @@ namespace DSharpCompiler.Core.Common
         {
             var routineNode = node as RoutineNode;
             var symbol = _symbols.Get(routineNode.Name);
+            if (symbol == null)
+                throw new TypeNotFoundException(routineNode.Name);
             var compoundNode = symbol.Value as CompoundNode;
             object returnValue = null;
             var argumentNodes = VisitArgumentNodes(routineNode.Arguments);

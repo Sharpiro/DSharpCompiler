@@ -1,5 +1,4 @@
 ﻿using DSharpCompiler.Core.Common;
-using DSharpCompiler.Core.DSharp;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
@@ -20,11 +19,7 @@ namespace DSharpCompiler.Core.Tests
                 let d = doWork();
                 let a = 5;
                 let e = doWork();";
-            var tokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(tokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
             var a = dictionary.GetValue<int>("a");
             var b = dictionary.GetValue<string>("b");

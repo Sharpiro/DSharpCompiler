@@ -10,23 +10,23 @@ namespace DSharpCompiler.Core.DSharp
 {
     public class DSharpParser : ITokenParser
     {
+        private readonly TypesTable _typesTable;
         private IList<Token> _tokens;
         private Token _currentToken;
         private int _currentIndex;
-        private Dictionary<string, Type> _typeDictionary = new Dictionary<string, Type>
+
+        public DSharpParser(TypesTable typesTable)
         {
-            ["string"] = typeof(string),
-            ["int"] = typeof(int),
-            ["void"] = typeof(void),
-            ["dSharpFunctions"] = typeof(DSharpFunctions)
-        };
+            _typesTable = typesTable;
+        }
 
         public Node Program(IList<Token> tokens)
         {
             _tokens = tokens;
             _currentToken = _tokens.FirstOrDefault();
             _currentIndex = 0;
-            var node = new CompoundNode(Enumerable.Empty<Node>(), new List<Node>()) { Name = DsharpConstants.Identifiers.EntryPoint };
+            var node = new CompoundNode(Enumerable.Empty<Node>(), new List<Node>())
+            { Name = DsharpConstants.Identifiers.EntryPoint };
             var children = StatementList(node);
             node.Children = children;
             return node;
@@ -77,7 +77,7 @@ namespace DSharpCompiler.Core.DSharp
             if (_currentToken.Type == TokenType.Identifier || _currentToken.Type == TokenType.NumericConstant
                 || _currentToken.Type == TokenType.StringConstant)
             {
-                var variableType = _typeDictionary.Get(_currentToken.Value);
+                var variableType = _typesTable[_currentToken.Value];
                 if (variableType == null)
                     throw new ArgumentException($"The type: {_currentToken.Value} does not exist in the current context");
 
@@ -136,7 +136,7 @@ namespace DSharpCompiler.Core.DSharp
         private CompoundNode CompoundStatement()
         {
             EatToken(TokenType.Keyword);
-            var functionReturnType = _typeDictionary.Get(_currentToken.Value);
+            var functionReturnType = _typesTable[_currentToken.Value];
             if (functionReturnType == null)
                 throw new ArgumentException($"The type: {functionReturnType} does not exist in the current context");
 
@@ -150,7 +150,7 @@ namespace DSharpCompiler.Core.DSharp
             EatToken(TokenType.Symbol);
 
             var node = new CompoundNode(Enumerable.Empty<Node>(), parameters) { Name = functionName, ValueType = functionReturnType };
-            _typeDictionary.Add(node.Name, functionReturnType);
+            _typesTable.Add(node.Name, functionReturnType);
             var statements = StatementList(node);
 
             var returnType = GetReturnType(statements);
@@ -235,7 +235,7 @@ namespace DSharpCompiler.Core.DSharp
             routineName = _currentToken.Value;
             EatToken(TokenType.Identifier);
 
-            var returnType = _typeDictionary.Get(routineName);
+            var returnType = _typesTable[routineName];
             if (returnType == null)
                 throw new TypeNotFoundException($"Could not find type: {returnType}");
 

@@ -1,5 +1,4 @@
 ﻿using DSharpCompiler.Core.Common;
-using DSharpCompiler.Core.DSharp;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
@@ -16,11 +15,7 @@ namespace DSharpCompiler.Core.Tests
                 };
                 let b = add(2, 6);
                 dSharpFunctions.print(b);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var symbols = interpreter.Interpret(code);
             var b = symbols.GetValue<int>("b");
             Assert.Equal(8, b);

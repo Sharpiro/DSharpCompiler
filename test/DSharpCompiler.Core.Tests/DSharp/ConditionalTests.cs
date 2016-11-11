@@ -1,7 +1,5 @@
 ﻿using DSharpCompiler.Core.Common;
-using DSharpCompiler.Core.DSharp;
 using Xunit;
-using System;
 using DSharpCompiler.Core.Common.Exceptions;
 
 namespace DSharpCompiler.Core.Tests
@@ -21,11 +19,7 @@ namespace DSharpCompiler.Core.Tests
                     return 2;
                 };
                 let b = doWork();";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
             var b = dictionary.GetValue<object>("b");
             Assert.Equal(1, b);
@@ -44,11 +38,7 @@ namespace DSharpCompiler.Core.Tests
                     return 0;
                 };
                 let b = doWork();";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
             var b = dictionary.GetValue<int>("b");
             Assert.Equal(0, b);
@@ -67,11 +57,7 @@ namespace DSharpCompiler.Core.Tests
                     return 0;
                 };
                 let b = doWork(2);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
             var b = dictionary.GetValue<int>("b");
             Assert.Equal(1, b);
@@ -94,11 +80,7 @@ namespace DSharpCompiler.Core.Tests
                     return fib(n - 2) + fib(n - 1);
                 };
                 let b = fib(25);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
             var b = dictionary.GetValue<int>("b");
             Assert.Equal(75025, b);
@@ -117,11 +99,7 @@ namespace DSharpCompiler.Core.Tests
                     return 0;
                 };
                 let b = test(9);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
             var b = dictionary.GetValue<int?>("b");
             Assert.Equal(9, b);
@@ -140,11 +118,7 @@ namespace DSharpCompiler.Core.Tests
                     return x;
                 };
                 let b = test(9);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var expectedMessage = "tried to use a variable that was null";
             var exception = Assert.Throws<VariableNotFoundException>(() => interpreter.Interpret(code));
             Assert.Equal(expectedMessage, exception.Message);

@@ -1,5 +1,4 @@
 ﻿using DSharpCompiler.Core.Common;
-using DSharpCompiler.Core.Pascal;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
@@ -10,11 +9,7 @@ namespace DSharpCompiler.Core.Tests
         public void BasicAdditionTest()
         {
             var code = "BEGIN a := 3 + 2; END.";
-            var pascalTokens = new PascalTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new PascalParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
             var result = dictionary.GetValue<int>("a");
             Assert.Equal(5, result);
@@ -24,11 +19,7 @@ namespace DSharpCompiler.Core.Tests
         public void MultiDigitTest()
         {
             var code = "BEGIN a := 12+3; END.";
-            var pascalTokens = new PascalTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new PascalParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
             var result = dictionary.GetValue<int>("a");
             Assert.Equal(15, result);
@@ -38,11 +29,7 @@ namespace DSharpCompiler.Core.Tests
         public void WhiteSpaceTest()
         {
             var code = "BEGIN a :=  12 + 3; END.";
-            var pascalTokens = new PascalTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new PascalParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
             var result = dictionary.GetValue<int>("a");
             Assert.Equal(15, result);
@@ -52,11 +39,7 @@ namespace DSharpCompiler.Core.Tests
         public void SubtractionTest()
         {
             var code = "BEGIN a := 7-5 END.";
-            var pascalTokens = new PascalTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new PascalParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
             var result = dictionary.GetValue<int>("a");
             Assert.Equal(2, result);
