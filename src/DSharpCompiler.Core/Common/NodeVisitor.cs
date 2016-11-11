@@ -3,6 +3,7 @@ using DSharpCompiler.Core.Common.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace DSharpCompiler.Core.Common
 {
@@ -10,6 +11,7 @@ namespace DSharpCompiler.Core.Common
     {
         private SymbolsTable _symbols;
         private readonly TypesTable _typesTable;
+        private readonly StringBuilder _console = new StringBuilder();
 
         public NodeVisitor(TypesTable typesTable)
         {
@@ -207,6 +209,15 @@ namespace DSharpCompiler.Core.Common
         private object VisitRoutineNode(Node node)
         {
             var routineNode = node as RoutineNode;
+            var argumentValues = routineNode.Arguments.Select(a => Visit(a)).ToArray();
+            var action = _typesTable.GetSubroutine(routineNode.Name);
+            if (action != null)
+            {
+                var y = action.DynamicInvoke(argumentValues);
+                _console.AppendLine(y.ToString());
+                return null;
+            }
+
             var symbol = _symbols.Get(routineNode.Name);
             if (symbol == null)
                 throw new TypeNotFoundException(routineNode.Name);
