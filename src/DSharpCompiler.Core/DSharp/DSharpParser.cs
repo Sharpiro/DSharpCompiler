@@ -313,8 +313,7 @@ namespace DSharpCompiler.Core.DSharp
                 EatToken(TokenType.Symbol);
                 node = new UnaryNode(token, Factor(parentType)) { ValueType = parentType };
             }
-            else if (token.Type == TokenType.Identifier &&
-                PeekToken()?.Value == DsharpConstants.Symbols.LeftParenthesis)
+            else if (IsRoutineNode(token))
             {
                 node = RoutineStatement();
             }
@@ -358,14 +357,27 @@ namespace DSharpCompiler.Core.DSharp
             return null;
         }
 
-        private Token PeekToken()
+        private Token PeekToken(int peekAmount = 1)
         {
             try
             {
-                return _tokens[_currentIndex + 1];
+                return _tokens[_currentIndex + peekAmount];
             }
             catch (ArgumentOutOfRangeException) { }
             return null;
+        }
+
+        private bool IsRoutineNode(Token currentToken)
+        {
+            if (currentToken.Type != TokenType.Identifier) return false;
+
+            int i;
+            for (i = 1; (currentToken = PeekToken(i))?.Value == DsharpConstants.Symbols.Period
+                || currentToken?.Type == TokenType.Identifier; i++)
+            {
+
+            }
+            return PeekToken(i)?.Value == DsharpConstants.Symbols.LeftParenthesis;
         }
 
         private Type GetReturnType(IEnumerable<Node> nodes)

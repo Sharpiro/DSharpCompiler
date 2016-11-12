@@ -18,11 +18,16 @@ namespace DSharpCompiler.Core.Common
             _typesTable = typesTable;
         }
 
-        public SymbolsTable VisitNodes(Node root)
+        public InterpretResult VisitNodes(Node root)
         {
             _symbols = new SymbolsTable();
             Visit(root);
-            return _symbols;
+            var interpretResult = new InterpretResult
+            {
+                SymbolsTable = _symbols,
+                ConsoleOutput = _console.ToString()
+            };
+            return interpretResult;
         }
 
         private object Visit(Node node)
@@ -209,21 +214,19 @@ namespace DSharpCompiler.Core.Common
         private object VisitRoutineNode(Node node)
         {
             var routineNode = node as RoutineNode;
-            var argumentValues = routineNode.Arguments.Select(a => Visit(a)).ToArray();
-            var action = _typesTable.GetSubroutine(routineNode.Name);
-            if (action != null)
-            {
-                var y = action.DynamicInvoke(argumentValues);
-                _console.AppendLine(y.ToString());
-                return null;
-            }
+            var callingType = _typesTable.GetCallingType(routineNode.Name);
+            return callingType == null ? VisitDSharpRoutineNode(routineNode)
+                : VisitLibraryRoutineNode(routineNode, callingType);
+        }
 
-            var symbol = _symbols.Get(routineNode.Name);
+        private object VisitDSharpRoutineNode(RoutineNode node)
+        {
+            var symbol = _symbols.Get(node.Name);
             if (symbol == null)
-                throw new TypeNotFoundException(routineNode.Name);
+                throw new TypeNotFoundException(node.Name);
             var compoundNode = symbol.Value as CompoundNode;
             object returnValue = null;
-            var argumentNodes = VisitArgumentNodes(routineNode.Arguments);
+            var argumentNodes = VisitArgumentNodes(node.Arguments);
             _symbols.AddNewScope();
             _symbols.AddNodes(compoundNode.Parameters, argumentNodes);
             if (compoundNode.NodeType == NodeType.Conditional)
@@ -236,6 +239,19 @@ namespace DSharpCompiler.Core.Common
             }
             _symbols.RemoveCurrentScope();
             return returnValue;
+        }
+
+        private object VisitLibraryRoutineNode(RoutineNode node, Type callingType)
+        {
+            var method = _typesTable.GetSubroutine(node.Name);
+            var argumentValues = node.Arguments.Select(a => Visit(a)).ToArray();
+            var result = method.DynamicInvoke(argumentValues);
+            if (callingType == typeof(DConsole))
+            {
+                _console.AppendLine(result.ToString());
+                return null;
+            }
+            return result;
         }
     }
 }

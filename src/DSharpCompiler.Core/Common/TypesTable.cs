@@ -16,7 +16,8 @@ namespace DSharpCompiler.Core.Common
             ["string"] = typeof(string),
             ["int"] = typeof(int),
             ["void"] = typeof(void),
-            ["dSharpFunctions"] = typeof(DSharpFunctions)
+            ["dConsole"] = typeof(DConsole),
+            ["dFunctions"] = typeof(DFunctions)
         };
 
         public void Add(string name, Type type)
@@ -46,6 +47,17 @@ namespace DSharpCompiler.Core.Common
             var call = Expression.Call(null, method, parameters);
             var lambdaDelegate = Expression.Lambda(call, parameters).Compile();
             return lambdaDelegate;
+        }
+
+        public Type GetCallingType(string routineName)
+        {
+            var data = routineName.Split('.');
+            if (data.Length == 1) return null;
+            var typeName = data.FirstOrDefault();
+            if (string.IsNullOrEmpty(typeName)) return null;
+
+            var type = _typeDictionary.Get(typeName);
+            return type;
         }
     }
 }

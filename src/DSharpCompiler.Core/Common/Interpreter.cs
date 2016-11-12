@@ -1,4 +1,5 @@
-﻿using DSharpCompiler.Core.DSharp;
+﻿using DSharpCompiler.Core.Common.Models;
+using DSharpCompiler.Core.DSharp;
 using DSharpCompiler.Core.Pascal;
 using System.Linq;
 
@@ -18,12 +19,12 @@ namespace DSharpCompiler.Core.Common
             _visitor = visitor;
         }
 
-        public SymbolsTable Interpret(string source)
+        public InterpretResult Interpret(string source)
         {
             var tokens = _lexer.Analayze(source).ToList();
             var rootNode = _parser.Program(tokens);
-            var dictionary = _visitor.VisitNodes(rootNode);
-            return dictionary;
+            var interpretResult = _visitor.VisitNodes(rootNode);
+            return interpretResult;
         }
 
         public static Interpreter GetDsharpInterpreter()

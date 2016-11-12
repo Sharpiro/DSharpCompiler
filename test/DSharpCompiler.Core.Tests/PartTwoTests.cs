@@ -11,7 +11,7 @@ namespace DSharpCompiler.Core.Tests
             var code = "BEGIN a := 1+1+1 END.";
             var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.GetValue<int>("a");
+            var result = dictionary.SymbolsTable.GetValue<int>("a");
             Assert.Equal(3, result);
         }
 
@@ -21,7 +21,7 @@ namespace DSharpCompiler.Core.Tests
             var code = "BEGIN a := 5*3 END.";
             var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.GetValue<int>("a");
+            var result = dictionary.SymbolsTable.GetValue<int>("a");
             Assert.Equal(15, result);
         }
 
@@ -31,7 +31,7 @@ namespace DSharpCompiler.Core.Tests
             var code = "BEGIN a := 12/3 END.";
             var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.GetValue<int>("a");
+            var result = dictionary.SymbolsTable.GetValue<int>("a");
             Assert.Equal(4, result);
         }
 
@@ -41,7 +41,7 @@ namespace DSharpCompiler.Core.Tests
             var code = "BEGIN a := 9 - 5 + 3 + 11 END.";
             var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.GetValue<int>("a");
+            var result = dictionary.SymbolsTable.GetValue<int>("a");
             Assert.Equal(18, result);
         }
 
@@ -51,7 +51,7 @@ namespace DSharpCompiler.Core.Tests
             var code = "BEGIN a := 7 * 4 / 2 * 3 END.";
             var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.GetValue<int>("a");
+            var result = dictionary.SymbolsTable.GetValue<int>("a");
             Assert.Equal(42, result);
         }
     }

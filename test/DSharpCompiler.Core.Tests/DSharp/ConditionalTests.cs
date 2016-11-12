@@ -21,7 +21,7 @@ namespace DSharpCompiler.Core.Tests
                 let b = doWork();";
             var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<object>("b");
+            var b = dictionary.SymbolsTable.GetValue<object>("b");
             Assert.Equal(1, b);
         }
 
@@ -40,7 +40,7 @@ namespace DSharpCompiler.Core.Tests
                 let b = doWork();";
             var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
+            var b = dictionary.SymbolsTable.GetValue<int>("b");
             Assert.Equal(0, b);
         }
 
@@ -59,7 +59,7 @@ namespace DSharpCompiler.Core.Tests
                 let b = doWork(2);";
             var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
+            var b = dictionary.SymbolsTable.GetValue<int>("b");
             Assert.Equal(1, b);
         }
 
@@ -82,7 +82,7 @@ namespace DSharpCompiler.Core.Tests
                 let b = fib(25);";
             var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
+            var b = dictionary.SymbolsTable.GetValue<int>("b");
             Assert.Equal(75025, b);
         }
 
@@ -101,7 +101,7 @@ namespace DSharpCompiler.Core.Tests
                 let b = test(9);";
             var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int?>("b");
+            var b = dictionary.SymbolsTable.GetValue<int?>("b");
             Assert.Equal(9, b);
         }
 

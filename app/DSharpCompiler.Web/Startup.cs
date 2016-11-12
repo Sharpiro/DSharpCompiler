@@ -17,6 +17,7 @@ namespace DSharpCompiler.Web
             services.AddTransient<ITokenParser, DSharpParser>();
             services.AddTransient<NodeVisitor, NodeVisitor>();
             services.AddTransient<Interpreter, Interpreter>();
+            services.AddTransient<TypesTable, TypesTable>();
             services.AddMvc();
         }
 

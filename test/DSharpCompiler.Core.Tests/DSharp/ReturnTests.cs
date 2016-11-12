@@ -17,7 +17,7 @@ namespace DSharpCompiler.Core.Tests
                 let b = doWork();";
             var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
+            var b = dictionary.SymbolsTable.GetValue<int>("b");
             Assert.Equal(2, b);
         }
 
@@ -52,9 +52,9 @@ namespace DSharpCompiler.Core.Tests
                 let c = doWork + doMoreWork;";
             var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var a = dictionary.GetValue<int>("a");
-            var b = dictionary.GetValue<int>("b");
-            var c = dictionary.GetValue<int>("c");
+            var a = dictionary.SymbolsTable.GetValue<int>("a");
+            var b = dictionary.SymbolsTable.GetValue<int>("b");
+            var c = dictionary.SymbolsTable.GetValue<int>("c");
             Assert.Equal(1, a);
             Assert.Equal(-1, b);
             Assert.Equal(0, c);
