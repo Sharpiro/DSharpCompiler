@@ -21,6 +21,7 @@ namespace DSharpCompiler.Core.DSharp
                 new Token { Value = DsharpConstants.Keywords.True , Type = TokenType.Keyword },
                 new Token { Value = DsharpConstants.Keywords.False , Type = TokenType.Keyword },
                 new Token { Value = DsharpConstants.Keywords.ConditionalEquals , Type = TokenType.Keyword },
+                new Token { Value = DsharpConstants.Keywords.Type , Type = TokenType.Keyword },
                 new Token { Value = DsharpConstants.Symbols.Quote , Type = TokenType.Symbol },
                 new Token { Value = DsharpConstants.Symbols.LeftCurlyBrace , Type = TokenType.Symbol },
                 new Token { Value = DsharpConstants.Symbols.RighCurlyBrace , Type = TokenType.Symbol },

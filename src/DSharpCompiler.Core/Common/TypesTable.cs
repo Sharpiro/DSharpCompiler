@@ -59,5 +59,14 @@ namespace DSharpCompiler.Core.Common
             var type = _typeDictionary.Get(typeName);
             return type;
         }
+
+        public Type GetX(string routineName)
+        {
+            var mainFunc = _typeDictionary.Get($"main.{routineName}");
+            if (mainFunc != null)
+                return mainFunc;
+
+            return this[routineName];
+        }
     }
 }

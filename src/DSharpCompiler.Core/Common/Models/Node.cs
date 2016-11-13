@@ -23,6 +23,11 @@ namespace DSharpCompiler.Core.Common.Models
         }
     }
 
+    public class CustomTypeNode : ParentNode
+    {
+
+    }
+
     public abstract class ParentNode : Node
     {
         public string Name { get; set; }
@@ -108,5 +113,6 @@ namespace DSharpCompiler.Core.Common.Models
     {
         None, BinaryOp, UnaryOp, Numeric, String, Boolean, Compound, Conditional, Variable,
         Assignment, Return, Routine, Empty,
+        CustomType,
     }
 }
