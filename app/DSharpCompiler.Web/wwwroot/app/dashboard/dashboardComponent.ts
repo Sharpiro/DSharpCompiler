@@ -24,7 +24,10 @@ export class DashboardComponent
     };
     return fib(n - 2) + fib(n - 1);
 };
-let b = fib(18);`;
+let b = fib(18);
+dConsole.printInt(b);
+let x = dFunctions.add(2, 3);
+dConsole.printInt(x);`;
     private input = this.defaultInput;
     private output: Observable<any>;
 

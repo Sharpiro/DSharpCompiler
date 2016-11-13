@@ -4,28 +4,29 @@ using DSharpCompiler.Core.Common.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace DSharpCompiler.Core.DSharp
 {
     public class DSharpParser : ITokenParser
     {
+        private readonly TypesTable _typesTable;
         private IList<Token> _tokens;
         private Token _currentToken;
         private int _currentIndex;
-        private Dictionary<string, Type> _typeDictionary = new Dictionary<string, Type>
+
+        public DSharpParser(TypesTable typesTable)
         {
-            ["string"] = typeof(string),
-            ["int"] = typeof(int),
-            ["void"] = typeof(void),
-            ["dSharpAdder"] = typeof(DSharpAdder)
-        };
+            _typesTable = typesTable;
+        }
 
         public Node Program(IList<Token> tokens)
         {
             _tokens = tokens;
             _currentToken = _tokens.FirstOrDefault();
             _currentIndex = 0;
-            var node = new CompoundNode(Enumerable.Empty<Node>(), new List<Node>()) { Name = DsharpConstants.Identifiers.EntryPoint };
+            var node = new CompoundNode(Enumerable.Empty<Node>(), new List<Node>())
+            { Name = DsharpConstants.Identifiers.EntryPoint };
             var children = StatementList(node);
             node.Children = children;
             return node;
@@ -76,7 +77,7 @@ namespace DSharpCompiler.Core.DSharp
             if (_currentToken.Type == TokenType.Identifier || _currentToken.Type == TokenType.NumericConstant
                 || _currentToken.Type == TokenType.StringConstant)
             {
-                var variableType = _typeDictionary.Get(_currentToken.Value);
+                var variableType = _typesTable[_currentToken.Value];
                 if (variableType == null)
                     throw new ArgumentException($"The type: {_currentToken.Value} does not exist in the current context");
 
@@ -135,7 +136,7 @@ namespace DSharpCompiler.Core.DSharp
         private CompoundNode CompoundStatement()
         {
             EatToken(TokenType.Keyword);
-            var functionReturnType = _typeDictionary.Get(_currentToken.Value);
+            var functionReturnType = _typesTable[_currentToken.Value];
             if (functionReturnType == null)
                 throw new ArgumentException($"The type: {functionReturnType} does not exist in the current context");
 
@@ -149,7 +150,7 @@ namespace DSharpCompiler.Core.DSharp
             EatToken(TokenType.Symbol);
 
             var node = new CompoundNode(Enumerable.Empty<Node>(), parameters) { Name = functionName, ValueType = functionReturnType };
-            _typeDictionary.Add(node.Name, functionReturnType);
+            _typesTable.Add(node.Name, functionReturnType);
             var statements = StatementList(node);
 
             var returnType = GetReturnType(statements);
@@ -218,20 +219,38 @@ namespace DSharpCompiler.Core.DSharp
 
         private Node RoutineStatement()
         {
-            var routineName = _currentToken.Value;
-            EatToken(TokenType.Identifier);
-
-            var returnType = _typeDictionary.Get(routineName);
-            if (returnType == null)
-                throw new TypeNotFoundException($"Could not find type: {returnType}");
+            string routineName;
+            var returnType = GetRoutineType(out routineName);
 
             EatToken(TokenType.Symbol);
             var arguments = ArgumentList(returnType);
             EatToken(TokenType.Symbol);
 
-
             var node = new RoutineNode(routineName, arguments) { ValueType = returnType };
             return node;
+        }
+
+        private Type GetRoutineType(out string routineName)
+        {
+            routineName = _currentToken.Value;
+            EatToken(TokenType.Identifier);
+
+            var returnType = _typesTable[routineName];
+            if (returnType == null)
+                throw new TypeNotFoundException($"Could not find type: {returnType}");
+
+            if (_currentToken.Value != ".")
+                return returnType;
+
+            EatToken(TokenType.Symbol);
+            var subRoutine = _currentToken.Value;
+            EatToken(TokenType.Identifier);
+
+            routineName = $"{routineName}.{subRoutine}";
+            returnType = returnType.GetRuntimeMethods()
+                .Single(m => m.Name.Equals(subRoutine, StringComparison.OrdinalIgnoreCase)).ReturnType;
+
+            return returnType;
         }
 
         private Node Empty()
@@ -294,8 +313,7 @@ namespace DSharpCompiler.Core.DSharp
                 EatToken(TokenType.Symbol);
                 node = new UnaryNode(token, Factor(parentType)) { ValueType = parentType };
             }
-            else if (token.Type == TokenType.Identifier &&
-                PeekToken()?.Value == DsharpConstants.Symbols.LeftParenthesis)
+            else if (IsRoutineNode(token))
             {
                 node = RoutineStatement();
             }
@@ -339,14 +357,27 @@ namespace DSharpCompiler.Core.DSharp
             return null;
         }
 
-        private Token PeekToken()
+        private Token PeekToken(int peekAmount = 1)
         {
             try
             {
-                return _tokens[_currentIndex + 1];
+                return _tokens[_currentIndex + peekAmount];
             }
             catch (ArgumentOutOfRangeException) { }
             return null;
+        }
+
+        private bool IsRoutineNode(Token currentToken)
+        {
+            if (currentToken.Type != TokenType.Identifier) return false;
+
+            int i;
+            for (i = 1; (currentToken = PeekToken(i))?.Value == DsharpConstants.Symbols.Period
+                || currentToken?.Type == TokenType.Identifier; i++)
+            {
+
+            }
+            return PeekToken(i)?.Value == DsharpConstants.Symbols.LeftParenthesis;
         }
 
         private Type GetReturnType(IEnumerable<Node> nodes)

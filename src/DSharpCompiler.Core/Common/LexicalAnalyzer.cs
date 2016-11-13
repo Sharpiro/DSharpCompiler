@@ -8,12 +8,12 @@ namespace DSharpCompiler.Core.Common
 {
     public class LexicalAnalyzer
     {
-        private ILanguageTokens _syntaxTokens;
+        private ITokenDefinitions _tokenDefinitions;
         private string _source;
 
-        public LexicalAnalyzer(ILanguageTokens tokens)
+        public LexicalAnalyzer(ITokenDefinitions tokenDefinitions)
         {
-            _syntaxTokens = tokens;
+            _tokenDefinitions = tokenDefinitions;
         }
 
         public IEnumerable<Token> Analayze(string source)
@@ -46,14 +46,14 @@ namespace DSharpCompiler.Core.Common
             var firstWord = GetFirstWord(_source);
 
             Token token = null;
-            if (_syntaxTokens.IsSymbol($"{firstLetter}{Peek()}"))
+            if (_tokenDefinitions.IsSymbol($"{firstLetter}{Peek()}"))
             {
-                token = _syntaxTokens.GetTokenBySymbol($"{firstLetter}{Peek()}");
+                token = _tokenDefinitions.GetTokenBySymbol($"{firstLetter}{Peek()}");
             }
-            else if (_syntaxTokens.IsSymbol(firstLetter))
+            else if (_tokenDefinitions.IsSymbol(firstLetter))
             {
-                token = _syntaxTokens.GetTokenBySymbol(firstLetter);
-                if (_syntaxTokens.IsQuote(firstLetter))
+                token = _tokenDefinitions.GetTokenBySymbol(firstLetter);
+                if (_tokenDefinitions.IsQuote(firstLetter))
                 {
                     _source = _source.Substring(1);
                     var endIndex = _source.IndexOf("\"");
@@ -61,15 +61,15 @@ namespace DSharpCompiler.Core.Common
                     _source = _source.Remove(endIndex, 1);
                 }
             }
-            else if (_syntaxTokens.IsNumeric(firstWord))
+            else if (_tokenDefinitions.IsNumeric(firstWord))
             {
                 token = new Token { Value = firstWord, Type = TokenType.NumericConstant };
             }
-            else if (_syntaxTokens.IsKeyword(firstWord))
+            else if (_tokenDefinitions.IsKeyword(firstWord))
             {
                 token = new Token { Value = firstWord, Type = TokenType.Keyword };
             }
-            else if (_syntaxTokens.IsIdentifier(firstWord))
+            else if (_tokenDefinitions.IsIdentifier(firstWord))
             {
                 token = new Token { Value = firstWord, Type = TokenType.Identifier };
             }
