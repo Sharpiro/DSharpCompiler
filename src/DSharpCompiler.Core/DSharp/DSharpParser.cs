@@ -77,7 +77,7 @@ namespace DSharpCompiler.Core.DSharp
             if (_currentToken.Type == TokenType.Identifier || _currentToken.Type == TokenType.NumericConstant
                 || _currentToken.Type == TokenType.StringConstant)
             {
-                var variableType = _typesTable[_currentToken.Value];
+                var variableType = _typesTable.GetX(_currentToken.Value);
                 if (variableType == null)
                     throw new ArgumentException($"The type: {_currentToken.Value} does not exist in the current context");
 
@@ -91,7 +91,7 @@ namespace DSharpCompiler.Core.DSharp
             return node;
         }
 
-        private IEnumerable<Node> StatementList(CompoundNode parentNode)
+        private IEnumerable<Node> StatementList(ParentNode parentNode)
         {
             var node = Statement(parentNode);
 
@@ -101,15 +101,20 @@ namespace DSharpCompiler.Core.DSharp
                 EatToken(TokenType.Symbol);
                 nodes.Add(Statement(parentNode));
             }
-            return nodes;
+            return nodes.Where(n => n.NodeType != NodeType.Empty);
         }
 
-        private Node Statement(CompoundNode parentNode)
+        private Node Statement(ParentNode parentNode)
         {
             Node node = null;
-            if (_currentToken?.Value == DsharpConstants.Keywords.Func)
+            if (_currentToken?.Value == DsharpConstants.Keywords.Type)
             {
-                var compoundNode = CompoundStatement();
+                var compoundNode = TypeStatement();
+                node = compoundNode;
+            }
+            else if (_currentToken?.Value == DsharpConstants.Keywords.Func)
+            {
+                var compoundNode = CompoundStatement(parentNode);
                 node = compoundNode;
             }
             else if (_currentToken?.Value == DsharpConstants.Keywords.Return)
@@ -133,15 +138,15 @@ namespace DSharpCompiler.Core.DSharp
             return node;
         }
 
-        private CompoundNode CompoundStatement()
+        private CompoundNode CompoundStatement(ParentNode parentNode)
         {
             EatToken(TokenType.Keyword);
-            var functionReturnType = _typesTable[_currentToken.Value];
+            var functionReturnType = _typesTable.GetX(_currentToken.Value);
             if (functionReturnType == null)
                 throw new ArgumentException($"The type: {functionReturnType} does not exist in the current context");
 
             EatToken(TokenType.Identifier);
-            var functionName = _currentToken.Value;
+            var functionName = $"{parentNode.Name}.{_currentToken.Value}";
             EatToken(TokenType.Identifier);
 
             EatToken(TokenType.Symbol);
@@ -162,7 +167,34 @@ namespace DSharpCompiler.Core.DSharp
             return node;
         }
 
-        private Node ConditionalStatement(CompoundNode parentNode)
+        private CustomTypeNode TypeStatement()
+        {
+            EatToken(TokenType.Keyword);
+            var customTypeName = _currentToken.Value;
+            EatToken(TokenType.Identifier);
+            EatToken(TokenType.Symbol);
+            var parentNode = new CustomTypeNode
+            {
+                Name = customTypeName,
+                ValueType = typeof(void),
+                NodeType = NodeType.CustomType
+            };
+            _typesTable.Add(customTypeName, typeof(object));
+            var statements = StatementList(parentNode);
+            EatToken(TokenType.Symbol);
+            if (statements.Any(s => s.NodeType != NodeType.Compound))
+                throw new ArgumentException("All memebers of a custom type must be compound functions");
+            parentNode.Children = statements;
+            //foreach (CompoundNode statement in statements)
+            //{
+            //    //var memberName = $"{customTypeName}.{statement.Name}";
+            //    //statement.Name = memberName;
+            //    //_typesTable.Add(statement.Name, statement.ValueType);
+            //}
+            return parentNode;
+        }
+
+        private Node ConditionalStatement(ParentNode parentNode)
         {
             EatToken(TokenType.Keyword);
             EatToken(TokenType.Symbol);
@@ -199,7 +231,7 @@ namespace DSharpCompiler.Core.DSharp
             return node;
         }
 
-        private Node ReturnStatement(CompoundNode compoundNode)
+        private Node ReturnStatement(ParentNode compoundNode)
         {
             var token = _currentToken;
             EatToken(TokenType.Keyword);
@@ -235,9 +267,9 @@ namespace DSharpCompiler.Core.DSharp
             routineName = _currentToken.Value;
             EatToken(TokenType.Identifier);
 
-            var returnType = _typesTable[routineName];
+            var returnType = _typesTable.GetX(routineName);
             if (returnType == null)
-                throw new TypeNotFoundException($"Could not find type: {returnType}");
+                throw new TypeNotFoundException($"Could not find type: {routineName}");
 
             if (_currentToken.Value != ".")
                 return returnType;
@@ -247,6 +279,10 @@ namespace DSharpCompiler.Core.DSharp
             EatToken(TokenType.Identifier);
 
             routineName = $"{routineName}.{subRoutine}";
+            var x = _typesTable.GetX(routineName);
+            if (x != null)
+                return x;
+
             returnType = returnType.GetRuntimeMethods()
                 .Single(m => m.Name.Equals(subRoutine, StringComparison.OrdinalIgnoreCase)).ReturnType;
 
