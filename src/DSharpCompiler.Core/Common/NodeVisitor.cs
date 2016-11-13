@@ -39,7 +39,11 @@ namespace DSharpCompiler.Core.Common
             {
                 return VisitCompoundNode(node);
             }
-            if (node.NodeType == NodeType.Conditional)
+            else if (node.NodeType == NodeType.CustomType)
+            {
+                return VisitCustomTypeNode(node);
+            }
+            else if (node.NodeType == NodeType.Conditional)
             {
                 return VisitConditionalNode(node);
             }
@@ -92,6 +96,16 @@ namespace DSharpCompiler.Core.Common
             }
             else
                 _symbols.Add(compoundNode.Name, new Symbol(compoundNode));
+            return null;
+        }
+
+        private int? VisitCustomTypeNode(Node node)
+        {
+            var customTypeNode = node.Cast<CustomTypeNode>();
+            foreach (CompoundNode compoundNode in customTypeNode.Children)
+            {
+                VisitCompoundNode(compoundNode);
+            }
             return null;
         }
 
@@ -215,7 +229,8 @@ namespace DSharpCompiler.Core.Common
         {
             var routineNode = node as RoutineNode;
             var callingType = _typesTable.GetCallingType(routineNode.Name);
-            return callingType == null ? VisitDSharpRoutineNode(routineNode)
+            return callingType == null || callingType == typeof(object)
+                ? VisitDSharpRoutineNode(routineNode)
                 : VisitLibraryRoutineNode(routineNode, callingType);
         }
 

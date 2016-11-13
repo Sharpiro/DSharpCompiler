@@ -11,6 +11,7 @@
             public const string True = "true";
             public const string False = "false";
             public const string ConditionalEquals = "eq";
+            public const string Type = "type";
         }
 
         public static class Symbols
