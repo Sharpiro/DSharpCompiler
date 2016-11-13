@@ -26,7 +26,12 @@
 
 .textArea
 {
-    height: 315px;
+    height: 335px;
+}
+
+.textAreaOutput
+{
+    height: 200px;
 }
 
 .disabled

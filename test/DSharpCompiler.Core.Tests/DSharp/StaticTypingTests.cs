@@ -1,7 +1,5 @@
 ﻿using DSharpCompiler.Core.Common;
 using DSharpCompiler.Core.Common.Exceptions;
-using DSharpCompiler.Core.DSharp;
-using System;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
@@ -21,11 +19,7 @@ namespace DSharpCompiler.Core.Tests
                     return ""abc"";
                 };
                 let b = doWork(2);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             Assert.Throws(typeof(TypeMismatchException), () => interpreter.Interpret(code));
         }
 
@@ -42,11 +36,7 @@ namespace DSharpCompiler.Core.Tests
                     return 123;
                 };
                 let b = doWork();";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             Assert.Throws(typeof(TypeMismatchException), () => interpreter.Interpret(code));
         }
 
@@ -63,11 +53,7 @@ namespace DSharpCompiler.Core.Tests
                     return ""abc"";
                 };
                 let b = doWork();";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             Assert.Throws(typeof(TypeMismatchException), () => interpreter.Interpret(code));
         }
 
@@ -84,13 +70,9 @@ namespace DSharpCompiler.Core.Tests
                     return 456;
                 };
                 let b = doWork(2);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
+            var b = dictionary.SymbolsTable.GetValue<int>("b");
             Assert.Equal(123, b);
         }
 
@@ -107,13 +89,9 @@ namespace DSharpCompiler.Core.Tests
                     return 456;
                 };
                 let b = doWork();";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
+            var b = dictionary.SymbolsTable.GetValue<int>("b");
             Assert.Equal(456, b);
         }
 
@@ -126,11 +104,7 @@ namespace DSharpCompiler.Core.Tests
                     return e + ""abcd"";
                 };
                 let e = add(2, 4);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var nodeVisitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, nodeVisitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             Assert.Throws(typeof(TypeMismatchException), () => interpreter.Interpret(code));
         }
     }

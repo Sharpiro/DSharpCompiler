@@ -12,11 +12,12 @@ namespace DSharpCompiler.Web
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<ILanguageTokens, DSharpTokens>();
+            services.AddTransient<ITokenDefinitions, DSharpTokenDefinitions>();
             services.AddTransient<LexicalAnalyzer, LexicalAnalyzer>();
             services.AddTransient<ITokenParser, DSharpParser>();
             services.AddTransient<NodeVisitor, NodeVisitor>();
             services.AddTransient<Interpreter, Interpreter>();
+            services.AddTransient<TypesTable, TypesTable>();
             services.AddMvc();
         }
 

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace DSharpCompiler.Core.Pascal
 {
-    public class PascalTokens : IEnumerable, IEnumerable<Token>, ILanguageTokens
+    public class PascalTokens : IEnumerable, IEnumerable<Token>, ITokenDefinitions
     {
         private IEnumerable<Token> _tokens;
 

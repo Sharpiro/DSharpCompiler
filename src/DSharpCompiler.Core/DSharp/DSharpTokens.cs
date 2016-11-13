@@ -6,11 +6,11 @@ using System.Linq;
 
 namespace DSharpCompiler.Core.DSharp
 {
-    public class DSharpTokens : IEnumerable, IEnumerable<Token>, ILanguageTokens
+    public class DSharpTokenDefinitions : IEnumerable, IEnumerable<Token>, ITokenDefinitions
     {
         private IEnumerable<Token> _tokens;
 
-        public DSharpTokens()
+        public DSharpTokenDefinitions()
         {
             _tokens = new List<Token>
             {

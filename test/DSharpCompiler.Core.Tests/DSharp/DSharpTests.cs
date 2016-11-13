@@ -1,5 +1,4 @@
 ﻿using DSharpCompiler.Core.Common;
-using DSharpCompiler.Core.DSharp;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
@@ -16,13 +15,9 @@ namespace DSharpCompiler.Core.Tests
                     return a;
                 };
                 let a = doWork();";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var interpreter = new NodeVisitor();
-            var wrapper = new Interpreter(lexer, parser, interpreter);
-            var dictionary = wrapper.Interpret(code);
-            var a = dictionary.GetValue<int>("a");
+            var interpreter = Interpreter.GetDsharpInterpreter();
+            var dictionary = interpreter.Interpret(code);
+            var a = dictionary.SymbolsTable.GetValue<int>("a");
             Assert.Equal(2, a);
         }
 
@@ -36,15 +31,11 @@ namespace DSharpCompiler.Core.Tests
                     let b = 2;
                 };
                 let c = 3;";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var interpreter = new NodeVisitor();
-            var wrapper = new Interpreter(lexer, parser, interpreter);
-            var dictionary = wrapper.Interpret(code);
-            var a = dictionary.GetValue<int>("a");
-            var b = dictionary.GetValue<object>("b");
-            var c = dictionary.GetValue<int>("c");
+            var interpreter = Interpreter.GetDsharpInterpreter();
+            var dictionary = interpreter.Interpret(code);
+            var a = dictionary.SymbolsTable.GetValue<int>("a");
+            var b = dictionary.SymbolsTable.GetValue<object>("b");
+            var c = dictionary.SymbolsTable.GetValue<int>("c");
             Assert.Equal(1, a);
             Assert.Equal(null, b);
             Assert.Equal(3, c);
@@ -66,16 +57,12 @@ namespace DSharpCompiler.Core.Tests
                 let d = 4;
                 doWork();
                 doMoreWork();";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var interpreter = new NodeVisitor();
-            var wrapper = new Interpreter(lexer, parser, interpreter);
-            var dictionary = wrapper.Interpret(code);
-            var a = dictionary.GetValue<int>("a");
-            var b = dictionary.GetValue<int?>("b");
-            var c = dictionary.GetValue<int?>("c");
-            var d = dictionary.GetValue<int>("d");
+            var interpreter = Interpreter.GetDsharpInterpreter();
+            var dictionary = interpreter.Interpret(code);
+            var a = dictionary.SymbolsTable.GetValue<int>("a");
+            var b = dictionary.SymbolsTable.GetValue<int?>("b");
+            var c = dictionary.SymbolsTable.GetValue<int?>("c");
+            var d = dictionary.SymbolsTable.GetValue<int>("d");
             Assert.Equal(1, a);
             Assert.Equal(null, b);
             Assert.Equal(null, c);
@@ -86,13 +73,9 @@ namespace DSharpCompiler.Core.Tests
         public void AssignmentStringSimpleTest()
         {
             var code = @"let a = ""hello world"";";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var interpreter = new NodeVisitor();
-            var wrapper = new Interpreter(lexer, parser, interpreter);
-            var dictionary = wrapper.Interpret(code);
-            var a = dictionary.GetValue<string>("a");
+            var interpreter = Interpreter.GetDsharpInterpreter();
+            var dictionary = interpreter.Interpret(code);
+            var a = dictionary.SymbolsTable.GetValue<string>("a");
             Assert.Equal("hello world", a);
         }
 
@@ -113,16 +96,12 @@ namespace DSharpCompiler.Core.Tests
                 let d = 4;
                 doWork();
                 let c = doMoreWork();";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var interpreter = new NodeVisitor();
-            var wrapper = new Interpreter(lexer, parser, interpreter);
-            var dictionary = wrapper.Interpret(code);
-            var a = dictionary.GetValue<int>("a");
-            var b = dictionary.GetValue<int?>("b");
-            var c = dictionary.GetValue<string>("c");
-            var d = dictionary.GetValue<int>("d");
+            var interpreter = Interpreter.GetDsharpInterpreter();
+            var dictionary = interpreter.Interpret(code);
+            var a = dictionary.SymbolsTable.GetValue<int>("a");
+            var b = dictionary.SymbolsTable.GetValue<int?>("b");
+            var c = dictionary.SymbolsTable.GetValue<string>("c");
+            var d = dictionary.SymbolsTable.GetValue<int>("d");
             Assert.Equal(1, a);
             Assert.Equal(null, b);
             Assert.Equal("hello world", c);
@@ -135,14 +114,10 @@ namespace DSharpCompiler.Core.Tests
             var code = @"
                 let c = ""hello world"";
                 let d = c";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var interpreter = new NodeVisitor();
-            var wrapper = new Interpreter(lexer, parser, interpreter);
-            var dictionary = wrapper.Interpret(code);
-            var c = dictionary.GetValue<string>("c");
-            var d = dictionary.GetValue<string>("d");
+            var interpreter = Interpreter.GetDsharpInterpreter();
+            var dictionary = interpreter.Interpret(code);
+            var c = dictionary.SymbolsTable.GetValue<string>("c");
+            var d = dictionary.SymbolsTable.GetValue<string>("d");
             Assert.Equal("hello world", c);
             Assert.Equal(c, d);
         }
