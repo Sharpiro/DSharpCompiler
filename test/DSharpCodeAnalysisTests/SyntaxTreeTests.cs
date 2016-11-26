@@ -13,7 +13,7 @@ namespace DSharpCodeAnalysisTests
             var lexer = new Lexer();
             var source = "using System;";
             lexer.Lex(source);
-            SyntaxFactory.TokenList()
+            SyntaxFactory.TokenList();
         }
     }
 }

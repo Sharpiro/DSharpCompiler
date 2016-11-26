@@ -9,7 +9,7 @@ namespace DSharpCodeAnalysis.Syntax
             return new DSharpClassDeclarationSyntax();
         }
 
-        public static DSharpClassDeclarationSyntax ClassDeclaration(string identifier)
+        public static DSharpClassDeclarationSyntax ClassDeclarationX(string identifier)
         {
             return new DSharpClassDeclarationSyntax();
         }
