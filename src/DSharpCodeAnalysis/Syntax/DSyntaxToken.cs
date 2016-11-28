@@ -7,17 +7,24 @@ namespace DSharpCodeAnalysis.Syntax
 {
     public class DSyntaxToken
     {
+        public DSyntaxKind SyntaxKind { get; }
+        public IEnumerable<Trivia> LeadingTrivia { get; set; } = Enumerable.Empty<Trivia>();
+        public IEnumerable<Trivia> TrailingTrivia { get; set; } = Enumerable.Empty<Trivia>();
+        public IEnumerable<Trivia> AllTrivia => LeadingTrivia.Concat(TrailingTrivia);
+        public bool HasLeadingTrivia => LeadingTrivia.Any();
+        public bool HasTrailingTrivia => TrailingTrivia.Any();
+        public bool HasAnyTrivia => AllTrivia.Any();
+        public string ValueText { get; set; }
+
         public DSyntaxToken(DSyntaxKind syntaxKind)
         {
             SyntaxKind = syntaxKind;
         }
 
-        public DSyntaxKind SyntaxKind { get;}
-        public IEnumerable<Trivia> LeadingTrivia { get; set; }
-        public IEnumerable<Trivia> TrailingTrivia { get; set; }
-        public bool HasLeadingTrivia => LeadingTrivia.Count() > 0;
-        public bool HasTrailingTrivia => TrailingTrivia.Count() > 0;
-        public string ValueText { get; set; }
+        public override string ToString()
+        {
+            return ValueText;
+        }
     }
 
     public class Trivia

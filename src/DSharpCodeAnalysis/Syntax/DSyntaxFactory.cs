@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DSharpCodeAnalysis.Syntax
@@ -30,7 +31,11 @@ namespace DSharpCodeAnalysis.Syntax
 
         public static DSyntaxToken Token(DSyntaxKind syntaxKind)
         {
-            return new DSyntaxToken(syntaxKind);
+            var token = new DSyntaxToken(syntaxKind)
+            {
+                ValueText = SyntaxString(syntaxKind)
+            };
+            return token;
         }
 
         public static DPredefinedTypeSyntax PredefinedType(DSyntaxToken keyword)
@@ -38,9 +43,24 @@ namespace DSharpCodeAnalysis.Syntax
             return new DPredefinedTypeSyntax(keyword);
         }
 
+        public static DBlockSyntax Block()
+        {
+            return new DBlockSyntax();
+        }
+
         public static IEnumerable<T> SingletonList<T>(T item)
         {
             return Enumerable.Repeat(item, 1);
+        }
+
+        public static string SyntaxString(DSyntaxKind syntaxKind)
+        {
+            return DSyntaxStrings.Get(syntaxKind);
+        }
+
+        public static DParameterListSyntax ParameterList()
+        {
+            return new DParameterListSyntax();
         }
     }
 }

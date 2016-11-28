@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DSharpCodeAnalysis.Syntax
@@ -31,6 +32,50 @@ namespace DSharpCodeAnalysis.Syntax
                 yield return tokenChild;
             }
         }
+
+        public IEnumerable<object> ChildNodesAndTokens()
+        {
+            return Children;
+        }
+
+        public IEnumerable<object> DescendantNodesAndTokens()
+        {
+            var runningList = new List<object>();
+            foreach (var child in Children)
+            {
+                var nodeChild = child as DSyntaxNode;
+                if (nodeChild != null)
+                {
+                    runningList.Add(nodeChild);
+                    runningList = runningList.Concat(nodeChild.DescendantNodesAndTokens()).ToList();
+                }
+                else
+                {
+                    var tokenChild = child as DSyntaxToken;
+                    runningList.Add(tokenChild);
+                    runningList = runningList.Concat(tokenChild.AllTrivia).ToList();
+                }
+            }
+            return runningList;
+        }
+
+        public override string ToString()
+        {
+            return string.Join(String.Empty, Children);
+        }
+    }
+
+    public class DParameterListSyntax : DSyntaxNode
+    {
+        public DParameterListSyntax()
+        {
+            SyntaxKind = DSyntaxKind.ParameterList;
+            Children = new List<object>
+            {
+                DSyntaxFactory.Token(DSyntaxKind.OpenParenToken),
+                DSyntaxFactory.Token(DSyntaxKind.CloseParenToken)
+            };
+        }
     }
 
     public class DMemberDeclarationSyntax : DSyntaxNode
@@ -50,12 +95,34 @@ namespace DSharpCodeAnalysis.Syntax
         public DPredefinedTypeSyntax(DSyntaxToken keyword)
         {
             Keyword = keyword;
+            SyntaxKind = DSyntaxKind.PredefinedType;
+            Children = new List<object>
+            {
+                keyword
+            };
+        }
+    }
+
+    public class DStatementSyntax : DSyntaxNode
+    {
+
+    }
+
+    public class DBlockSyntax : DStatementSyntax
+    {
+        public DBlockSyntax()
+        {
+            SyntaxKind = DSyntaxKind.Block;
+            Children = new List<object>
+            {
+                DSyntaxFactory.Token(DSyntaxKind.OpenBraceToken),
+                DSyntaxFactory.Token(DSyntaxKind.CloseBraceToken)
+            };
         }
     }
 
     public class DMethodDeclarationSyntax : DMemberDeclarationSyntax
     {
-        //public IEnumerable<DMemberDeclarationSyntax> Members { get; set; }
         public DSyntaxToken Identifier { get; set; }
         public DTypeSyntax ReturnType { get; set; }
 
@@ -64,17 +131,30 @@ namespace DSharpCodeAnalysis.Syntax
             ReturnType = returnType;
             Identifier = identifierToken;
             SyntaxKind = DSyntaxKind.MethodDeclaration;
+            Children = new List<object>
+            {
+                returnType,
+                Identifier,
+                DSyntaxFactory.ParameterList()
+            };
         }
 
         public DMethodDeclarationSyntax WithModifiers()
         {
+            throw new NotImplementedException();
+            return this;
+        }
+        public DMethodDeclarationSyntax WithBody(DBlockSyntax syntax)
+        {
+            var childrenList = Children.ToList();
+            childrenList.Insert(childrenList.Count, syntax);
+            Children = childrenList;
             return this;
         }
     }
 
     public class DClassDeclarationSyntax : DMemberDeclarationSyntax
     {
-        //public IEnumerable<DMemberDeclarationSyntax> Members { get; set; }
         public DSyntaxToken Identifier { get; }
 
         public DClassDeclarationSyntax(DSyntaxToken identifierToken)
@@ -98,19 +178,15 @@ namespace DSharpCodeAnalysis.Syntax
         public DClassDeclarationSyntax WithMembers(IEnumerable<DMemberDeclarationSyntax> members)
         {
             var membersList = members as List<DMemberDeclarationSyntax> ?? members.ToList();
-            var tempList = Children.ToList();
-            var insertLocation = ChildTokens().Select(c => c.SyntaxKind).ToList().IndexOf(DSyntaxKind.OpenBraceToken);
+            var modifiedChildren = Children.ToList();
+            var insertLocation = ChildTokens().Select(c => c.SyntaxKind).ToList().IndexOf(DSyntaxKind.OpenBraceToken) + 1;
             for (var i = 0; i < membersList.Count; i++)
             {
-                membersList[i].Parent = this;
-                //tempList.Insert()
+                var member = membersList[i];
+                member.Parent = this;
+                modifiedChildren.Insert(insertLocation + i, member);
             }
-            //foreach (var member in membersList)
-            //{
-            //    member.Parent = this;
-            //    tempList.Insert()
-            //}
-            Children = Children.Concat(membersList);
+            Children = modifiedChildren;
             return this;
         }
     }
