@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace DSharpCodeAnalysis.Syntax
@@ -46,6 +45,11 @@ namespace DSharpCodeAnalysis.Syntax
         public static DBlockSyntax Block()
         {
             return new DBlockSyntax();
+        }
+
+        public static Trivia SyntaxTrivia(DSyntaxKind syntaxKind, string triviaText)
+        {
+            return new Trivia(syntaxKind, triviaText);
         }
 
         public static IEnumerable<T> SingletonList<T>(T item)

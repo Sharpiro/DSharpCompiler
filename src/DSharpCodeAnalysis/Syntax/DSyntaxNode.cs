@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DSharpCodeAnalysis.Models;
 
 namespace DSharpCodeAnalysis.Syntax
 {
-    public class DSyntaxNode
+    public class DSyntaxNode : IDSyntax
     {
-        protected IEnumerable<object> Children { get; set; } = Enumerable.Empty<object>();
+        protected IEnumerable<IDSyntax> Children { get; set; } = Enumerable.Empty<IDSyntax>();
 
         public DSyntaxKind SyntaxKind { get; set; }
         public DSyntaxNode Parent { get; set; }
+        public Span FullSpan { get; set; }
+        public int Position { get; set; }
 
         public IEnumerable<DSyntaxNode> ChildNodes()
         {
@@ -33,35 +36,74 @@ namespace DSharpCodeAnalysis.Syntax
             }
         }
 
-        public IEnumerable<object> ChildNodesAndTokens()
+        public IEnumerable<IDSyntax> ChildNodesAndTokens()
         {
             return Children;
         }
 
-        public IEnumerable<object> DescendantNodesAndTokens()
+        public IEnumerable<IDSyntax> DescendantNodesAndTokens()
         {
-            var runningList = new List<object>();
             foreach (var child in Children)
             {
                 var nodeChild = child as DSyntaxNode;
                 if (nodeChild != null)
                 {
-                    runningList.Add(nodeChild);
-                    runningList = runningList.Concat(nodeChild.DescendantNodesAndTokens()).ToList();
+                    yield return child;
+                    foreach (var item in nodeChild.DescendantNodesAndTokens().ToList())
+                    {
+                        yield return item;
+                    }
                 }
                 else
                 {
                     var tokenChild = child as DSyntaxToken;
-                    runningList.Add(tokenChild);
-                    runningList = runningList.Concat(tokenChild.AllTrivia).ToList();
+                    yield return child;
                 }
             }
-            return runningList;
+            //return runningList;
         }
+
+        public SyntaxHierarchyModel DescendantHierarchy()
+        {
+            var model = new SyntaxHierarchyModel
+            {
+                SyntaxKind = SyntaxKind.ToString(),
+                SyntaxType = nameof(DSyntaxNode)
+            };
+            foreach (var child in Children)
+            {
+                IDSyntax syntaxChild;
+                if ((syntaxChild = child as DSyntaxNode) != null)
+                {
+                    model.Children.Add(syntaxChild.DescendantHierarchy());
+                }
+                else if ((syntaxChild = child as DSyntaxToken) != null)
+                {
+                    model.Children.Add(new SyntaxHierarchyModel
+                    {
+                        SyntaxKind = syntaxChild.SyntaxKind.ToString(),
+                        SyntaxType = nameof(DSyntaxToken),
+                        Children = syntaxChild.DescendantHierarchy().Children
+                    });
+                }
+                else if ((syntaxChild = child as Trivia) != null)
+                {
+                    model.Children.Add(new SyntaxHierarchyModel
+                    {
+                        SyntaxKind = syntaxChild.SyntaxKind.ToString(),
+                        SyntaxType = nameof(DSyntaxToken)
+                    });
+                }
+                else
+                    throw new ArgumentException($"Invalid Syntax item for {child.ToString()}");
+            }
+            return model;
+        }
+
 
         public override string ToString()
         {
-            return string.Join(String.Empty, Children);
+            return string.Join(string.Empty, Children);
         }
     }
 
@@ -70,7 +112,7 @@ namespace DSharpCodeAnalysis.Syntax
         public DParameterListSyntax()
         {
             SyntaxKind = DSyntaxKind.ParameterList;
-            Children = new List<object>
+            Children = new List<IDSyntax>
             {
                 DSyntaxFactory.Token(DSyntaxKind.OpenParenToken),
                 DSyntaxFactory.Token(DSyntaxKind.CloseParenToken)
@@ -96,7 +138,7 @@ namespace DSharpCodeAnalysis.Syntax
         {
             Keyword = keyword;
             SyntaxKind = DSyntaxKind.PredefinedType;
-            Children = new List<object>
+            Children = new List<IDSyntax>
             {
                 keyword
             };
@@ -113,7 +155,7 @@ namespace DSharpCodeAnalysis.Syntax
         public DBlockSyntax()
         {
             SyntaxKind = DSyntaxKind.Block;
-            Children = new List<object>
+            Children = new List<IDSyntax>
             {
                 DSyntaxFactory.Token(DSyntaxKind.OpenBraceToken),
                 DSyntaxFactory.Token(DSyntaxKind.CloseBraceToken)
@@ -131,7 +173,7 @@ namespace DSharpCodeAnalysis.Syntax
             ReturnType = returnType;
             Identifier = identifierToken;
             SyntaxKind = DSyntaxKind.MethodDeclaration;
-            Children = new List<object>
+            Children = new List<IDSyntax>
             {
                 returnType,
                 Identifier,
@@ -155,13 +197,15 @@ namespace DSharpCodeAnalysis.Syntax
 
     public class DClassDeclarationSyntax : DMemberDeclarationSyntax
     {
+        private const int defaultSpanLength = 7;
         public DSyntaxToken Identifier { get; }
 
         public DClassDeclarationSyntax(DSyntaxToken identifierToken)
         {
             Identifier = identifierToken;
             SyntaxKind = DSyntaxKind.ClassDeclaration;
-            Children = new List<object>
+            FullSpan = new Span(Position, defaultSpanLength + identifierToken.FullSpan.Length);
+            Children = new List<IDSyntax>
             {
                 DSyntaxFactory.Token(DSyntaxKind.ClassKeyword),
                 Identifier,

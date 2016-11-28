@@ -1,11 +1,20 @@
-﻿using System;
+﻿using DSharpCodeAnalysis.Models;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DSharpCodeAnalysis.Syntax
 {
-    public class DSyntaxToken
+    public interface IDSyntax
+    {
+        DSyntaxKind SyntaxKind { get; }
+        Span FullSpan { get; }
+        int Position { get; set; }
+        SyntaxHierarchyModel DescendantHierarchy();
+    }
+
+    public class DSyntaxToken : IDSyntax
     {
         public DSyntaxKind SyntaxKind { get; }
         public IEnumerable<Trivia> LeadingTrivia { get; set; } = Enumerable.Empty<Trivia>();
@@ -15,22 +24,59 @@ namespace DSharpCodeAnalysis.Syntax
         public bool HasTrailingTrivia => TrailingTrivia.Any();
         public bool HasAnyTrivia => AllTrivia.Any();
         public string ValueText { get; set; }
+        public Span FullSpan => new Span(Position, ValueText.Length);
+        public int Position { get; set; }
 
         public DSyntaxToken(DSyntaxKind syntaxKind)
         {
             SyntaxKind = syntaxKind;
         }
 
+        public DSyntaxToken(DSyntaxKind syntaxKind, int position)
+        {
+            SyntaxKind = syntaxKind;
+            Position = position;
+        }
+
         public override string ToString()
         {
             return ValueText;
         }
+
+        public SyntaxHierarchyModel DescendantHierarchy()
+        {
+            return new SyntaxHierarchyModel
+            {
+                Children = AllTrivia.Select(t => new SyntaxHierarchyModel
+                {
+                    SyntaxKind = t.SyntaxKind.ToString(),
+                    SyntaxType = nameof(Trivia)
+                }).ToList()
+            };
+        }
     }
 
-    public class Trivia
+    public class Trivia : IDSyntax
     {
         public DSyntaxToken Token { get; set; }
         public Span Span { get; set; }
+        public DSyntaxKind SyntaxKind { get; set; }
+        public Span FullSpan { get; set; }
+        public string FullText { get; set; }
+        public int Position { get; set; }
+
+        public Trivia(DSyntaxKind syntaxKind, string triviaText)
+        {
+            SyntaxKind = syntaxKind;
+            FullText = triviaText;
+            FullSpan = new Span(0, triviaText.Length);
+
+        }
+
+        public SyntaxHierarchyModel DescendantHierarchy()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class Span
