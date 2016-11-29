@@ -11,8 +11,9 @@ namespace DSharpCodeAnalysis.Syntax
 
         public DSyntaxKind SyntaxKind { get; set; }
         public DSyntaxNode Parent { get; set; }
-        public Span FullSpan { get; set; }
+        public Span FullSpan => new Span(Position, Width);
         public int Position { get; set; }
+        public int Width => ChildNodesAndTokens().Sum(c => c.Width);
 
         public IEnumerable<DSyntaxNode> ChildNodes()
         {
@@ -43,24 +44,28 @@ namespace DSharpCodeAnalysis.Syntax
 
         public IEnumerable<IDSyntax> DescendantNodesAndTokens()
         {
+            var position = Position;
             foreach (var child in Children)
             {
                 var nodeChild = child as DSyntaxNode;
                 if (nodeChild != null)
                 {
-                    yield return child;
+                    nodeChild.Position = position;
+                    yield return nodeChild;
                     foreach (var item in nodeChild.DescendantNodesAndTokens().ToList())
                     {
+                        if (item.FullSpan != null)
+                            position += item.FullSpan.Length;
                         yield return item;
                     }
                 }
                 else
                 {
-                    var tokenChild = child as DSyntaxToken;
+                    child.Position = position;
+                    position += child.FullSpan.Length;
                     yield return child;
                 }
             }
-            //return runningList;
         }
 
         public SyntaxHierarchyModel DescendantHierarchy()
@@ -204,7 +209,7 @@ namespace DSharpCodeAnalysis.Syntax
         {
             Identifier = identifierToken;
             SyntaxKind = DSyntaxKind.ClassDeclaration;
-            FullSpan = new Span(Position, defaultSpanLength + identifierToken.FullSpan.Length);
+            //FullSpan = new Span(Position, defaultSpanLength + identifierToken.FullSpan.Length);
             Children = new List<IDSyntax>
             {
                 DSyntaxFactory.Token(DSyntaxKind.ClassKeyword),

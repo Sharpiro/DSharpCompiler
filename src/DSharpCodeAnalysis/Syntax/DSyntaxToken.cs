@@ -11,6 +11,7 @@ namespace DSharpCodeAnalysis.Syntax
         DSyntaxKind SyntaxKind { get; }
         Span FullSpan { get; }
         int Position { get; set; }
+        int Width { get; }
         SyntaxHierarchyModel DescendantHierarchy();
     }
 
@@ -24,8 +25,9 @@ namespace DSharpCodeAnalysis.Syntax
         public bool HasTrailingTrivia => TrailingTrivia.Any();
         public bool HasAnyTrivia => AllTrivia.Any();
         public string ValueText { get; set; }
-        public Span FullSpan => new Span(Position, ValueText.Length);
+        public Span FullSpan => new Span(Position, Width);
         public int Position { get; set; }
+        public int Width => ValueText.Length;
 
         public DSyntaxToken(DSyntaxKind syntaxKind)
         {
@@ -64,6 +66,7 @@ namespace DSharpCodeAnalysis.Syntax
         public Span FullSpan { get; set; }
         public string FullText { get; set; }
         public int Position { get; set; }
+        public int Width { get; set; }
 
         public Trivia(DSyntaxKind syntaxKind, string triviaText)
         {

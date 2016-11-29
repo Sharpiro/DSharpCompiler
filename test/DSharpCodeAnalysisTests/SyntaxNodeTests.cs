@@ -76,7 +76,6 @@ namespace DSharpCodeAnalysisTests
             var dChildren = dClass.ChildNodesAndTokens().ToList();
             var dSource = dClass.ToString();
 
-            //var x = new { Kind = dClass.SyntaxKind, Children = dClass.chil };
             var model = dClass.DescendantHierarchy();
 
             var json = JsonConvert.SerializeObject(model);
