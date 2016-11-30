@@ -18,6 +18,7 @@ namespace DSharpCodeAnalysis.Syntax
     public class DSyntaxToken : IDSyntax
     {
         public DSyntaxKind SyntaxKind { get; }
+        public DSyntaxNode Parent { get; set; }
         public IEnumerable<Trivia> LeadingTrivia { get; set; } = Enumerable.Empty<Trivia>();
         public IEnumerable<Trivia> TrailingTrivia { get; set; } = Enumerable.Empty<Trivia>();
         public IEnumerable<Trivia> AllTrivia => LeadingTrivia.Concat(TrailingTrivia);
@@ -32,17 +33,15 @@ namespace DSharpCodeAnalysis.Syntax
         public DSyntaxToken(DSyntaxKind syntaxKind)
         {
             SyntaxKind = syntaxKind;
-        }
-
-        public DSyntaxToken(DSyntaxKind syntaxKind, int position)
-        {
-            SyntaxKind = syntaxKind;
-            Position = position;
+            ValueText = DSyntaxFactory.SyntaxString(syntaxKind);
         }
 
         public override string ToString()
         {
-            return ValueText;
+            var leadingText = string.Join(string.Empty, LeadingTrivia.Select(l => l.ToString()));
+            var trailingText = string.Join(string.Empty, TrailingTrivia.Select(l => l.ToString()));
+            var tokenString = $"{leadingText}{ValueText}{trailingText}";
+            return tokenString;
         }
 
         public SyntaxHierarchyModel DescendantHierarchy()
@@ -79,6 +78,16 @@ namespace DSharpCodeAnalysis.Syntax
         public SyntaxHierarchyModel DescendantHierarchy()
         {
             throw new NotImplementedException();
+        }
+
+        public static Trivia Create(DSyntaxKind syntaxKind, string text)
+        {
+            return new Trivia(syntaxKind, text);
+        }
+
+        public override string ToString()
+        {
+            return FullText;
         }
     }
 

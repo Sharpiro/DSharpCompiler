@@ -19,13 +19,15 @@ namespace DSharpCodeAnalysis.Syntax
         UsingDirective = 8843,
         ClassDeclaration = 8855,
         MethodDeclaration = 8875,
-        ParameterList = 8906
+        ParameterList = 8906,
+        WhitespaceTrivia = 8907
     }
 
     public static class DSyntaxStrings
     {
         private static readonly Dictionary<int, string> _strings = new Dictionary<int, string>
         {
+            [8508] = null,
             [8200] = "(",
             [8201] = ")",
             [8205] = "{",
