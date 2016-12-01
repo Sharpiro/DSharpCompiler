@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace DSharpCodeAnalysis.Syntax
 {
     public static class DSyntaxFactory
     {
-        public static Trivia Space => WhiteSpace(" ");
+        public static Trivia Space => Whitespace(" ");
+        public static Trivia LineFeed => EndOfLine("\n");
 
         public static DClassDeclarationSyntax ClassDeclaration(string identifier)
         {
@@ -17,19 +17,34 @@ namespace DSharpCodeAnalysis.Syntax
             return newClass;
         }
 
+        public static DClassDeclarationSyntax ClassDeclaration(DSyntaxToken identifierToken)
+        {
+            var newClass = new DClassDeclarationSyntax(identifierToken);
+            identifierToken.Parent = newClass;
+            return newClass;
+        }
+
         public static DMethodDeclarationSyntax MethodDeclaration(DTypeSyntax returnType, DSyntaxToken identifierToken)
         {
-            var returnKeyword = Token(DSyntaxKind.VoidKeyword);
-            var predefinedTYpe = PredefinedType(returnKeyword);
-
-            return new DMethodDeclarationSyntax(predefinedTYpe, identifierToken);
+            return new DMethodDeclarationSyntax(returnType, identifierToken);
         }
 
         public static DSyntaxToken Identifier(string identifier)
         {
             var token = new DSyntaxToken(DSyntaxKind.IdentifierToken)
             {
-                ValueText = identifier
+                Value = identifier
+            };
+            return token;
+        }
+
+        public static DSyntaxToken Identifier(IEnumerable<Trivia> leading, string identifier, IEnumerable<Trivia> trailing)
+        {
+            var token = new DSyntaxToken(DSyntaxKind.IdentifierToken)
+            {
+                LeadingTrivia = leading,
+                Value = identifier,
+                TrailingTrivia = trailing
             };
             return token;
         }
@@ -40,9 +55,9 @@ namespace DSharpCodeAnalysis.Syntax
             return token;
         }
 
-        public static DSyntaxToken Token(IEnumerable<Trivia> leading, DSyntaxKind classKeyword, IEnumerable<Trivia> trailing)
+        public static DSyntaxToken Token(IEnumerable<Trivia> leading, DSyntaxKind syntaxKind, IEnumerable<Trivia> trailing)
         {
-            return new DSyntaxToken(classKeyword) { LeadingTrivia = leading, TrailingTrivia = trailing };
+            return new DSyntaxToken(syntaxKind) { LeadingTrivia = leading, TrailingTrivia = trailing };
         }
 
         public static DPredefinedTypeSyntax PredefinedType(DSyntaxToken keyword)
@@ -53,6 +68,11 @@ namespace DSharpCodeAnalysis.Syntax
         public static DBlockSyntax Block()
         {
             return new DBlockSyntax();
+        }
+
+        public static DBlockSyntax Block(IEnumerable<DStatementSyntax> statements)
+        {
+            return new DBlockSyntax(statements);
         }
 
         public static Trivia SyntaxTrivia(DSyntaxKind syntaxKind, string triviaText)
@@ -80,14 +100,65 @@ namespace DSharpCodeAnalysis.Syntax
             return Enumerable.Empty<Trivia>();
         }
 
-        public static IEnumerable<Trivia> TriviaList(Trivia space)
+        public static IEnumerable<Trivia> TriviaList(Trivia trivia)
         {
-            return new List<Trivia> { space };
+            return new List<Trivia> { trivia };
         }
 
-        public static Trivia WhiteSpace(string text)
+        public static IEnumerable<Trivia> TriviaList(params Trivia[] trivia)
+        {
+            return trivia;
+        }
+
+        public static Trivia Whitespace(string text)
         {
             return Trivia.Create(DSyntaxKind.WhitespaceTrivia, text);
+        }
+
+        public static Trivia EndOfLine(string text)
+        {
+            return Trivia.Create(DSyntaxKind.EndOfLineTrivia, text);
+        }
+
+        public static DLocalDeclarationStatementSyntax LocalDeclarationStatement(DVariableDeclarationSyntax variableSyntax)
+        {
+            return new DLocalDeclarationStatementSyntax(variableSyntax);
+        }
+
+        public static DVariableDeclarationSyntax VariableDeclaration(DTypeSyntax typeSyntax)
+        {
+            return new DVariableDeclarationSyntax(typeSyntax);
+        }
+
+        public static DIdentifierNameSyntax IdentifierName(DSyntaxToken identifierToken)
+        {
+            return new DIdentifierNameSyntax(identifierToken);
+        }
+
+        public static IEnumerable<T> SingletonSeparatedList<T>(T item)
+        {
+            return new List<T> { item };
+        }
+
+        public static DVariableDeclaratorSyntax VariableDeclarator(DSyntaxToken identifierToken)
+        {
+            return new DVariableDeclaratorSyntax(identifierToken);
+        }
+
+        public static DEqualsValueClauseSyntax EqualsValueClause(DExpressionSyntax expressionSyntax)
+        {
+            return new DEqualsValueClauseSyntax(expressionSyntax);
+        }
+
+        public static DExpressionSyntax LiteralExpression(DSyntaxKind syntaxKind, DSyntaxToken syntaxToken)
+        {
+            return new DLiteralExpressionSyntax(syntaxKind, syntaxToken);
+        }
+
+        public static DSyntaxToken Literal(int value)
+        {
+            var token = new DSyntaxToken(DSyntaxKind.NumericLiteralToken, value);
+            return token;
         }
     }
 }

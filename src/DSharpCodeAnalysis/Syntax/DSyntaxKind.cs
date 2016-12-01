@@ -7,20 +7,28 @@ namespace DSharpCodeAnalysis.Syntax
         Null,
         OpenParenToken = 8200,
         CloseParenToken = 8201,
+        EqualsToken = 8204,
         OpenBraceToken = 8205,
         CloseBraceToken = 8206,
+        SemicolonToken = 8212,
         VoidKeyword = 8318,
         UsingKeyword = 8373,
         ClassKeyword = 8374,
 
         IdentifierToken = 8508,
+        NumericLiteralToken = 8509,
+        CharacterLiteralToken = 8510,
+        StringLiteralToken = 8511,
+        EndOfLineTrivia = 8539,
+        WhitespaceTrivia = 8540,
         PredefinedType = 8621,
+        NumericLiteralExpression = 8749,
+        StringLiteralExpression = 8750,
         Block = 8792,
         UsingDirective = 8843,
         ClassDeclaration = 8855,
         MethodDeclaration = 8875,
-        ParameterList = 8906,
-        WhitespaceTrivia = 8907
+        ParameterList = 8906
     }
 
     public static class DSyntaxStrings

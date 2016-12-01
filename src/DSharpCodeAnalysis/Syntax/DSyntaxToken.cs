@@ -25,7 +25,8 @@ namespace DSharpCodeAnalysis.Syntax
         public bool HasLeadingTrivia => LeadingTrivia.Any();
         public bool HasTrailingTrivia => TrailingTrivia.Any();
         public bool HasAnyTrivia => AllTrivia.Any();
-        public string ValueText { get; set; }
+        public string ValueText => Value.ToString();
+        public object Value { get; set; }
         public Span FullSpan => new Span(Position, Width);
         public int Position { get; set; }
         public int Width => ValueText.Length;
@@ -33,7 +34,13 @@ namespace DSharpCodeAnalysis.Syntax
         public DSyntaxToken(DSyntaxKind syntaxKind)
         {
             SyntaxKind = syntaxKind;
-            ValueText = DSyntaxFactory.SyntaxString(syntaxKind);
+            Value = DSyntaxFactory.SyntaxString(syntaxKind);
+        }
+
+        public DSyntaxToken(DSyntaxKind syntaxKind, object value)
+        {
+            SyntaxKind = syntaxKind;
+            Value = value;
         }
 
         public override string ToString()
@@ -54,6 +61,18 @@ namespace DSharpCodeAnalysis.Syntax
                     SyntaxType = nameof(Trivia)
                 }).ToList()
             };
+        }
+
+        public DSyntaxToken WithLeadingTrivia(IEnumerable<Trivia> leadingTrivia)
+        {
+            LeadingTrivia = leadingTrivia;
+            return this;
+        }
+
+        public DSyntaxToken WithTrailingTrivia(IEnumerable<Trivia> trailingTrivia)
+        {
+            TrailingTrivia = trailingTrivia;
+            return this;
         }
     }
 
@@ -103,18 +122,5 @@ namespace DSharpCodeAnalysis.Syntax
         public int End => Start + Length;
         public int Length { get; }
         public bool IsEmpty => this.Length == 0;
-    }
-
-    public class DSyntaxTokenList : IEnumerable<DSyntaxToken>
-    {
-        public IEnumerator<DSyntaxToken> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
