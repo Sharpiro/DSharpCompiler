@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace DSharpCodeAnalysis.Syntax
@@ -15,6 +16,7 @@ namespace DSharpCodeAnalysis.Syntax
         SyntaxHierarchyModel DescendantHierarchy();
     }
 
+    [DebuggerDisplay("{GetDebuggerDisplay(), nq}")]
     public class DSyntaxToken : IDSyntax
     {
         public DSyntaxKind SyntaxKind { get; }
@@ -73,6 +75,11 @@ namespace DSharpCodeAnalysis.Syntax
         {
             TrailingTrivia = trailingTrivia;
             return this;
+        }
+
+        private string GetDebuggerDisplay()
+        {
+            return GetType().Name + " " + SyntaxKind.ToString() + " " + ToString();
         }
     }
 

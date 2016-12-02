@@ -70,7 +70,7 @@ namespace DSharpCodeAnalysis.Syntax
             return new DBlockSyntax();
         }
 
-        public static DBlockSyntax Block(IEnumerable<DStatementSyntax> statements)
+        public static DBlockSyntax Block(DSyntaxList<DStatementSyntax> statements)
         {
             return new DBlockSyntax(statements);
         }
@@ -80,9 +80,19 @@ namespace DSharpCodeAnalysis.Syntax
             return new Trivia(syntaxKind, triviaText);
         }
 
-        public static IEnumerable<T> SingletonList<T>(T item)
+        public static DSyntaxList<T> SingletonList<T>() where T : DSyntaxNode
         {
-            return Enumerable.Repeat(item, 1);
+            return new DSyntaxList<T>(new List<T>());
+        }
+
+        public static DSyntaxList<T> SingletonList<T>(T item) where T : DSyntaxNode
+        {
+            return new DSyntaxList<T>(new List<T> { item });
+        }
+
+        public static DSyntaxList<T> SingletonSeparatedList<T>(T item) where T : DSyntaxNode
+        {
+            return new DSyntaxList<T>(new List<T> { item });
         }
 
         public static string SyntaxString(DSyntaxKind syntaxKind)
@@ -133,11 +143,6 @@ namespace DSharpCodeAnalysis.Syntax
         public static DIdentifierNameSyntax IdentifierName(DSyntaxToken identifierToken)
         {
             return new DIdentifierNameSyntax(identifierToken);
-        }
-
-        public static IEnumerable<T> SingletonSeparatedList<T>(T item)
-        {
-            return new List<T> { item };
         }
 
         public static DVariableDeclaratorSyntax VariableDeclarator(DSyntaxToken identifierToken)

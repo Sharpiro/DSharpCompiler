@@ -42,14 +42,13 @@ namespace DSharpCodeAnalysisTests
         [Fact]
         public void ClassMethodTriviaTest()
         {
-            //const string desiredSource = "class Test\n{\n    void Do()\n    {\n\n    }\n}";
             var desiredSource =
 @"class Test
 {
-	void Do()
-	{
-		var x = 2;
-	}
+    void Do()
+    {
+        var x = 2;
+    }
 }".Replace(Environment.NewLine, "\n");
 
             var cGeneratedClass = SyntaxFactory.ClassDeclaration(
@@ -230,8 +229,12 @@ namespace DSharpCodeAnalysisTests
                            DSyntaxFactory.TriviaList(
                                DSyntaxFactory.LineFeed))))));
 
+            var cDescendants = cGeneratedClass.DescendantNodesAndTokens().ToList();
             var dDescendants = dGeneratedClass.DescendantNodesAndTokens().ToList();
+            var dTypes = dDescendants.Select(d => d.GetType());
             var dgeneratedClassString = dGeneratedClass.ToString();
+            var model = dGeneratedClass.DescendantHierarchy();
+            var json = JsonConvert.SerializeObject(model);
 
             Assert.Equal(desiredSource, dgeneratedClassString);
         }
@@ -241,7 +244,7 @@ namespace DSharpCodeAnalysisTests
     {
         void Do()
         {
-            Console.WriteLine("Hi");
+            var x = 2;
         }
     }
 }

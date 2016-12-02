@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DSharpCodeAnalysis.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Diagnostics;
 
 namespace DSharpCodeAnalysis.Syntax
 {
+    [DebuggerDisplay("{GetDebuggerDisplay(), nq}")]
     public class DSyntaxNode : IDSyntax
     {
-        protected IList<IDSyntax> Children { get; set; } = Enumerable.Empty<IDSyntax>().ToList();
+        protected virtual List<IDSyntax> Children { get; set; } = Enumerable.Empty<IDSyntax>().ToList();
 
         public DSyntaxKind SyntaxKind { get; set; }
         public DSyntaxNode Parent { get; set; }
@@ -119,6 +122,11 @@ namespace DSharpCodeAnalysis.Syntax
         {
             return string.Join(string.Empty, Children);
         }
+
+        private string GetDebuggerDisplay()
+        {
+            return GetType().Name + " " + SyntaxKind.ToString() + " " + ToString();
+        }
     }
 
     public class DParameterListSyntax : DSyntaxNode
@@ -175,51 +183,82 @@ namespace DSharpCodeAnalysis.Syntax
     {
         public DSyntaxToken EqualsToken { get; set; }
         public DExpressionSyntax Value { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { EqualsToken, Value };
 
         public DEqualsValueClauseSyntax(DExpressionSyntax expressionSyntax)
         {
+            expressionSyntax.Parent = this;
             Value = expressionSyntax;
+            SyntaxKind = DSyntaxKind.EqualsValueClause;
         }
 
         public DEqualsValueClauseSyntax WithEqualsToken(DSyntaxToken dSyntaxToken)
         {
             dSyntaxToken.Parent = this;
-            EqualsToken = dSyntaxToken;
-            return this;
+            var newClause = new DEqualsValueClauseSyntax(Value)
+            {
+                EqualsToken = dSyntaxToken,
+                Parent = Parent
+            };
+            return newClause;
         }
     }
 
     public class DVariableDeclaratorSyntax : DSyntaxNode
     {
-        public DEqualsValueClauseSyntax Initializer { get; set; }
         public DSyntaxToken Identifier { get; set; }
+        public DEqualsValueClauseSyntax Initializer { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Identifier, Initializer };
 
         public DVariableDeclaratorSyntax(DSyntaxToken identifierToken)
         {
             Identifier = identifierToken;
+            SyntaxKind = DSyntaxKind.VariableDeclarator;
         }
 
         public DVariableDeclaratorSyntax WithInitializer(DEqualsValueClauseSyntax equalsSyntax)
         {
             equalsSyntax.Parent = this;
-            Initializer = equalsSyntax;
-            return this;
+            var newVariableDeclarator = new DVariableDeclaratorSyntax(Identifier)
+            {
+                Parent = Parent,
+                Initializer = equalsSyntax
+            };
+            return newVariableDeclarator;
         }
     }
 
     public class DVariableDeclarationSyntax : DSyntaxNode
     {
         public DTypeSyntax Type { get; set; }
+        public DSyntaxList<DVariableDeclaratorSyntax> Variables { get; set; }
+        protected override List<IDSyntax> Children
+        {
+            get
+            {
+                var list = new List<IDSyntax> { Type };
+                list.AddRange(Variables);
+                return list;
+            }
+        }
 
         public DVariableDeclarationSyntax(DTypeSyntax typeSyntax)
         {
             typeSyntax.Parent = this;
             Type = typeSyntax;
+            SyntaxKind = DSyntaxKind.VariableDeclaration;
+
         }
 
-        public DVariableDeclarationSyntax WithVariables(IEnumerable<DVariableDeclaratorSyntax> variableDeclaratorSyntaxes)
+        public DVariableDeclarationSyntax(DTypeSyntax typeSyntax, DSyntaxList<DVariableDeclaratorSyntax> variables)
+            : this(typeSyntax)
         {
-            throw new NotImplementedException();
+            Variables = variables;
+        }
+
+        public DVariableDeclarationSyntax WithVariables(DSyntaxList<DVariableDeclaratorSyntax> variables)
+        {
+            return new DVariableDeclarationSyntax(Type, variables);
         }
     }
 
@@ -233,9 +272,29 @@ namespace DSharpCodeAnalysis.Syntax
 
     }
 
+    public class DSyntaxList<T> : DSyntaxNode, IEnumerable<T> where T : DSyntaxNode
+    {
+        public DSyntaxList(IList<T> list)
+        {
+            Children = list.OfType<IDSyntax>().ToList();
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return Children.OfType<T>().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+    }
+
     public class DLiteralExpressionSyntax : DExpressionSyntax
     {
         public DSyntaxToken Token { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Token };
+
         public DLiteralExpressionSyntax(DSyntaxKind syntaxKind, DSyntaxToken token)
         {
             SyntaxKind = syntaxKind;
@@ -248,29 +307,37 @@ namespace DSharpCodeAnalysis.Syntax
     {
         public DVariableDeclarationSyntax Declaration { get; set; }
         public DSyntaxToken SemicolonToken { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Declaration, SemicolonToken };
 
         public DLocalDeclarationStatementSyntax(DVariableDeclarationSyntax declaration)
         {
             declaration.Parent = this;
             Declaration = declaration;
+            SyntaxKind = DSyntaxKind.LocalDeclarationStatement;
         }
 
         public DStatementSyntax WithSemicolonToken(DSyntaxToken dSyntaxToken)
         {
             dSyntaxToken.Parent = this;
-            SemicolonToken = dSyntaxToken;
-            return this;
+            var newLocalStatement = new DLocalDeclarationStatementSyntax(Declaration)
+            {
+                Parent = Parent,
+                SemicolonToken = dSyntaxToken
+            };
+            return newLocalStatement;
         }
     }
 
     public class DIdentifierNameSyntax : DTypeSyntax
     {
         public DSyntaxToken Identifier { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Identifier };
 
         public DIdentifierNameSyntax(DSyntaxToken identifierToken)
         {
             identifierToken.Parent = this;
             Identifier = identifierToken;
+            SyntaxKind = DSyntaxKind.IdentifierName;
         }
     }
 
@@ -278,19 +345,35 @@ namespace DSharpCodeAnalysis.Syntax
     {
         public DSyntaxToken OpenBraceToken { get; }
         public DSyntaxToken CloseBraceToken { get; }
-        public IEnumerable<DStatementSyntax> Statements { get; set; }
+        public DSyntaxList<DStatementSyntax> Statements { get; set; } = DSyntaxFactory.SingletonList<DStatementSyntax>();
+        protected override List<IDSyntax> Children
+        {
+            get
+            {
+                var newList = new List<IDSyntax> { OpenBraceToken };
+                newList.AddRange(Statements);
+                newList.Add(CloseBraceToken);
+                return newList;
+            }
+        }
 
-        public DBlockSyntax(IEnumerable<DStatementSyntax> statements = null)
+        public DBlockSyntax()
         {
             SyntaxKind = DSyntaxKind.Block;
             OpenBraceToken = new DSyntaxToken(DSyntaxKind.OpenBraceToken) { Parent = this };
             CloseBraceToken = new DSyntaxToken(DSyntaxKind.CloseBraceToken) { Parent = this };
-            Statements = statements ?? Enumerable.Empty<DStatementSyntax>();
-            Children = new List<IDSyntax>
+        }
+
+        public DBlockSyntax(DSyntaxList<DStatementSyntax> statements)
+        {
+            SyntaxKind = DSyntaxKind.Block;
+            OpenBraceToken = new DSyntaxToken(DSyntaxKind.OpenBraceToken) { Parent = this };
+            CloseBraceToken = new DSyntaxToken(DSyntaxKind.CloseBraceToken) { Parent = this };
+            foreach (var statement in statements)
             {
-                OpenBraceToken,
-                CloseBraceToken,
-            };
+                statement.Parent = this;
+            }
+            Statements = statements;
         }
 
         public DBlockSyntax WithOpenBraceToken(DSyntaxToken dSyntaxToken)
@@ -305,6 +388,17 @@ namespace DSharpCodeAnalysis.Syntax
             CloseBraceToken.WithLeadingTrivia(dSyntaxToken.LeadingTrivia);
             CloseBraceToken.WithTrailingTrivia(dSyntaxToken.TrailingTrivia);
             return this;
+        }
+
+        public DBlockSyntax WithStatements(DSyntaxList<DStatementSyntax> statements)
+        {
+            foreach (var item in statements)
+            {
+                item.Parent = this;
+            }
+            var newBlock = DSyntaxFactory.Block(statements);
+            newBlock.Parent = Parent;
+            return newBlock;
         }
     }
 

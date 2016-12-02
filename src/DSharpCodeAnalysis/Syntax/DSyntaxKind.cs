@@ -21,10 +21,15 @@ namespace DSharpCodeAnalysis.Syntax
         StringLiteralToken = 8511,
         EndOfLineTrivia = 8539,
         WhitespaceTrivia = 8540,
+        IdentifierName = 8616,
         PredefinedType = 8621,
         NumericLiteralExpression = 8749,
         StringLiteralExpression = 8750,
         Block = 8792,
+        LocalDeclarationStatement = 8793,
+        VariableDeclaration = 8794,
+        VariableDeclarator = 8795,
+        EqualsValueClause = 8796,
         UsingDirective = 8843,
         ClassDeclaration = 8855,
         MethodDeclaration = 8875,
@@ -35,14 +40,16 @@ namespace DSharpCodeAnalysis.Syntax
     {
         private static readonly Dictionary<int, string> _strings = new Dictionary<int, string>
         {
-            [8508] = null,
             [8200] = "(",
             [8201] = ")",
+            [8204] = "=",
             [8205] = "{",
             [8206] = "}",
+            [8212] = ";",
             [8318] = "void",
             [8373] = "using",
-            [8374] = "class"
+            [8374] = "class",
+            [8508] = null
         };
 
         public static string Get(DSyntaxKind syntaxKind)
