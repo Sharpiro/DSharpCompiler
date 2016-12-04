@@ -129,6 +129,18 @@ namespace DSharpCodeAnalysis.Syntax
         }
     }
 
+    public class DArgumentSyntax : DSyntaxNode
+    {
+        public DExpressionSyntax Expression { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Expression };
+
+
+        public DArgumentSyntax(DExpressionSyntax expression)
+        {
+            Expression = expression;
+        }
+    }
+
     public class DParameterListSyntax : DSyntaxNode
     {
         public DSyntaxToken OpenParenToken { get; set; }
@@ -153,12 +165,40 @@ namespace DSharpCodeAnalysis.Syntax
         }
     }
 
+    public class DArgumentListSyntax : DSyntaxNode
+    {
+        public DSyntaxList<DArgumentSyntax> Arguments { get; set; }
+        public DSyntaxToken OpenParenToken { get; } = DSyntaxFactory.Token(DSyntaxKind.OpenParenToken);
+        public DSyntaxToken CloseParenToken { get; } = DSyntaxFactory.Token(DSyntaxKind.CloseParenToken);
+        protected override List<IDSyntax> Children
+        {
+            get
+            {
+                var list = new List<IDSyntax> { OpenParenToken };
+                list.AddRange(Arguments);
+                list.Add(CloseParenToken);
+                return list;
+            }
+        }
+
+
+        public DArgumentListSyntax()
+        {
+            Arguments = DSyntaxFactory.List<DArgumentSyntax>();
+        }
+
+        public DArgumentListSyntax(DSyntaxList<DArgumentSyntax> arguments)
+        {
+            Arguments = arguments;
+        }
+    }
+
     public class DMemberDeclarationSyntax : DSyntaxNode
     {
 
     }
 
-    public class DTypeSyntax : DSyntaxNode
+    public class DTypeSyntax : DExpressionSyntax
     {
 
     }
@@ -267,9 +307,47 @@ namespace DSharpCodeAnalysis.Syntax
 
     }
 
+    public class DExpressionStatementSyntax : DStatementSyntax
+    {
+        public DExpressionSyntax Expression { get; }
+        public DSyntaxToken SemicolonToken { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Expression, SemicolonToken };
+
+        public DExpressionStatementSyntax(DExpressionSyntax expression)
+        {
+            Expression = expression;
+        }
+
+        public DExpressionStatementSyntax WithSemicolonToken(DSyntaxToken token)
+        {
+            var newExpressionStatement = new DExpressionStatementSyntax(Expression);
+            Expression.Parent = newExpressionStatement;
+            token.Parent = newExpressionStatement;
+            newExpressionStatement.SemicolonToken = token;
+            return newExpressionStatement;
+        }
+    }
+
     public class DExpressionSyntax : DSyntaxNode
     {
 
+    }
+
+    public class DMemberAccessException : DExpressionSyntax
+    {
+        public DExpressionSyntax Expression { get; }
+        public DIdentifierNameSyntax Name { get; set; }
+        public DSyntaxToken OperatorToken { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Expression, OperatorToken, Name };
+
+
+        public DMemberAccessException(DSyntaxKind syntaxKind, DExpressionSyntax expression, DIdentifierNameSyntax name)
+        {
+            SyntaxKind = syntaxKind;
+            Expression = expression;
+            Name = name;
+            OperatorToken = DSyntaxFactory.Token(DSyntaxKind.DotToken);
+        }
     }
 
     public class DSyntaxList<T> : DSyntaxNode, IEnumerable<T> where T : DSyntaxNode
@@ -300,6 +378,28 @@ namespace DSharpCodeAnalysis.Syntax
             SyntaxKind = syntaxKind;
             token.Parent = this;
             Token = token;
+        }
+    }
+
+    public class DInvocationExpressionSyntax : DExpressionSyntax
+    {
+        public DArgumentListSyntax ArgumentList { get; set; }
+        public DExpressionSyntax Expression { get; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Expression, ArgumentList };
+
+        public DInvocationExpressionSyntax(DExpressionSyntax expression)
+        {
+            ArgumentList = DSyntaxFactory.ArgumentList();
+            Expression = expression;
+        }
+
+        public DInvocationExpressionSyntax WithArgumentList(DArgumentListSyntax argumentList)
+        {
+            var newInvocationExpression = new DInvocationExpressionSyntax(Expression);
+            Expression.Parent = newInvocationExpression;
+            argumentList.Parent = newInvocationExpression;
+            newInvocationExpression.ArgumentList = argumentList;
+            return newInvocationExpression;
         }
     }
 
@@ -335,7 +435,6 @@ namespace DSharpCodeAnalysis.Syntax
 
         public DIdentifierNameSyntax(DSyntaxToken identifierToken)
         {
-            identifierToken.Parent = this;
             Identifier = identifierToken;
             SyntaxKind = DSyntaxKind.IdentifierName;
         }

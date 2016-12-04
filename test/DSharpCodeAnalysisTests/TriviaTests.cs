@@ -18,7 +18,6 @@ namespace DSharpCodeAnalysisTests
         public void OneLineClassTriviaTest()
         {
             const string desiredSource = "class Test{}";
-
             var cGeneratedClass = SyntaxFactory.ClassDeclaration("Test").WithKeyword(
                 SyntaxFactory.Token(SyntaxFactory.TriviaList(), SyntaxKind.ClassKeyword,
                 SyntaxFactory.TriviaList(SyntaxFactory.Space)));
@@ -48,6 +47,7 @@ namespace DSharpCodeAnalysisTests
     void Do()
     {
         var x = 2;
+        System.Console.WriteLine(x);
     }
 }".Replace(Environment.NewLine, "\n");
 
@@ -90,7 +90,6 @@ namespace DSharpCodeAnalysisTests
                                 SyntaxFactory.LineFeed))))
                 .WithBody(
                     SyntaxFactory.Block(
-                        SyntaxFactory.SingletonList<StatementSyntax>(
                             SyntaxFactory.LocalDeclarationStatement(
                                 SyntaxFactory.VariableDeclaration(
                                     SyntaxFactory.IdentifierName(
@@ -124,7 +123,32 @@ namespace DSharpCodeAnalysisTests
                                     SyntaxFactory.TriviaList(),
                                     SyntaxKind.SemicolonToken,
                                     SyntaxFactory.TriviaList(
-                                        SyntaxFactory.LineFeed)))))
+                                        SyntaxFactory.LineFeed))),
+                            SyntaxFactory.ExpressionStatement(
+                            SyntaxFactory.InvocationExpression(
+                                SyntaxFactory.MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    SyntaxFactory.MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        SyntaxFactory.IdentifierName(
+                                            SyntaxFactory.Identifier(
+                                                SyntaxFactory.TriviaList(
+                                                    SyntaxFactory.Whitespace("        ")),
+                                                "System",
+                                                SyntaxFactory.TriviaList())),
+                                        SyntaxFactory.IdentifierName("Console")),
+                                    SyntaxFactory.IdentifierName("WriteLine")))
+                            .WithArgumentList(
+                                SyntaxFactory.ArgumentList(
+                                    SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                                        SyntaxFactory.Argument(
+                                            SyntaxFactory.IdentifierName("x"))))))
+                            .WithSemicolonToken(
+                            SyntaxFactory.Token(
+                                SyntaxFactory.TriviaList(),
+                                SyntaxKind.SemicolonToken,
+                                SyntaxFactory.TriviaList(
+                                    SyntaxFactory.LineFeed))))
                     .WithOpenBraceToken(
                         SyntaxFactory.Token(
                             SyntaxFactory.TriviaList(
@@ -140,6 +164,8 @@ namespace DSharpCodeAnalysisTests
                             SyntaxFactory.TriviaList(
                                 SyntaxFactory.LineFeed))))));
 
+            //dsharp
+            
             var dGeneratedClass = DSyntaxFactory.ClassDeclaration(
            DSyntaxFactory.Identifier(
                DSyntaxFactory.TriviaList(),
@@ -179,7 +205,6 @@ namespace DSharpCodeAnalysisTests
                                DSyntaxFactory.LineFeed))))
                .WithBody(
                    DSyntaxFactory.Block(
-                       DSyntaxFactory.SingletonList<DStatementSyntax>(
                            DSyntaxFactory.LocalDeclarationStatement(
                                DSyntaxFactory.VariableDeclaration(
                                    DSyntaxFactory.IdentifierName(
@@ -213,7 +238,32 @@ namespace DSharpCodeAnalysisTests
                                    DSyntaxFactory.TriviaList(),
                                    DSyntaxKind.SemicolonToken,
                                    DSyntaxFactory.TriviaList(
-                                       DSyntaxFactory.LineFeed)))))
+                                       DSyntaxFactory.LineFeed))),
+                           DSyntaxFactory.ExpressionStatement(
+                            DSyntaxFactory.InvocationExpression(
+                                DSyntaxFactory.MemberAccessExpression(
+                                    DSyntaxKind.SimpleMemberAccessExpression,
+                                    DSyntaxFactory.MemberAccessExpression(
+                                        DSyntaxKind.SimpleMemberAccessExpression,
+                                        DSyntaxFactory.IdentifierName(
+                                            DSyntaxFactory.Identifier(
+                                                DSyntaxFactory.TriviaList(
+                                                    DSyntaxFactory.Whitespace("        ")),
+                                                "System",
+                                                DSyntaxFactory.TriviaList())),
+                                        DSyntaxFactory.IdentifierName("Console")),
+                                    DSyntaxFactory.IdentifierName("WriteLine")))
+                            .WithArgumentList(
+                                DSyntaxFactory.ArgumentList(
+                                    DSyntaxFactory.SingletonSeparatedList<DArgumentSyntax>(
+                                        DSyntaxFactory.Argument(
+                                            DSyntaxFactory.IdentifierName("x"))))))
+                        .WithSemicolonToken(
+                            DSyntaxFactory.Token(
+                                DSyntaxFactory.TriviaList(),
+                                DSyntaxKind.SemicolonToken,
+                                DSyntaxFactory.TriviaList(
+                                    DSyntaxFactory.LineFeed))))
                    .WithOpenBraceToken(
                        DSyntaxFactory.Token(
                            DSyntaxFactory.TriviaList(
@@ -232,19 +282,13 @@ namespace DSharpCodeAnalysisTests
             var cDescendants = cGeneratedClass.DescendantNodesAndTokens().ToList();
             var dDescendants = dGeneratedClass.DescendantNodesAndTokens().ToList();
             var dTypes = dDescendants.Select(d => d.GetType());
-            var dgeneratedClassString = dGeneratedClass.ToString();
+            var cGeneratedClassString = cGeneratedClass.ToString();
+            var dGeneratedClassString = dGeneratedClass.ToString();
             var model = dGeneratedClass.DescendantHierarchy();
             var json = JsonConvert.SerializeObject(model);
 
-            Assert.Equal(desiredSource, dgeneratedClassString);
-        }
-    }
-
-    class Test
-    {
-        void Do()
-        {
-            var x = 2;
+            Assert.Equal(desiredSource, cGeneratedClassString);
+            Assert.Equal(desiredSource, dGeneratedClassString);
         }
     }
 }

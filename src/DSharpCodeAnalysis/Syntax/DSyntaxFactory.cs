@@ -75,9 +75,25 @@ namespace DSharpCodeAnalysis.Syntax
             return new DBlockSyntax(statements);
         }
 
+        public static DBlockSyntax Block(params DStatementSyntax[] statements)
+        {
+            var list = List(statements);
+            return new DBlockSyntax(list);
+        }
+
         public static Trivia SyntaxTrivia(DSyntaxKind syntaxKind, string triviaText)
         {
             return new Trivia(syntaxKind, triviaText);
+        }
+
+        public static DSyntaxList<T> List<T>() where T : DSyntaxNode
+        {
+            return new DSyntaxList<T>(new List<T>());
+        }
+
+        public static DSyntaxList<T> List<T>(IEnumerable<T> list) where T : DSyntaxNode
+        {
+            return new DSyntaxList<T>(list.ToList());
         }
 
         public static DSyntaxList<T> SingletonList<T>() where T : DSyntaxNode
@@ -103,6 +119,16 @@ namespace DSharpCodeAnalysis.Syntax
         public static DParameterListSyntax ParameterList()
         {
             return new DParameterListSyntax();
+        }
+
+        public static DArgumentListSyntax ArgumentList()
+        {
+            return new DArgumentListSyntax();
+        }
+
+        public static DArgumentListSyntax ArgumentList(DSyntaxList<DArgumentSyntax> arguments)
+        {
+            return new DArgumentListSyntax(arguments);
         }
 
         public static IEnumerable<Trivia> TriviaList()
@@ -142,7 +168,15 @@ namespace DSharpCodeAnalysis.Syntax
 
         public static DIdentifierNameSyntax IdentifierName(DSyntaxToken identifierToken)
         {
-            return new DIdentifierNameSyntax(identifierToken);
+            var identifierNameSyntax = new DIdentifierNameSyntax(identifierToken);
+            identifierToken.Parent = identifierNameSyntax;
+            return identifierNameSyntax;
+        }
+
+        public static DIdentifierNameSyntax IdentifierName(string identifier)
+        {
+            var identifierToken = Identifier(identifier);
+            return IdentifierName(identifierToken);
         }
 
         public static DVariableDeclaratorSyntax VariableDeclarator(DSyntaxToken identifierToken)
@@ -155,15 +189,44 @@ namespace DSharpCodeAnalysis.Syntax
             return new DEqualsValueClauseSyntax(expressionSyntax);
         }
 
-        public static DExpressionSyntax LiteralExpression(DSyntaxKind syntaxKind, DSyntaxToken syntaxToken)
+        public static DLiteralExpressionSyntax LiteralExpression(DSyntaxKind syntaxKind, DSyntaxToken syntaxToken)
         {
             return new DLiteralExpressionSyntax(syntaxKind, syntaxToken);
+        }
+
+        public static DInvocationExpressionSyntax InvocationExpression(DExpressionSyntax expression)
+        {
+            var invocationExpression = new DInvocationExpressionSyntax(expression);
+            expression.Parent = invocationExpression;
+            return invocationExpression;
+        }
+
+        public static DMemberAccessException MemberAccessExpression(DSyntaxKind syntaxKind, DExpressionSyntax expression, DIdentifierNameSyntax name)
+        {
+            var invocationExpression = new DMemberAccessException(syntaxKind, expression, name);
+            expression.Parent = invocationExpression;
+            name.Parent = invocationExpression;
+            return invocationExpression;
         }
 
         public static DSyntaxToken Literal(int value)
         {
             var token = new DSyntaxToken(DSyntaxKind.NumericLiteralToken, value);
             return token;
+        }
+
+        public static DArgumentSyntax Argument(DExpressionSyntax expression)
+        {
+            var argument = new DArgumentSyntax(expression);
+            expression.Parent = argument;
+            return argument;
+        }
+
+        public static DExpressionStatementSyntax ExpressionStatement(DExpressionSyntax expression)
+        {
+            var expressionStatementSyntax = new DExpressionStatementSyntax(expression);
+            expression.Parent = expressionStatementSyntax;
+            return expressionStatementSyntax;
         }
     }
 }
