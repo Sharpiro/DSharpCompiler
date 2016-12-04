@@ -13,6 +13,8 @@ namespace DSharpCodeAnalysis.Syntax
         Span FullSpan { get; }
         int Position { get; set; }
         int Width { get; }
+        DSyntaxNode Parent { get; set; }
+
         SyntaxHierarchyModel DescendantHierarchy();
     }
 
@@ -92,6 +94,19 @@ namespace DSharpCodeAnalysis.Syntax
         public string FullText { get; set; }
         public int Position { get; set; }
         public int Width { get; set; }
+
+        public DSyntaxNode Parent
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         public Trivia(DSyntaxKind syntaxKind, string triviaText)
         {

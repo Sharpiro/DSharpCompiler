@@ -101,6 +101,20 @@ namespace DSharpCodeAnalysis.Syntax
             return new DSyntaxList<T>(new List<T>());
         }
 
+        public static DSeparatedSyntaxList<T> SeparatedList<T>() where T : DSyntaxNode
+        {
+            var nodes = Enumerable.Empty<T>();
+            var seperators = Enumerable.Empty<DSyntaxToken>();
+            return new DSeparatedSyntaxList<T>(nodes, seperators);
+        }
+
+        public static DSeparatedSyntaxList<T> SeparatedList<T>(IEnumerable<IDSyntax> nodesOrTokens) where T : DSyntaxNode
+        {
+            var nodes = nodesOrTokens.OfType<T>();
+            var seperators = nodesOrTokens.OfType<DSyntaxToken>();
+            return new DSeparatedSyntaxList<T>(nodes, seperators);
+        }
+
         public static DSyntaxList<T> SingletonList<T>(T item) where T : DSyntaxNode
         {
             return new DSyntaxList<T>(new List<T> { item });
@@ -116,9 +130,26 @@ namespace DSharpCodeAnalysis.Syntax
             return DSyntaxStrings.Get(syntaxKind);
         }
 
+        public static DParameterSyntax Parameter(DSyntaxToken identifier)
+        {
+            var parameter = new DParameterSyntax(identifier);
+            identifier.Parent = parameter;
+            return parameter;
+        }
+
         public static DParameterListSyntax ParameterList()
         {
             return new DParameterListSyntax();
+        }
+
+        public static DParameterListSyntax ParameterList(DSeparatedSyntaxList<DParameterSyntax> parameters)
+        {
+            var parameterList = new DParameterListSyntax(parameters);
+            foreach (var parameter in parameters.GetNodesAndSeperators())
+            {
+                parameter.Parent = parameterList;
+            }
+            return parameterList;
         }
 
         public static DArgumentListSyntax ArgumentList()
@@ -159,6 +190,19 @@ namespace DSharpCodeAnalysis.Syntax
         public static DLocalDeclarationStatementSyntax LocalDeclarationStatement(DVariableDeclarationSyntax variableSyntax)
         {
             return new DLocalDeclarationStatementSyntax(variableSyntax);
+        }
+
+        public static DReturnStatementSyntax ReturnStatement(DExpressionSyntax expression)
+        {
+            return new DReturnStatementSyntax(expression);
+        }
+
+        public static DBinaryExpressionSyntax BinaryExpression(DSyntaxKind syntaxKind, DExpressionSyntax left, DExpressionSyntax right)
+        {
+            var binaryExpression = new DBinaryExpressionSyntax(syntaxKind, left, right); ;
+            left.Parent = binaryExpression;
+            right.Parent = binaryExpression;
+            return binaryExpression;
         }
 
         public static DVariableDeclarationSyntax VariableDeclaration(DTypeSyntax typeSyntax)

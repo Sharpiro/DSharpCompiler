@@ -141,27 +141,69 @@ namespace DSharpCodeAnalysis.Syntax
         }
     }
 
+    public class DParameterSyntax : DSyntaxNode
+    {
+        public DTypeSyntax Type { get; set; }
+        public DSyntaxToken Identifier { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Type, Identifier };
+
+        public DParameterSyntax(DSyntaxToken identifier)
+        {
+            Identifier = identifier;
+            SyntaxKind = DSyntaxKind.Parameter;
+        }
+
+        public DParameterSyntax WithType(DTypeSyntax type)
+        {
+            var newParameter = new DParameterSyntax(Identifier) { Type = type };
+            Identifier.Parent = newParameter;
+            type.Parent = newParameter;
+            newParameter.Parent = Parent;
+            return newParameter;
+        }
+    }
+
     public class DParameterListSyntax : DSyntaxNode
     {
         public DSyntaxToken OpenParenToken { get; set; }
         public DSyntaxToken CloseParenToken { get; set; }
+        public DSeparatedSyntaxList<DParameterSyntax> Parameters { get; set; }
+        protected override List<IDSyntax> Children
+        {
+            get
+            {
+                var list = new List<IDSyntax> { OpenParenToken };
+                list.AddRange(Parameters.GetNodesAndSeperators());
+                list.Add(CloseParenToken);
+                return list;
+            }
+        }
+
         public DParameterListSyntax()
         {
             SyntaxKind = DSyntaxKind.ParameterList;
             OpenParenToken = new DSyntaxToken(DSyntaxKind.OpenParenToken) { Parent = this };
             CloseParenToken = new DSyntaxToken(DSyntaxKind.CloseParenToken) { Parent = this };
-            Children = new List<IDSyntax>
-            {
-                OpenParenToken,
-                CloseParenToken,
-            };
+            Parameters = DSyntaxFactory.SeparatedList<DParameterSyntax>();
+        }
+
+        public DParameterListSyntax(DSeparatedSyntaxList<DParameterSyntax> parameters)
+        {
+            SyntaxKind = DSyntaxKind.ParameterList;
+            OpenParenToken = new DSyntaxToken(DSyntaxKind.OpenParenToken) { Parent = this };
+            CloseParenToken = new DSyntaxToken(DSyntaxKind.CloseParenToken) { Parent = this };
+            Parameters = parameters;
         }
 
         public DParameterListSyntax WithCloseParenToken(DSyntaxToken dSyntaxToken)
         {
-            CloseParenToken.WithLeadingTrivia(dSyntaxToken.LeadingTrivia);
-            CloseParenToken.WithTrailingTrivia(dSyntaxToken.TrailingTrivia);
-            return this;
+            var newParameterList = DSyntaxFactory.ParameterList(Parameters);
+            OpenParenToken.Parent = newParameterList;
+            dSyntaxToken.Parent = newParameterList;
+            newParameterList.OpenParenToken = OpenParenToken;
+            newParameterList.CloseParenToken = dSyntaxToken;
+            newParameterList.Parent = Parent;
+            return newParameterList;
         }
     }
 
@@ -333,6 +375,78 @@ namespace DSharpCodeAnalysis.Syntax
 
     }
 
+    public class DBinaryExpressionSyntax : DExpressionSyntax
+    {
+        public DExpressionSyntax Left { get; set; }
+        public DSyntaxToken OperatorToken { get; set; }
+        public DExpressionSyntax Right { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Left, OperatorToken, Right };
+
+        public DBinaryExpressionSyntax(DSyntaxKind syntaxKind, DExpressionSyntax left, DExpressionSyntax right)
+        {
+            SyntaxKind = syntaxKind;
+            Left = left;
+            Right = right;
+        }
+
+        public DBinaryExpressionSyntax WithOperatorToken(DSyntaxToken token)
+        {
+            var newBinaryExpression = new DBinaryExpressionSyntax(SyntaxKind, Left, Right)
+            {
+                OperatorToken = token
+            };
+            token.Parent = newBinaryExpression;
+            Left.Parent = newBinaryExpression;
+            Right.Parent = newBinaryExpression;
+            newBinaryExpression.Parent = Parent;
+            return newBinaryExpression;
+        }
+    }
+
+    public class DReturnStatementSyntax : DStatementSyntax
+    {
+        public DExpressionSyntax Expression { get; set; }
+        public DSyntaxToken ReturnKeyword { get; set; }
+        public DSyntaxToken SemicolonToken { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { ReturnKeyword, Expression, SemicolonToken };
+
+        public DReturnStatementSyntax(DExpressionSyntax expression)
+        {
+            Expression = expression;
+            ReturnKeyword = new DSyntaxToken(DSyntaxKind.ReturnKeyword) { Parent = this };
+            SemicolonToken = new DSyntaxToken(DSyntaxKind.SemicolonToken) { Parent = this };
+            SyntaxKind = DSyntaxKind.ReturnStatement;
+        }
+
+        public DReturnStatementSyntax WithReturnKeyword(DSyntaxToken returnKeyword)
+        {
+            var newReturnStatement = new DReturnStatementSyntax(Expression)
+            {
+                ReturnKeyword = returnKeyword,
+                SemicolonToken = SemicolonToken
+            };
+            Expression.Parent = newReturnStatement;
+            returnKeyword.Parent = newReturnStatement;
+            SemicolonToken.Parent = newReturnStatement;
+            newReturnStatement.Parent = Parent;
+            return newReturnStatement;
+        }
+
+        public DReturnStatementSyntax WithSemicolonToken(DSyntaxToken semicolan)
+        {
+            var newReturnStatement = new DReturnStatementSyntax(Expression)
+            {
+                ReturnKeyword = ReturnKeyword,
+                SemicolonToken = semicolan
+            };
+            Expression.Parent = newReturnStatement;
+            semicolan.Parent = newReturnStatement;
+            ReturnKeyword.Parent = newReturnStatement;
+            newReturnStatement.Parent = Parent;
+            return newReturnStatement;
+        }
+    }
+
     public class DMemberAccessException : DExpressionSyntax
     {
         public DExpressionSyntax Expression { get; }
@@ -347,24 +461,6 @@ namespace DSharpCodeAnalysis.Syntax
             Expression = expression;
             Name = name;
             OperatorToken = DSyntaxFactory.Token(DSyntaxKind.DotToken);
-        }
-    }
-
-    public class DSyntaxList<T> : DSyntaxNode, IEnumerable<T> where T : DSyntaxNode
-    {
-        public DSyntaxList(IList<T> list)
-        {
-            Children = list.OfType<IDSyntax>().ToList();
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            return Children.OfType<T>().GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
     }
 

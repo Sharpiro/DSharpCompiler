@@ -7,12 +7,16 @@ namespace DSharpCodeAnalysis.Syntax
         Null,
         OpenParenToken = 8200,
         CloseParenToken = 8201,
+        PlusToken = 8203,
         EqualsToken = 8204,
         OpenBraceToken = 8205,
         CloseBraceToken = 8206,
         SemicolonToken = 8212,
+        CommaToken = 8216,
         DotToken = 8218,
+        IntKeyword = 8309,
         VoidKeyword = 8318,
+        ReturnKeyword = 8341,
         UsingKeyword = 8373,
         ClassKeyword = 8374,
 
@@ -24,6 +28,7 @@ namespace DSharpCodeAnalysis.Syntax
         WhitespaceTrivia = 8540,
         IdentifierName = 8616,
         PredefinedType = 8621,
+        AddExpression = 8668,
         SimpleMemberAccessExpression = 8689,
         NumericLiteralExpression = 8749,
         StringLiteralExpression = 8750,
@@ -32,10 +37,12 @@ namespace DSharpCodeAnalysis.Syntax
         VariableDeclaration = 8794,
         VariableDeclarator = 8795,
         EqualsValueClause = 8796,
+        ReturnStatement = 8805,
         UsingDirective = 8843,
         ClassDeclaration = 8855,
         MethodDeclaration = 8875,
-        ParameterList = 8906
+        ParameterList = 8906,
+        Parameter = 8908,
     }
 
     public static class DSyntaxStrings
@@ -44,12 +51,16 @@ namespace DSharpCodeAnalysis.Syntax
         {
             [8200] = "(",
             [8201] = ")",
+            [8203] = "+",
             [8204] = "=",
             [8205] = "{",
             [8206] = "}",
             [8212] = ";",
+            [8216] = ",",
             [8218] = ".",
+            [8309] = "int",
             [8318] = "void",
+            [8341] = "return",
             [8373] = "using",
             [8374] = "class",
             [8508] = null
