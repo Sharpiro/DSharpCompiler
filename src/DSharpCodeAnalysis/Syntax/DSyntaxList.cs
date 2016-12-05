@@ -7,9 +7,9 @@ namespace DSharpCodeAnalysis.Syntax
 {
     public class DSyntaxList<T> : IEnumerable<T> where T : DSyntaxNode
     {
-        private List<T> _list = new List<T>();
+        private IEnumerable<T> _list = new List<T>();
 
-        public DSyntaxList(List<T> list)
+        public DSyntaxList(IEnumerable<T> list)
         {
             _list = list;
         }
@@ -22,6 +22,11 @@ namespace DSharpCodeAnalysis.Syntax
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public void SetParent(DSyntaxNode node)
+        {
+            _list = _list.ForEach(t => t.Parent = node);
         }
     }
 

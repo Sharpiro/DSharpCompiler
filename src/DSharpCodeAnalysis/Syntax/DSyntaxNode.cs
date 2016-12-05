@@ -661,29 +661,88 @@ namespace DSharpCodeAnalysis.Syntax
         }
     }
 
+    public class DCompilationUnitSyntax : DSyntaxNode
+    {
+        public DSyntaxList<DMemberDeclarationSyntax> Members { get; set; } = DSyntaxFactory.List<DMemberDeclarationSyntax>();
+        public DSyntaxToken EndOfFileToken { get; set; } = new DSyntaxToken(DSyntaxKind.EndOfFileToken);
+
+        protected override List<IDSyntax> Children => new List<IDSyntax>(Members) { EndOfFileToken };
+
+        public DCompilationUnitSyntax WithMembers(DSyntaxList<DMemberDeclarationSyntax> members)
+        {
+            var newCompilation = Clone();
+            Members.SetParent(newCompilation);
+            newCompilation.Members = members;
+            return newCompilation;
+        }
+
+        private DCompilationUnitSyntax Clone()
+        {
+            var newCompilation = new DCompilationUnitSyntax();
+            Members.SetParent(newCompilation);
+            newCompilation.Members = Members;
+            return newCompilation;
+        }
+    }
+
+    public class DFieldDeclarationSytnax : DMemberDeclarationSyntax
+    {
+        public DVariableDeclarationSyntax Declaration { get; set; }
+        public DSyntaxToken SemicolonToken { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Declaration, SemicolonToken };
+
+        public DFieldDeclarationSytnax(DVariableDeclarationSyntax declaration)
+        {
+            Declaration = declaration;
+            SemicolonToken = new DSyntaxToken(DSyntaxKind.SemicolonToken) { Parent = this };
+            SyntaxKind = DSyntaxKind.FieldDeclaration;
+        }
+
+        public DFieldDeclarationSytnax WithSemicolonToken(DSyntaxToken token)
+        {
+            var newField = Clone();
+            token.Parent = newField;
+            newField.SemicolonToken = token;
+            return newField;
+        }
+
+        private DFieldDeclarationSytnax Clone()
+        {
+            var newFieldSyntax = new DFieldDeclarationSytnax(Declaration);
+
+            Declaration.Parent = newFieldSyntax;
+            SemicolonToken.Parent = newFieldSyntax;
+
+            newFieldSyntax.SemicolonToken = SemicolonToken;
+
+            return newFieldSyntax;
+        }
+    }
+
     public class DClassDeclarationSyntax : DMemberDeclarationSyntax
     {
-        public DSyntaxToken Identifier { get; }
         public DSyntaxToken Keyword { get; set; }
+        public DSyntaxToken Identifier { get; }
         public DSyntaxToken OpenBraceToken { get; private set; }
-        public DSyntaxToken SemicolonToken { get; private set; }
+        public DSyntaxList<DMemberDeclarationSyntax> Members { get; set; }
         public DSyntaxToken CloseBraceToken { get; private set; }
-
+        protected override List<IDSyntax> Children
+        {
+            get
+            {
+                var list = new List<IDSyntax> { Keyword, Identifier, OpenBraceToken, CloseBraceToken };
+                list.InsertRange(3, Members.OfType<IDSyntax>());
+                return list;
+            }
+        }
 
         public DClassDeclarationSyntax(DSyntaxToken identifierToken)
         {
-            Keyword = new DSyntaxToken(DSyntaxKind.ClassKeyword) { Parent = this };
             Identifier = identifierToken;
-            SyntaxKind = DSyntaxKind.ClassDeclaration;
+            Keyword = new DSyntaxToken(DSyntaxKind.ClassKeyword) { Parent = this };
             OpenBraceToken = new DSyntaxToken(DSyntaxKind.OpenBraceToken) { Parent = this };
             CloseBraceToken = new DSyntaxToken(DSyntaxKind.CloseBraceToken) { Parent = this };
-            Children = new List<IDSyntax>
-            {
-                Keyword,
-                Identifier,
-                OpenBraceToken,
-                CloseBraceToken
-            };
+            SyntaxKind = DSyntaxKind.ClassDeclaration;
         }
 
         public DClassDeclarationSyntax WithModifiers()
@@ -694,6 +753,7 @@ namespace DSharpCodeAnalysis.Syntax
 
         public DClassDeclarationSyntax WithMembers(IEnumerable<DMemberDeclarationSyntax> members)
         {
+            var list = new DSyntaxList<DMemberDeclarationSyntax>(members);
             var membersList = members as List<DMemberDeclarationSyntax> ?? members.ToList();
             var modifiedChildren = Children.ToList();
             var insertLocation = ChildTokens().Select(c => c.SyntaxKind).ToList().IndexOf(DSyntaxKind.OpenBraceToken) + 1;
@@ -738,12 +798,10 @@ namespace DSharpCodeAnalysis.Syntax
             Identifier.Parent = newClassDeclaration;
             Keyword.Parent = newClassDeclaration;
             OpenBraceToken.Parent = newClassDeclaration;
-            SemicolonToken.Parent = newClassDeclaration;
             CloseBraceToken.Parent = newClassDeclaration;
 
             newClassDeclaration.Keyword = Keyword;
             newClassDeclaration.OpenBraceToken = OpenBraceToken;
-            newClassDeclaration.SemicolonToken = SemicolonToken;
             newClassDeclaration.CloseBraceToken = CloseBraceToken;
 
             return newClassDeclaration;

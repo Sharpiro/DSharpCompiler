@@ -18,6 +18,12 @@ namespace DSharpCodeAnalysis.Syntax
             return newClass;
         }
 
+        public static DCompilationUnitSyntax CompilationUnit()
+        {
+            var newCompilation = new DCompilationUnitSyntax();
+            return newCompilation;
+        }
+
         public static DClassDeclarationSyntax ClassDeclaration(DSyntaxToken identifierToken)
         {
             var newClass = new DClassDeclarationSyntax(identifierToken);
@@ -209,6 +215,11 @@ namespace DSharpCodeAnalysis.Syntax
             left.Parent = binaryExpression;
             right.Parent = binaryExpression;
             return binaryExpression;
+        }
+
+        public static DFieldDeclarationSytnax FieldDeclaration(DVariableDeclarationSyntax declaration)
+        {
+            return new DFieldDeclarationSytnax(declaration);
         }
 
         public static DVariableDeclarationSyntax VariableDeclaration(DTypeSyntax typeSyntax)

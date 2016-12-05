@@ -21,6 +21,7 @@ namespace DSharpCodeAnalysis.Syntax
         UsingKeyword = 8373,
         ClassKeyword = 8374,
 
+        EndOfFileToken = 8496,
         IdentifierToken = 8508,
         NumericLiteralToken = 8509,
         CharacterLiteralToken = 8510,
@@ -41,6 +42,7 @@ namespace DSharpCodeAnalysis.Syntax
         ReturnStatement = 8805,
         UsingDirective = 8843,
         ClassDeclaration = 8855,
+        FieldDeclaration = 8873,
         MethodDeclaration = 8875,
         ParameterList = 8906,
         Parameter = 8908,
@@ -65,6 +67,7 @@ namespace DSharpCodeAnalysis.Syntax
             [8347] = "static",
             [8373] = "using",
             [8374] = "class",
+            [8496] = "",
             [8508] = null
         };
 
