@@ -58,17 +58,50 @@ namespace DSharpCodeAnalysis.Syntax
                 if (@switch)
                 {
                     hasNext = nodeEnumerator.MoveNext();
+                    if (!hasNext) yield break;
                     syntax = nodeEnumerator.Current;
                 }
                 else
                 {
                     hasNext = seperatorEnumerator.MoveNext();
+                    if (!hasNext) yield break;
                     syntax = seperatorEnumerator.Current;
                 }
                 @switch = !@switch;
-                if (!hasNext) yield break;
                 yield return syntax;
             }
+        }
+    }
+
+    public class DSyntaxTokenList : IEnumerable<DSyntaxToken>
+    {
+        private IEnumerable<DSyntaxToken> _tokens = Enumerable.Empty<DSyntaxToken>();
+
+        public DSyntaxTokenList()
+        {
+            _tokens = Enumerable.Empty<DSyntaxToken>();
+        }
+
+        public DSyntaxTokenList(IEnumerable<DSyntaxToken> tokens)
+        {
+            if (tokens == null) throw new ArgumentNullException(nameof(tokens));
+
+            _tokens = tokens;
+        }
+
+        public IEnumerator<DSyntaxToken> GetEnumerator()
+        {
+            return _tokens.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public void SetParent(DSyntaxNode node)
+        {
+            _tokens = _tokens.ForEach(t => t.Parent = node);
         }
     }
 }

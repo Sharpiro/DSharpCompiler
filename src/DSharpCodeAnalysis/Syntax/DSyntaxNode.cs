@@ -599,9 +599,12 @@ namespace DSharpCodeAnalysis.Syntax
 
     public class DMethodDeclarationSyntax : DMemberDeclarationSyntax
     {
-        public DSyntaxToken Identifier { get; set; }
+        public DSyntaxTokenList Modifiers { get; set; }
         public DTypeSyntax ReturnType { get; set; }
+        public DSyntaxToken Identifier { get; set; }
         public DParameterListSyntax ParameterList { get; set; }
+        public DBlockSyntax Body { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax>(Modifiers) { ReturnType, Identifier, ParameterList, Body };
 
         public DMethodDeclarationSyntax(DTypeSyntax returnType, DSyntaxToken identifierToken)
         {
@@ -609,47 +612,62 @@ namespace DSharpCodeAnalysis.Syntax
             ReturnType = returnType;
             identifierToken.Parent = this;
             Identifier = identifierToken;
-            SyntaxKind = DSyntaxKind.MethodDeclaration;
             ParameterList = new DParameterListSyntax { Parent = this };
-            Children = new List<IDSyntax>
-            {
-                returnType,
-                Identifier,
-                ParameterList
-            };
+            Body = new DBlockSyntax { Parent = this };
+            Modifiers = new DSyntaxTokenList();
+            SyntaxKind = DSyntaxKind.MethodDeclaration;
         }
 
-        public DMethodDeclarationSyntax WithModifiers()
+        public DMethodDeclarationSyntax WithModifiers(DSyntaxTokenList modifiers)
         {
-            throw new NotImplementedException();
-            return this;
+            var newMethodDeclaration = Clone();
+            modifiers.SetParent(newMethodDeclaration);
+            newMethodDeclaration.Modifiers = modifiers;
+            return newMethodDeclaration;
         }
-        public DMethodDeclarationSyntax WithBody(DBlockSyntax syntax)
+
+        public DMethodDeclarationSyntax WithBody(DBlockSyntax body)
         {
-            syntax.Parent = this;
-            var childrenList = Children.ToList();
-            childrenList.Insert(childrenList.Count, syntax);
-            Children = childrenList;
-            return this;
+            var newMethodDeclaration = Clone();
+            body.Parent = newMethodDeclaration;
+            newMethodDeclaration.Body = body;
+            return newMethodDeclaration;
         }
 
         public DMethodDeclarationSyntax WithParameterList(DParameterListSyntax parameterList)
         {
-            parameterList.Parent = this;
-            Children[2] = parameterList;
-            ParameterList = parameterList;
-            return this;
+            var newMethodDeclaration = Clone();
+            parameterList.Parent = newMethodDeclaration;
+            newMethodDeclaration.ParameterList = parameterList;
+            return newMethodDeclaration;
+        }
+
+        private DMethodDeclarationSyntax Clone()
+        {
+            var newMethodDeclaration = new DMethodDeclarationSyntax(ReturnType, Identifier);
+
+            Modifiers.SetParent(newMethodDeclaration);
+            ReturnType.Parent = newMethodDeclaration;
+            Identifier.Parent = newMethodDeclaration;
+            ParameterList.Parent = newMethodDeclaration;
+            Body.Parent = newMethodDeclaration;
+
+            newMethodDeclaration.Modifiers = Modifiers;
+            newMethodDeclaration.ParameterList = ParameterList;
+            newMethodDeclaration.Body = Body;
+            newMethodDeclaration.Parent = Parent;
+
+            return newMethodDeclaration;
         }
     }
 
     public class DClassDeclarationSyntax : DMemberDeclarationSyntax
     {
-        private const int defaultSpanLength = 7;
         public DSyntaxToken Identifier { get; }
         public DSyntaxToken Keyword { get; set; }
-        public DSyntaxToken OpenBraceToken { get; }
-        public DSyntaxToken SemicolonToken { get; }
-        public DSyntaxToken CloseBraceToken { get; }
+        public DSyntaxToken OpenBraceToken { get; private set; }
+        public DSyntaxToken SemicolonToken { get; private set; }
+        public DSyntaxToken CloseBraceToken { get; private set; }
 
 
         public DClassDeclarationSyntax(DSyntaxToken identifierToken)
@@ -691,23 +709,44 @@ namespace DSharpCodeAnalysis.Syntax
 
         public DClassDeclarationSyntax WithKeyword(DSyntaxToken dSyntaxToken)
         {
-            Keyword.WithLeadingTrivia(dSyntaxToken.LeadingTrivia);
-            Keyword.WithTrailingTrivia(dSyntaxToken.TrailingTrivia);
-            return this;
+            var newClassDeclaration = Clone();
+            dSyntaxToken.Parent = newClassDeclaration;
+            newClassDeclaration.Keyword = dSyntaxToken;
+            return newClassDeclaration;
         }
 
         public DClassDeclarationSyntax WithOpenBraceToken(DSyntaxToken dSyntaxToken)
         {
-            OpenBraceToken.WithLeadingTrivia(dSyntaxToken.LeadingTrivia);
-            OpenBraceToken.WithTrailingTrivia(dSyntaxToken.TrailingTrivia);
-            return this;
+            var newClassDeclaration = Clone();
+            dSyntaxToken.Parent = newClassDeclaration;
+            newClassDeclaration.OpenBraceToken = dSyntaxToken;
+            return newClassDeclaration;
         }
 
         public DClassDeclarationSyntax WithCloseBraceToken(DSyntaxToken dSyntaxToken)
         {
-            CloseBraceToken.WithLeadingTrivia(dSyntaxToken.LeadingTrivia);
-            CloseBraceToken.WithTrailingTrivia(dSyntaxToken.TrailingTrivia);
-            return this;
+            var newClassDeclaration = Clone();
+            dSyntaxToken.Parent = newClassDeclaration;
+            newClassDeclaration.CloseBraceToken = dSyntaxToken;
+            return newClassDeclaration;
+        }
+
+        private DClassDeclarationSyntax Clone()
+        {
+            var newClassDeclaration = new DClassDeclarationSyntax(Identifier);
+
+            Identifier.Parent = newClassDeclaration;
+            Keyword.Parent = newClassDeclaration;
+            OpenBraceToken.Parent = newClassDeclaration;
+            SemicolonToken.Parent = newClassDeclaration;
+            CloseBraceToken.Parent = newClassDeclaration;
+
+            newClassDeclaration.Keyword = Keyword;
+            newClassDeclaration.OpenBraceToken = OpenBraceToken;
+            newClassDeclaration.SemicolonToken = SemicolonToken;
+            newClassDeclaration.CloseBraceToken = CloseBraceToken;
+
+            return newClassDeclaration;
         }
     }
 }

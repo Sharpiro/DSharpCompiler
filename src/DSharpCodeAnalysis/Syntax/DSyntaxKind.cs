@@ -17,6 +17,7 @@ namespace DSharpCodeAnalysis.Syntax
         IntKeyword = 8309,
         VoidKeyword = 8318,
         ReturnKeyword = 8341,
+        StaticKeyword = 8347,
         UsingKeyword = 8373,
         ClassKeyword = 8374,
 
@@ -61,6 +62,7 @@ namespace DSharpCodeAnalysis.Syntax
             [8309] = "int",
             [8318] = "void",
             [8341] = "return",
+            [8347] = "static",
             [8373] = "using",
             [8374] = "class",
             [8508] = null

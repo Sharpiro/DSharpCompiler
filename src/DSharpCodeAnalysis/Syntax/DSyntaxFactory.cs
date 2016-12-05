@@ -8,6 +8,7 @@ namespace DSharpCodeAnalysis.Syntax
     {
         public static Trivia Space => Whitespace(" ");
         public static Trivia LineFeed => EndOfLine("\n");
+        public static Trivia Tab => Whitespace("    ");
 
         public static DClassDeclarationSyntax ClassDeclaration(string identifier)
         {
@@ -89,6 +90,11 @@ namespace DSharpCodeAnalysis.Syntax
         public static DSyntaxList<T> List<T>() where T : DSyntaxNode
         {
             return new DSyntaxList<T>(new List<T>());
+        }
+
+        public static DSyntaxTokenList TokenList(params DSyntaxToken[] tokens)
+        {
+            return new DSyntaxTokenList(tokens);
         }
 
         public static DSyntaxList<T> List<T>(IEnumerable<T> list) where T : DSyntaxNode

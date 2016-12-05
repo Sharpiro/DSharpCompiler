@@ -51,121 +51,6 @@ namespace DSharpCodeAnalysisTests
     }
 }".Replace(Environment.NewLine, "\n");
 
-            var cGeneratedClass = SyntaxFactory.ClassDeclaration(
-            SyntaxFactory.Identifier(
-                SyntaxFactory.TriviaList(),
-                "Test",
-                SyntaxFactory.TriviaList(
-                    SyntaxFactory.LineFeed)))
-        .WithKeyword(
-            SyntaxFactory.Token(
-                SyntaxFactory.TriviaList(),
-                SyntaxKind.ClassKeyword,
-                SyntaxFactory.TriviaList(
-                    SyntaxFactory.Space)))
-        .WithOpenBraceToken(
-            SyntaxFactory.Token(
-                SyntaxFactory.TriviaList(),
-                SyntaxKind.OpenBraceToken,
-                SyntaxFactory.TriviaList(
-                    SyntaxFactory.LineFeed)))
-        .WithMembers(
-            SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
-                SyntaxFactory.MethodDeclaration(
-                    SyntaxFactory.PredefinedType(
-                        SyntaxFactory.Token(
-                            SyntaxFactory.TriviaList(
-                                SyntaxFactory.Whitespace("    ")),
-                            SyntaxKind.VoidKeyword,
-                            SyntaxFactory.TriviaList(
-                                SyntaxFactory.Space))),
-                    SyntaxFactory.Identifier("Do"))
-                .WithParameterList(
-                    SyntaxFactory.ParameterList()
-                    .WithCloseParenToken(
-                        SyntaxFactory.Token(
-                            SyntaxFactory.TriviaList(),
-                            SyntaxKind.CloseParenToken,
-                            SyntaxFactory.TriviaList(
-                                SyntaxFactory.LineFeed))))
-                .WithBody(
-                    SyntaxFactory.Block(
-                            SyntaxFactory.LocalDeclarationStatement(
-                                SyntaxFactory.VariableDeclaration(
-                                    SyntaxFactory.IdentifierName(
-                                        SyntaxFactory.Identifier(
-                                            SyntaxFactory.TriviaList(
-                                                SyntaxFactory.Whitespace("        ")),
-                                            "var",
-                                            SyntaxFactory.TriviaList(
-                                                SyntaxFactory.Space))))
-                                .WithVariables(
-                                    SyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
-                                        SyntaxFactory.VariableDeclarator(
-                                            SyntaxFactory.Identifier(
-                                                SyntaxFactory.TriviaList(),
-                                                "x",
-                                                SyntaxFactory.TriviaList(
-                                                    SyntaxFactory.Space)))
-                                        .WithInitializer(
-                                            SyntaxFactory.EqualsValueClause(
-                                                SyntaxFactory.LiteralExpression(
-                                                    SyntaxKind.NumericLiteralExpression,
-                                                    SyntaxFactory.Literal(2)))
-                                            .WithEqualsToken(
-                                                SyntaxFactory.Token(
-                                                    SyntaxFactory.TriviaList(),
-                                                    SyntaxKind.EqualsToken,
-                                                    SyntaxFactory.TriviaList(
-                                                        SyntaxFactory.Space)))))))
-                            .WithSemicolonToken(
-                                SyntaxFactory.Token(
-                                    SyntaxFactory.TriviaList(),
-                                    SyntaxKind.SemicolonToken,
-                                    SyntaxFactory.TriviaList(
-                                        SyntaxFactory.LineFeed))),
-                            SyntaxFactory.ExpressionStatement(
-                            SyntaxFactory.InvocationExpression(
-                                SyntaxFactory.MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    SyntaxFactory.MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        SyntaxFactory.IdentifierName(
-                                            SyntaxFactory.Identifier(
-                                                SyntaxFactory.TriviaList(
-                                                    SyntaxFactory.Whitespace("        ")),
-                                                "System",
-                                                SyntaxFactory.TriviaList())),
-                                        SyntaxFactory.IdentifierName("Console")),
-                                    SyntaxFactory.IdentifierName("WriteLine")))
-                            .WithArgumentList(
-                                SyntaxFactory.ArgumentList(
-                                    SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
-                                        SyntaxFactory.Argument(
-                                            SyntaxFactory.IdentifierName("x"))))))
-                            .WithSemicolonToken(
-                            SyntaxFactory.Token(
-                                SyntaxFactory.TriviaList(),
-                                SyntaxKind.SemicolonToken,
-                                SyntaxFactory.TriviaList(
-                                    SyntaxFactory.LineFeed))))
-                    .WithOpenBraceToken(
-                        SyntaxFactory.Token(
-                            SyntaxFactory.TriviaList(
-                                SyntaxFactory.Whitespace("    ")),
-                            SyntaxKind.OpenBraceToken,
-                            SyntaxFactory.TriviaList(
-                                SyntaxFactory.LineFeed)))
-                    .WithCloseBraceToken(
-                        SyntaxFactory.Token(
-                            SyntaxFactory.TriviaList(
-                                SyntaxFactory.Whitespace("    ")),
-                            SyntaxKind.CloseBraceToken,
-                            SyntaxFactory.TriviaList(
-                                SyntaxFactory.LineFeed))))));
-
-            //dsharp
-
             var dGeneratedClass = DSyntaxFactory.ClassDeclaration(
            DSyntaxFactory.Identifier(
                DSyntaxFactory.TriviaList(),
@@ -279,15 +164,12 @@ namespace DSharpCodeAnalysisTests
                            DSyntaxFactory.TriviaList(
                                DSyntaxFactory.LineFeed))))));
 
-            var cDescendants = cGeneratedClass.DescendantNodesAndTokens().ToList();
             var dDescendants = dGeneratedClass.DescendantNodesAndTokens().ToList();
             var dTypes = dDescendants.Select(d => d.GetType());
-            var cGeneratedClassString = cGeneratedClass.ToString();
             var dGeneratedClassString = dGeneratedClass.ToString();
             var model = dGeneratedClass.DescendantHierarchy();
             var json = JsonConvert.SerializeObject(model);
 
-            Assert.Equal(desiredSource, cGeneratedClassString);
             Assert.Equal(desiredSource, dGeneratedClassString);
         }
 
@@ -299,88 +181,6 @@ namespace DSharpCodeAnalysisTests
 {
     return x + y;
 }".Replace(Environment.NewLine, "\n");
-
-
-            var cGeneratedClass =
-                        SyntaxFactory.MethodDeclaration(
-                            SyntaxFactory.PredefinedType(
-                                SyntaxFactory.Token(
-                                    SyntaxFactory.TriviaList(),
-                                    SyntaxKind.VoidKeyword,
-                                    SyntaxFactory.TriviaList(
-                                        SyntaxFactory.Space))),
-                            SyntaxFactory.Identifier("Add"))
-                        .WithParameterList(
-                            SyntaxFactory.ParameterList(
-                                SyntaxFactory.SeparatedList<ParameterSyntax>(
-                                    new SyntaxNodeOrToken[]{
-                                        SyntaxFactory.Parameter(
-                                            SyntaxFactory.Identifier("x"))
-                                        .WithType(
-                                            SyntaxFactory.PredefinedType(
-                                                SyntaxFactory.Token(
-                                                    SyntaxFactory.TriviaList(),
-                                                    SyntaxKind.IntKeyword,
-                                                    SyntaxFactory.TriviaList(
-                                                        SyntaxFactory.Space)))),
-                                        SyntaxFactory.Token(
-                                            SyntaxFactory.TriviaList(),
-                                            SyntaxKind.CommaToken,
-                                            SyntaxFactory.TriviaList(
-                                                SyntaxFactory.Space)),
-                                        SyntaxFactory.Parameter(
-                                            SyntaxFactory.Identifier("y"))
-                                        .WithType(
-                                            SyntaxFactory.PredefinedType(
-                                                SyntaxFactory.Token(
-                                                    SyntaxFactory.TriviaList(),
-                                                    SyntaxKind.IntKeyword,
-                                                    SyntaxFactory.TriviaList(
-                                                        SyntaxFactory.Space))))}))
-                            .WithCloseParenToken(
-                                SyntaxFactory.Token(
-                                    SyntaxFactory.TriviaList(),
-                                    SyntaxKind.CloseParenToken,
-                                    SyntaxFactory.TriviaList(
-                                        SyntaxFactory.LineFeed))))
-                        .WithBody(
-                            SyntaxFactory.Block(
-                                SyntaxFactory.SingletonList<StatementSyntax>(
-                                    SyntaxFactory.ReturnStatement(
-                                        SyntaxFactory.BinaryExpression(
-                                            SyntaxKind.AddExpression,
-                                            SyntaxFactory.IdentifierName(
-                                                SyntaxFactory.Identifier(
-                                                    SyntaxFactory.TriviaList(),
-                                                    "x",
-                                                    SyntaxFactory.TriviaList(
-                                                        SyntaxFactory.Space))),
-                                            SyntaxFactory.IdentifierName("y"))
-                                        .WithOperatorToken(
-                                            SyntaxFactory.Token(
-                                                SyntaxFactory.TriviaList(),
-                                                SyntaxKind.PlusToken,
-                                                SyntaxFactory.TriviaList(
-                                                    SyntaxFactory.Space))))
-                                    .WithReturnKeyword(
-                                        SyntaxFactory.Token(
-                                            SyntaxFactory.TriviaList(
-                                                SyntaxFactory.Whitespace("    ")),
-                                            SyntaxKind.ReturnKeyword,
-                                            SyntaxFactory.TriviaList(
-                                                SyntaxFactory.Space)))
-                                    .WithSemicolonToken(
-                                        SyntaxFactory.Token(
-                                            SyntaxFactory.TriviaList(),
-                                            SyntaxKind.SemicolonToken,
-                                            SyntaxFactory.TriviaList(
-                                                SyntaxFactory.LineFeed)))))
-                            .WithOpenBraceToken(
-                                SyntaxFactory.Token(
-                                    SyntaxFactory.TriviaList(),
-                                    SyntaxKind.OpenBraceToken,
-                                    SyntaxFactory.TriviaList(
-                                        SyntaxFactory.LineFeed))));
 
             var dGeneratedClass =
                         DSyntaxFactory.MethodDeclaration(
@@ -463,22 +263,9 @@ namespace DSharpCodeAnalysisTests
                                     DSyntaxFactory.TriviaList(
                                         DSyntaxFactory.LineFeed))));
 
-            var cDescendants = cGeneratedClass.DescendantNodesAndTokens().ToList();
             var dDescendants = dGeneratedClass.DescendantNodesAndTokens().ToList();
-            var cNodes = cGeneratedClass.DescendantNodes().ToList();
-            var cTokens = cGeneratedClass.DescendantTokens().ToList();
-            var cGeneratedClassString = cGeneratedClass.ToString();
             var dGeneratedClassString = dGeneratedClass.ToString();
 
-            for (var i = 0; i < cDescendants.Count; i++)
-            {
-                var cItem = cDescendants[i];
-                var dItem = dDescendants[i];
-                Assert.True(cItem.RawKind == (int)dItem.SyntaxKind);
-            }
-
-            Assert.Equal(cDescendants.Count, dDescendants.Count);
-            Assert.Equal(desiredSource, cGeneratedClassString);
             Assert.Equal(desiredSource, dGeneratedClassString);
         }
     }
