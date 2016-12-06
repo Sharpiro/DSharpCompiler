@@ -137,7 +137,10 @@ namespace DSharpCodeAnalysis.Syntax
 
         public DArgumentSyntax(DExpressionSyntax expression)
         {
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+
             Expression = expression;
+            SyntaxKind = DSyntaxKind.Argument;
         }
     }
 
@@ -209,35 +212,46 @@ namespace DSharpCodeAnalysis.Syntax
 
     public class DArgumentListSyntax : DSyntaxNode
     {
-        public DSyntaxList<DArgumentSyntax> Arguments { get; set; }
-        public DSyntaxToken OpenParenToken { get; } = DSyntaxFactory.Token(DSyntaxKind.OpenParenToken);
-        public DSyntaxToken CloseParenToken { get; } = DSyntaxFactory.Token(DSyntaxKind.CloseParenToken);
+        public DSeparatedSyntaxList<DArgumentSyntax> Arguments { get; set; }
+        public DSyntaxToken OpenParenToken { get; }
+        public DSyntaxToken CloseParenToken { get; }
         protected override List<IDSyntax> Children
         {
             get
             {
                 var list = new List<IDSyntax> { OpenParenToken };
-                list.AddRange(Arguments);
+                list.AddRange(Arguments.GetNodesAndSeperators());
                 list.Add(CloseParenToken);
                 return list;
             }
         }
 
-
-        public DArgumentListSyntax()
+        public DArgumentListSyntax(DSeparatedSyntaxList<DArgumentSyntax> arguments = default(DSeparatedSyntaxList<DArgumentSyntax>))
         {
-            Arguments = DSyntaxFactory.List<DArgumentSyntax>();
-        }
-
-        public DArgumentListSyntax(DSyntaxList<DArgumentSyntax> arguments)
-        {
-            Arguments = arguments;
+            Arguments = arguments ?? DSyntaxFactory.SeparatedList<DArgumentSyntax>();
+            OpenParenToken = new DSyntaxToken(DSyntaxKind.OpenParenToken) { Parent = this };
+            CloseParenToken = new DSyntaxToken(DSyntaxKind.CloseParenToken) { Parent = this };
+            SyntaxKind = DSyntaxKind.ArgumentList;
         }
     }
 
     public class DMemberDeclarationSyntax : DSyntaxNode
     {
 
+    }
+
+    public class DGlobalStatementSyntax : DMemberDeclarationSyntax
+    {
+        public DStatementSyntax Statement { get; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Statement };
+
+        public DGlobalStatementSyntax(DStatementSyntax statement)
+        {
+            if (statement == null) throw new ArgumentNullException(nameof(statement));
+
+            Statement = statement;
+            SyntaxKind = DSyntaxKind.GlobalStatement;
+        }
     }
 
     public class DTypeSyntax : DExpressionSyntax
@@ -313,13 +327,13 @@ namespace DSharpCodeAnalysis.Syntax
     public class DVariableDeclarationSyntax : DSyntaxNode
     {
         public DTypeSyntax Type { get; set; }
-        public DSyntaxList<DVariableDeclaratorSyntax> Variables { get; set; }
+        public DSeparatedSyntaxList<DVariableDeclaratorSyntax> Variables { get; set; }
         protected override List<IDSyntax> Children
         {
             get
             {
                 var list = new List<IDSyntax> { Type };
-                list.AddRange(Variables);
+                list.AddRange(Variables.GetNodesAndSeperators());
                 return list;
             }
         }
@@ -332,15 +346,18 @@ namespace DSharpCodeAnalysis.Syntax
 
         }
 
-        public DVariableDeclarationSyntax(DTypeSyntax typeSyntax, DSyntaxList<DVariableDeclaratorSyntax> variables)
+        public DVariableDeclarationSyntax(DTypeSyntax typeSyntax, DSeparatedSyntaxList<DVariableDeclaratorSyntax> variables)
             : this(typeSyntax)
         {
             Variables = variables;
         }
 
-        public DVariableDeclarationSyntax WithVariables(DSyntaxList<DVariableDeclaratorSyntax> variables)
+        public DVariableDeclarationSyntax WithVariables(DSeparatedSyntaxList<DVariableDeclaratorSyntax> variables)
         {
-            return new DVariableDeclarationSyntax(Type, variables);
+            var newVariableDeclaration = new DVariableDeclarationSyntax(Type, variables);
+            Type.Parent = newVariableDeclaration;
+            variables.SetParent(newVariableDeclaration);
+            return newVariableDeclaration;
         }
     }
 
@@ -357,7 +374,11 @@ namespace DSharpCodeAnalysis.Syntax
 
         public DExpressionStatementSyntax(DExpressionSyntax expression)
         {
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+
             Expression = expression;
+            SemicolonToken = new DSyntaxToken(DSyntaxKind.SemicolonToken) { Parent = this };
+            SyntaxKind = DSyntaxKind.ExpressionStatement;
         }
 
         public DExpressionStatementSyntax WithSemicolonToken(DSyntaxToken token)
@@ -460,7 +481,7 @@ namespace DSharpCodeAnalysis.Syntax
             SyntaxKind = syntaxKind;
             Expression = expression;
             Name = name;
-            OperatorToken = DSyntaxFactory.Token(DSyntaxKind.DotToken);
+            OperatorToken = new DSyntaxToken(DSyntaxKind.DotToken) { Parent = this };
         }
     }
 
@@ -487,6 +508,7 @@ namespace DSharpCodeAnalysis.Syntax
         {
             ArgumentList = DSyntaxFactory.ArgumentList();
             Expression = expression;
+            SyntaxKind = DSyntaxKind.InvocationExpression;
         }
 
         public DInvocationExpressionSyntax WithArgumentList(DArgumentListSyntax argumentList)
@@ -664,14 +686,19 @@ namespace DSharpCodeAnalysis.Syntax
     public class DCompilationUnitSyntax : DSyntaxNode
     {
         public DSyntaxList<DMemberDeclarationSyntax> Members { get; set; } = DSyntaxFactory.List<DMemberDeclarationSyntax>();
-        public DSyntaxToken EndOfFileToken { get; set; } = new DSyntaxToken(DSyntaxKind.EndOfFileToken);
+        public DSyntaxToken EndOfFileToken { get; set; }
+
+        public DCompilationUnitSyntax()
+        {
+            EndOfFileToken = new DSyntaxToken(DSyntaxKind.EndOfFileToken) { Parent = this };
+        }
 
         protected override List<IDSyntax> Children => new List<IDSyntax>(Members) { EndOfFileToken };
 
         public DCompilationUnitSyntax WithMembers(DSyntaxList<DMemberDeclarationSyntax> members)
         {
             var newCompilation = Clone();
-            Members.SetParent(newCompilation);
+            members.SetParent(newCompilation);
             newCompilation.Members = members;
             return newCompilation;
         }

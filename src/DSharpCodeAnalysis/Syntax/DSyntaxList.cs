@@ -76,6 +76,12 @@ namespace DSharpCodeAnalysis.Syntax
                 yield return syntax;
             }
         }
+
+        public void SetParent(DSyntaxNode node)
+        {
+            _nodes = _nodes.ForEach(t => t.Parent = node);
+            _seperators = _seperators.ForEach(t => t.Parent = node);
+        }
     }
 
     public class DSyntaxTokenList : IEnumerable<DSyntaxToken>

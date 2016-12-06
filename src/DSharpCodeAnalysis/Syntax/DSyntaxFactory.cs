@@ -132,9 +132,9 @@ namespace DSharpCodeAnalysis.Syntax
             return new DSyntaxList<T>(new List<T> { item });
         }
 
-        public static DSyntaxList<T> SingletonSeparatedList<T>(T item) where T : DSyntaxNode
+        public static DSeparatedSyntaxList<T> SingletonSeparatedList<T>(T item) where T : DSyntaxNode
         {
-            return new DSyntaxList<T>(new List<T> { item });
+            return new DSeparatedSyntaxList<T>(new List<T> { item }, Enumerable.Empty<DSyntaxToken>());
         }
 
         public static string SyntaxString(DSyntaxKind syntaxKind)
@@ -169,9 +169,11 @@ namespace DSharpCodeAnalysis.Syntax
             return new DArgumentListSyntax();
         }
 
-        public static DArgumentListSyntax ArgumentList(DSyntaxList<DArgumentSyntax> arguments)
+        public static DArgumentListSyntax ArgumentList(DSeparatedSyntaxList<DArgumentSyntax> arguments)
         {
-            return new DArgumentListSyntax(arguments);
+            var argumentList = new DArgumentListSyntax(arguments);
+            arguments.SetParent(argumentList);
+            return argumentList;
         }
 
         public static IEnumerable<Trivia> TriviaList()
@@ -242,7 +244,9 @@ namespace DSharpCodeAnalysis.Syntax
 
         public static DVariableDeclaratorSyntax VariableDeclarator(DSyntaxToken identifierToken)
         {
-            return new DVariableDeclaratorSyntax(identifierToken);
+            var variableDeclarator = new DVariableDeclaratorSyntax(identifierToken);
+            identifierToken.Parent = variableDeclarator;
+            return variableDeclarator;
         }
 
         public static DEqualsValueClauseSyntax EqualsValueClause(DExpressionSyntax expressionSyntax)
@@ -288,6 +292,13 @@ namespace DSharpCodeAnalysis.Syntax
             var expressionStatementSyntax = new DExpressionStatementSyntax(expression);
             expression.Parent = expressionStatementSyntax;
             return expressionStatementSyntax;
+        }
+
+        public static DGlobalStatementSyntax GlobalStatement(DStatementSyntax dStatementSyntax)
+        {
+            var globalStatement = new DGlobalStatementSyntax(dStatementSyntax);
+            dStatementSyntax.Parent = globalStatement;
+            return globalStatement;
         }
     }
 }
