@@ -1,15 +1,43 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using System.Linq;
 
 namespace DSharpCodeAnalysis.Parser
 {
     public class Lexer
     {
-        public void Lex(string source)
+        private SlidingTextWindow _textWindow;
+
+        public Lexer(string source)
         {
-            var x = UsingDirective(IdentifierName("System"));
-            var z = x.Kind();
-            var y = SyntaxKind.UsingDirective;
+            _textWindow = source.ToArray();
+        }
+
+        public void Lex()
+        {
+            var character = _textWindow.PeekChar();
+            switch (character)
+            {
+                default:
+                    break;
+            }
+        }
+    }
+
+    public class SlidingTextWindow
+    {
+        private int _offset = 0;
+        private char[] _characterWindow;
+
+        public char[] CharacterWindow => _characterWindow;
+
+        public void AdvanceChar()
+        {
+            _offset++;
+        }
+
+        public char PeekChar()
+        {
+            return _characterWindow[_offset++];
         }
     }
 }
