@@ -103,7 +103,7 @@ namespace DSharpCodeAnalysis.Syntax
                         FullSpan = syntaxChild.FullSpan
                     });
                 }
-                else if ((syntaxChild = child as Trivia) != null)
+                else if ((syntaxChild = child as DTrivia) != null)
                 {
                     model.Children.Add(new SyntaxHierarchyModel
                     {

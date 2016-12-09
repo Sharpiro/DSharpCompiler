@@ -23,9 +23,9 @@ namespace DSharpCodeAnalysis.Syntax
     {
         public DSyntaxKind SyntaxKind { get; }
         public DSyntaxNode Parent { get; set; }
-        public IEnumerable<Trivia> LeadingTrivia { get; set; } = Enumerable.Empty<Trivia>();
-        public IEnumerable<Trivia> TrailingTrivia { get; set; } = Enumerable.Empty<Trivia>();
-        public IEnumerable<Trivia> AllTrivia => LeadingTrivia.Concat(TrailingTrivia);
+        public IEnumerable<DTrivia> LeadingTrivia { get; set; } = Enumerable.Empty<DTrivia>();
+        public IEnumerable<DTrivia> TrailingTrivia { get; set; } = Enumerable.Empty<DTrivia>();
+        public IEnumerable<DTrivia> AllTrivia => LeadingTrivia.Concat(TrailingTrivia);
         public bool HasLeadingTrivia => LeadingTrivia.Any();
         public bool HasTrailingTrivia => TrailingTrivia.Any();
         public bool HasAnyTrivia => AllTrivia.Any();
@@ -62,18 +62,18 @@ namespace DSharpCodeAnalysis.Syntax
                 Children = AllTrivia.Select(t => new SyntaxHierarchyModel
                 {
                     SyntaxKind = t.SyntaxKind.ToString(),
-                    SyntaxType = nameof(Trivia)
+                    SyntaxType = nameof(DTrivia)
                 }).ToList()
             };
         }
 
-        public DSyntaxToken WithLeadingTrivia(IEnumerable<Trivia> leadingTrivia)
+        public DSyntaxToken WithLeadingTrivia(IEnumerable<DTrivia> leadingTrivia)
         {
             LeadingTrivia = leadingTrivia;
             return this;
         }
 
-        public DSyntaxToken WithTrailingTrivia(IEnumerable<Trivia> trailingTrivia)
+        public DSyntaxToken WithTrailingTrivia(IEnumerable<DTrivia> trailingTrivia)
         {
             TrailingTrivia = trailingTrivia;
             return this;
@@ -85,7 +85,7 @@ namespace DSharpCodeAnalysis.Syntax
         }
     }
 
-    public class Trivia : IDSyntax
+    public class DTrivia : IDSyntax
     {
         public DSyntaxToken Token { get; set; }
         public Span Span { get; set; }
@@ -108,7 +108,7 @@ namespace DSharpCodeAnalysis.Syntax
             }
         }
 
-        public Trivia(DSyntaxKind syntaxKind, string triviaText)
+        public DTrivia(DSyntaxKind syntaxKind, string triviaText)
         {
             SyntaxKind = syntaxKind;
             FullText = triviaText;
@@ -121,9 +121,9 @@ namespace DSharpCodeAnalysis.Syntax
             throw new NotImplementedException();
         }
 
-        public static Trivia Create(DSyntaxKind syntaxKind, string text)
+        public static DTrivia Create(DSyntaxKind syntaxKind, string text)
         {
-            return new Trivia(syntaxKind, text);
+            return new DTrivia(syntaxKind, text);
         }
 
         public override string ToString()

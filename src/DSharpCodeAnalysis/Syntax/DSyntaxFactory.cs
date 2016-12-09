@@ -6,9 +6,9 @@ namespace DSharpCodeAnalysis.Syntax
 {
     public static class DSyntaxFactory
     {
-        public static Trivia Space => Whitespace(" ");
-        public static Trivia LineFeed => EndOfLine("\n");
-        public static Trivia Tab => Whitespace("    ");
+        public static DTrivia Space => Whitespace(" ");
+        public static DTrivia LineFeed => EndOfLine("\n");
+        public static DTrivia Tab => Whitespace("    ");
 
         public static DClassDeclarationSyntax ClassDeclaration(string identifier)
         {
@@ -45,7 +45,7 @@ namespace DSharpCodeAnalysis.Syntax
             return token;
         }
 
-        public static DSyntaxToken Identifier(IEnumerable<Trivia> leading, string identifier, IEnumerable<Trivia> trailing)
+        public static DSyntaxToken Identifier(IEnumerable<DTrivia> leading, string identifier, IEnumerable<DTrivia> trailing)
         {
             var token = new DSyntaxToken(DSyntaxKind.IdentifierToken)
             {
@@ -62,7 +62,7 @@ namespace DSharpCodeAnalysis.Syntax
             return token;
         }
 
-        public static DSyntaxToken Token(IEnumerable<Trivia> leading, DSyntaxKind syntaxKind, IEnumerable<Trivia> trailing)
+        public static DSyntaxToken Token(IEnumerable<DTrivia> leading, DSyntaxKind syntaxKind, IEnumerable<DTrivia> trailing)
         {
             return new DSyntaxToken(syntaxKind) { LeadingTrivia = leading, TrailingTrivia = trailing };
         }
@@ -88,9 +88,9 @@ namespace DSharpCodeAnalysis.Syntax
             return new DBlockSyntax(list);
         }
 
-        public static Trivia SyntaxTrivia(DSyntaxKind syntaxKind, string triviaText)
+        public static DTrivia SyntaxTrivia(DSyntaxKind syntaxKind, string triviaText)
         {
-            return new Trivia(syntaxKind, triviaText);
+            return new DTrivia(syntaxKind, triviaText);
         }
 
         public static DSyntaxList<T> List<T>() where T : DSyntaxNode
@@ -139,7 +139,8 @@ namespace DSharpCodeAnalysis.Syntax
 
         public static string SyntaxString(DSyntaxKind syntaxKind)
         {
-            return DSyntaxStrings.Get(syntaxKind);
+            var cache = new DSyntaxCache();
+            return cache.Get(syntaxKind);
         }
 
         public static DParameterSyntax Parameter(DSyntaxToken identifier)
@@ -176,29 +177,29 @@ namespace DSharpCodeAnalysis.Syntax
             return argumentList;
         }
 
-        public static IEnumerable<Trivia> TriviaList()
+        public static IEnumerable<DTrivia> TriviaList()
         {
-            return Enumerable.Empty<Trivia>();
+            return Enumerable.Empty<DTrivia>();
         }
 
-        public static IEnumerable<Trivia> TriviaList(Trivia trivia)
+        public static IEnumerable<DTrivia> TriviaList(DTrivia trivia)
         {
-            return new List<Trivia> { trivia };
+            return new List<DTrivia> { trivia };
         }
 
-        public static IEnumerable<Trivia> TriviaList(params Trivia[] trivia)
+        public static IEnumerable<DTrivia> TriviaList(params DTrivia[] trivia)
         {
             return trivia;
         }
 
-        public static Trivia Whitespace(string text)
+        public static DTrivia Whitespace(string text)
         {
-            return Trivia.Create(DSyntaxKind.WhitespaceTrivia, text);
+            return DTrivia.Create(DSyntaxKind.WhitespaceTrivia, text);
         }
 
-        public static Trivia EndOfLine(string text)
+        public static DTrivia EndOfLine(string text)
         {
-            return Trivia.Create(DSyntaxKind.EndOfLineTrivia, text);
+            return DTrivia.Create(DSyntaxKind.EndOfLineTrivia, text);
         }
 
         public static DLocalDeclarationStatementSyntax LocalDeclarationStatement(DVariableDeclarationSyntax variableSyntax)

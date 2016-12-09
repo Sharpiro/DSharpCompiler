@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DSharpCodeAnalysis.Syntax
 {
@@ -53,36 +55,108 @@ namespace DSharpCodeAnalysis.Syntax
         Parameter = 8908,
     }
 
-    public static class DSyntaxStrings
+    public class DSyntaxEntry
     {
-        private static readonly Dictionary<int, string> _strings = new Dictionary<int, string>
-        {
-            [8200] = "(",
-            [8201] = ")",
-            [8203] = "+",
-            [8204] = "=",
-            [8205] = "{",
-            [8206] = "}",
-            [8212] = ";",
-            [8216] = ",",
-            [8218] = ".",
-            [8309] = "int",
-            [8318] = "void",
-            [8341] = "return",
-            [8347] = "static",
-            [8373] = "using",
-            [8374] = "class",
-            [8496] = "",
-            [8508] = null
-        };
+        public int Id => (int)SyntaxKind;
+        public string KeywordText { get; }
+        public DSyntaxKind SyntaxKind { get; }
 
-        public static string Get(DSyntaxKind syntaxKind)
+        public DSyntaxEntry(string keywordText, DSyntaxKind syntaxKind)
         {
-            var index = (int)syntaxKind;
-            if (!_strings.ContainsKey(index))
+            if (syntaxKind == DSyntaxKind.Null) throw new ArgumentNullException(nameof(SyntaxKind));
+
+            KeywordText = keywordText;
+            SyntaxKind = syntaxKind;
+        }
+    }
+
+    public class DSyntaxCache
+    {
+        private readonly IEnumerable<DSyntaxEntry> _entires = new List<DSyntaxEntry>
+        {
+            new DSyntaxEntry("(", DSyntaxKind.OpenParenToken),
+            new DSyntaxEntry(")", DSyntaxKind.CloseParenToken),
+            new DSyntaxEntry("+", DSyntaxKind.PlusToken),
+            new DSyntaxEntry("=", DSyntaxKind.EqualsToken),
+            new DSyntaxEntry("{", DSyntaxKind.OpenBraceToken),
+            new DSyntaxEntry("}", DSyntaxKind.CloseBraceToken),
+            new DSyntaxEntry(";", DSyntaxKind.SemicolonToken),
+            new DSyntaxEntry(",", DSyntaxKind.CommaToken),
+            new DSyntaxEntry(".", DSyntaxKind.DotToken),
+            new DSyntaxEntry("int", DSyntaxKind.IntKeyword),
+            new DSyntaxEntry("void", DSyntaxKind.VoidKeyword),
+            new DSyntaxEntry("return", DSyntaxKind.ReturnKeyword),
+            new DSyntaxEntry("static", DSyntaxKind.StaticKeyword),
+            new DSyntaxEntry("using", DSyntaxKind.UsingKeyword),
+            new DSyntaxEntry("class", DSyntaxKind.ClassKeyword),
+            new DSyntaxEntry("\uffff", DSyntaxKind.EndOfFileToken),
+            new DSyntaxEntry("Identifier", DSyntaxKind.IdentifierToken),
+        };
+        private readonly Dictionary<DSyntaxKind, string> _kindToSyntax;
+        private readonly Dictionary<string, DSyntaxKind> _syntaxToKind;
+
+        public DSyntaxCache()
+        {
+            _kindToSyntax = _entires.ToDictionary(e => e.SyntaxKind, e => e.KeywordText);
+            _syntaxToKind = _entires.ToDictionary(e => e.KeywordText, e => e.SyntaxKind);
+        }
+
+        //private static readonly Dictionary<int, string> _strings = new Dictionary<int, string>
+        //{
+        //    [8200] = "(",
+        //    [8201] = ")",
+        //    [8203] = "+",
+        //    [8204] = "=",
+        //    [8205] = "{",
+        //    [8206] = "}",
+        //    [8212] = ";",
+        //    [8216] = ",",
+        //    [8218] = ".",
+        //    [8309] = "int",
+        //    [8318] = "void",
+        //    [8341] = "return",
+        //    [8347] = "static",
+        //    [8373] = "using",
+        //    [8374] = "class",
+        //    [8496] = "",
+        //    [8508] = null
+        //};
+
+        //private static readonly Dictionary<string, int> _x = new Dictionary<string, int>
+        //{
+        //    ["("] = 8200,
+        //    [")"] = 8201,
+        //    ["+"] = 8203,
+        //    [8204] = "=",
+        //    [8205] = "{",
+        //    [8206] = "}",
+        //    [8212] = ";",
+        //    [8216] = ",",
+        //    [8218] = ".",
+        //    [8309] = "int",
+        //    [8318] = "void",
+        //    [8341] = "return",
+        //    [8347] = "static",
+        //    [8373] = "using",
+        //    ["class"] = 8374,
+        //    [8496] = "",
+        //    [8508] = null
+        //};
+
+        public string Get(DSyntaxKind syntaxKind)
+        {
+            if (!_kindToSyntax.ContainsKey(syntaxKind))
                 throw new KeyNotFoundException($"Could not find the value for the key ${syntaxKind}");
 
-            return _strings[index];
+            return _kindToSyntax[syntaxKind];
+        }
+
+        public DSyntaxKind Get(string syntaxText)
+        {
+            if (!_syntaxToKind.ContainsKey(syntaxText))
+                return DSyntaxKind.Null;
+
+            return _syntaxToKind[syntaxText];
         }
     }
 }

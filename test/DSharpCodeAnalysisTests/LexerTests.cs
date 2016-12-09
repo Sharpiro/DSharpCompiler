@@ -1,4 +1,6 @@
 ﻿using DSharpCodeAnalysis.Parser;
+using Microsoft.CodeAnalysis.CSharp;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +17,8 @@ namespace DSharpCodeAnalysisTests
             var source = "class Test{}";
             var lexer = new DLexer(source);
             lexer.Lex();
+            //var x = SyntaxFactory.Token(SyntaxKind.ClassKeyword);
+            
         }
     }
 }
