@@ -1,7 +1,7 @@
 ﻿using DSharpCodeAnalysis.Models;
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 
@@ -55,6 +55,11 @@ namespace DSharpCodeAnalysis.Syntax
             return tokenString;
         }
 
+        public DSyntaxToken Clone()
+        {
+            return (DSyntaxToken)MemberwiseClone();
+        }
+
         public SyntaxHierarchyModel DescendantHierarchy()
         {
             return new SyntaxHierarchyModel
@@ -69,13 +74,15 @@ namespace DSharpCodeAnalysis.Syntax
 
         public DSyntaxToken WithLeadingTrivia(IEnumerable<DTrivia> leadingTrivia)
         {
-            LeadingTrivia = leadingTrivia;
+            var newLeading = ImmutableList.CreateRange(leadingTrivia);
+            LeadingTrivia = newLeading;
             return this;
         }
 
         public DSyntaxToken WithTrailingTrivia(IEnumerable<DTrivia> trailingTrivia)
         {
-            TrailingTrivia = trailingTrivia;
+            var newTrailing = ImmutableList.CreateRange(trailingTrivia);
+            TrailingTrivia = newTrailing;
             return this;
         }
 

@@ -91,6 +91,7 @@ namespace DSharpCodeAnalysis.Syntax
             new DSyntaxEntry("class", DSyntaxKind.ClassKeyword),
             new DSyntaxEntry("\uffff", DSyntaxKind.EndOfFileToken),
             new DSyntaxEntry("Identifier", DSyntaxKind.IdentifierToken),
+            new DSyntaxEntry("0", DSyntaxKind.NumericLiteralToken),
         };
         private readonly Dictionary<DSyntaxKind, string> _kindToSyntax;
         private readonly Dictionary<string, DSyntaxKind> _syntaxToKind;
@@ -100,48 +101,6 @@ namespace DSharpCodeAnalysis.Syntax
             _kindToSyntax = _entires.ToDictionary(e => e.SyntaxKind, e => e.KeywordText);
             _syntaxToKind = _entires.ToDictionary(e => e.KeywordText, e => e.SyntaxKind);
         }
-
-        //private static readonly Dictionary<int, string> _strings = new Dictionary<int, string>
-        //{
-        //    [8200] = "(",
-        //    [8201] = ")",
-        //    [8203] = "+",
-        //    [8204] = "=",
-        //    [8205] = "{",
-        //    [8206] = "}",
-        //    [8212] = ";",
-        //    [8216] = ",",
-        //    [8218] = ".",
-        //    [8309] = "int",
-        //    [8318] = "void",
-        //    [8341] = "return",
-        //    [8347] = "static",
-        //    [8373] = "using",
-        //    [8374] = "class",
-        //    [8496] = "",
-        //    [8508] = null
-        //};
-
-        //private static readonly Dictionary<string, int> _x = new Dictionary<string, int>
-        //{
-        //    ["("] = 8200,
-        //    [")"] = 8201,
-        //    ["+"] = 8203,
-        //    [8204] = "=",
-        //    [8205] = "{",
-        //    [8206] = "}",
-        //    [8212] = ";",
-        //    [8216] = ",",
-        //    [8218] = ".",
-        //    [8309] = "int",
-        //    [8318] = "void",
-        //    [8341] = "return",
-        //    [8347] = "static",
-        //    [8373] = "using",
-        //    ["class"] = 8374,
-        //    [8496] = "",
-        //    [8508] = null
-        //};
 
         public string Get(DSyntaxKind syntaxKind)
         {

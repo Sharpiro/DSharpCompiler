@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace DSharpCodeAnalysis.Syntax
 {
     public static class DSyntaxFactory
     {
-        public static DTrivia Space => Whitespace(" ");
+        public static DTrivia CarriageReturnLineFeed => EndOfLine("\r\n");
         public static DTrivia LineFeed => EndOfLine("\n");
+        public static DTrivia Space => Whitespace(" ");
         public static DTrivia Tab => Whitespace("    ");
 
         public static DClassDeclarationSyntax ClassDeclaration(string identifier)
@@ -49,9 +51,9 @@ namespace DSharpCodeAnalysis.Syntax
         {
             var token = new DSyntaxToken(DSyntaxKind.IdentifierToken)
             {
-                LeadingTrivia = leading,
+                LeadingTrivia = ImmutableList.CreateRange(leading),
                 Value = identifier,
-                TrailingTrivia = trailing
+                TrailingTrivia = ImmutableList.CreateRange(trailing)
             };
             return token;
         }
@@ -64,7 +66,11 @@ namespace DSharpCodeAnalysis.Syntax
 
         public static DSyntaxToken Token(IEnumerable<DTrivia> leading, DSyntaxKind syntaxKind, IEnumerable<DTrivia> trailing)
         {
-            return new DSyntaxToken(syntaxKind) { LeadingTrivia = leading, TrailingTrivia = trailing };
+            return new DSyntaxToken(syntaxKind)
+            {
+                LeadingTrivia = ImmutableList.CreateRange(leading),
+                TrailingTrivia = ImmutableList.CreateRange(trailing)
+            };
         }
 
         public static DPredefinedTypeSyntax PredefinedType(DSyntaxToken keyword)
@@ -278,6 +284,14 @@ namespace DSharpCodeAnalysis.Syntax
         public static DSyntaxToken Literal(int value)
         {
             var token = new DSyntaxToken(DSyntaxKind.NumericLiteralToken, value);
+            return token;
+        }
+
+        public static DSyntaxToken Literal(IEnumerable<DTrivia> leading, int value, IEnumerable<DTrivia> trailing)
+        {
+            var token = new DSyntaxToken(DSyntaxKind.NumericLiteralToken, value);
+            token = token.WithLeadingTrivia(leading);
+            token = token.WithTrailingTrivia(trailing);
             return token;
         }
 
