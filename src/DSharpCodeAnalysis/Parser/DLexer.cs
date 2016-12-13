@@ -22,12 +22,13 @@ namespace DSharpCodeAnalysis.Parser
             _syntaxCache = new DSyntaxCache();
         }
 
-        public void Lex()
+        public List<DSyntaxToken> Lex()
         {
             while (_textWindow.PeekChar() != SlidingTextWindow.InvalidCharacter)
             {
                 _lexedTokens.Add(LexSyntaxToken());
             }
+            return _lexedTokens;
         }
 
         private DSyntaxToken LexSyntaxToken()

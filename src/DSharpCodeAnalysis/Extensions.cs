@@ -21,5 +21,12 @@ namespace DSharpCodeAnalysis
         //    enumerated.ForEach(t => action(t));
         //    return enumerated;
         //}
+
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> list)
+        {
+            if (list == null || !list.Any())
+                return true;
+            return false;
+        }
     }
 }
