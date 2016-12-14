@@ -10,6 +10,7 @@ namespace DSharpCodeAnalysis.Syntax
     public interface IDSyntax
     {
         DSyntaxKind SyntaxKind { get; }
+        Span Span { get; }
         Span FullSpan { get; }
         int Position { get; set; }
         int Width { get; }
@@ -31,9 +32,19 @@ namespace DSharpCodeAnalysis.Syntax
         public bool HasAnyTrivia => AllTrivia.Any();
         public string ValueText => Value.ToString();
         public object Value { get; set; }
-        public Span FullSpan => new Span(Position, Width);
+        public Span Span => new Span(Position + LeadingTrivia.Sum(l => l.FullSpan.Length), Width);
+        public Span FullSpan => new Span(Position, FullWidth);
         public int Position { get; set; }
         public int Width => ValueText.Length;
+        public int FullWidth
+        {
+            get
+            {
+                var leadingWidth = LeadingTrivia.Sum(l => l.Width);
+                var trailingWidth = TrailingTrivia.Sum(l => l.Width);
+                return leadingWidth + Width + trailingWidth;
+            }
+        }
 
         public DSyntaxToken(DSyntaxKind syntaxKind)
         {
@@ -67,7 +78,9 @@ namespace DSharpCodeAnalysis.Syntax
                 Children = AllTrivia.Select(t => new SyntaxHierarchyModel
                 {
                     SyntaxKind = t.SyntaxKind.ToString(),
-                    SyntaxType = nameof(DTrivia)
+                    SyntaxType = nameof(DTrivia),
+                    Span = t.Span,
+                    FullSpan = t.FullSpan
                 }).ToList()
             };
         }
@@ -95,12 +108,12 @@ namespace DSharpCodeAnalysis.Syntax
     public class DTrivia : IDSyntax
     {
         public DSyntaxToken Token { get; set; }
-        public Span Span { get; set; }
         public DSyntaxKind SyntaxKind { get; set; }
-        public Span FullSpan { get; set; }
+        public Span Span => new Span(Position, Width);
+        public Span FullSpan => new Span(Position, Width);
         public string FullText { get; set; }
         public int Position { get; set; }
-        public int Width { get; set; }
+        public int Width => FullText.Length;
 
         public DSyntaxNode Parent
         {
@@ -115,12 +128,11 @@ namespace DSharpCodeAnalysis.Syntax
             }
         }
 
-        public DTrivia(DSyntaxKind syntaxKind, string triviaText)
+        public DTrivia(DSyntaxKind syntaxKind, string triviaText, int position = 0)
         {
             SyntaxKind = syntaxKind;
             FullText = triviaText;
-            FullSpan = new Span(0, triviaText.Length);
-
+            Position = position;
         }
 
         public SyntaxHierarchyModel DescendantHierarchy()
@@ -128,9 +140,9 @@ namespace DSharpCodeAnalysis.Syntax
             throw new NotImplementedException();
         }
 
-        public static DTrivia Create(DSyntaxKind syntaxKind, string text)
+        public static DTrivia Create(DSyntaxKind syntaxKind, string text, int position = 0)
         {
-            return new DTrivia(syntaxKind, text);
+            return new DTrivia(syntaxKind, text, position);
         }
 
         public override string ToString()

@@ -12,14 +12,6 @@ namespace DSharpCodeAnalysis.Syntax
         public static DTrivia Space => Whitespace(" ");
         public static DTrivia Tab => Whitespace("    ");
 
-        public static DClassDeclarationSyntax ClassDeclaration(string identifier)
-        {
-            var identifierToken = Identifier(identifier);
-            var newClass = new DClassDeclarationSyntax(identifierToken);
-            identifierToken.Parent = newClass;
-            return newClass;
-        }
-
         public static DCompilationUnitSyntax CompilationUnit()
         {
             var newCompilation = new DCompilationUnitSyntax();
@@ -30,6 +22,18 @@ namespace DSharpCodeAnalysis.Syntax
         {
             var newClass = new DClassDeclarationSyntax(identifierToken);
             identifierToken.Parent = newClass;
+            return newClass;
+        }
+
+        public static DClassDeclarationSyntax ClassDeclaration(string identifier) => ClassDeclaration(Identifier(identifier));
+
+        public static DClassDeclarationSyntax ClassDeclaration(DSyntaxToken typeToken, DSyntaxToken identifierToken, DSyntaxToken openBrace, DSyntaxToken closeBrace)
+        {
+            var newClass = ClassDeclaration(identifierToken).WithKeyword(typeToken).WithOpenBraceToken(openBrace).WithCloseBraceToken(closeBrace);
+            identifierToken.Parent = newClass;
+            openBrace.Parent = newClass;
+            closeBrace.Parent = newClass;
+            typeToken.Parent = newClass;
             return newClass;
         }
 
@@ -198,14 +202,14 @@ namespace DSharpCodeAnalysis.Syntax
             return trivia;
         }
 
-        public static DTrivia Whitespace(string text)
+        public static DTrivia Whitespace(string text, int position = 0)
         {
-            return DTrivia.Create(DSyntaxKind.WhitespaceTrivia, text);
+            return DTrivia.Create(DSyntaxKind.WhitespaceTrivia, text, position);
         }
 
-        public static DTrivia EndOfLine(string text)
+        public static DTrivia EndOfLine(string text, int position = 0)
         {
-            return DTrivia.Create(DSyntaxKind.EndOfLineTrivia, text);
+            return DTrivia.Create(DSyntaxKind.EndOfLineTrivia, text, position);
         }
 
         public static DLocalDeclarationStatementSyntax LocalDeclarationStatement(DVariableDeclarationSyntax variableSyntax)

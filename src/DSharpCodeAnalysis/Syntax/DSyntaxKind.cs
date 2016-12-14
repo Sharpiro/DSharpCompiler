@@ -46,6 +46,7 @@ namespace DSharpCodeAnalysis.Syntax
         EqualsValueClause = 8796,
         ExpressionStatement = 8797,
         ReturnStatement = 8805,
+        CompilationUnit = 8840,
         GlobalStatement = 8841,
         UsingDirective = 8843,
         ClassDeclaration = 8855,
@@ -89,7 +90,7 @@ namespace DSharpCodeAnalysis.Syntax
             new DSyntaxEntry("static", DSyntaxKind.StaticKeyword),
             new DSyntaxEntry("using", DSyntaxKind.UsingKeyword),
             new DSyntaxEntry("class", DSyntaxKind.ClassKeyword),
-            new DSyntaxEntry("\uffff", DSyntaxKind.EndOfFileToken),
+            new DSyntaxEntry("", DSyntaxKind.EndOfFileToken),
             new DSyntaxEntry("Identifier", DSyntaxKind.IdentifierToken),
             new DSyntaxEntry("0", DSyntaxKind.NumericLiteralToken),
         };

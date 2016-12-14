@@ -8,6 +8,7 @@ namespace DSharpCodeAnalysis.Models
         public string SyntaxKind { get; set; }
         public string SyntaxType { get; set; }
         public IList<SyntaxHierarchyModel> Children { get; set; } = new List<SyntaxHierarchyModel>();
+        public Span Span { get; set; }
         public Span FullSpan { get; set; }
     }
 }

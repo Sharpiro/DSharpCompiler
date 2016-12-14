@@ -32,13 +32,13 @@ namespace DSharpCodeAnalysis.Syntax
 
     public class DSeparatedSyntaxList<T> : IEnumerable<T> where T : DSyntaxNode
     {
-        private IEnumerable<T> _nodes = Enumerable.Empty<T>();
-        private IEnumerable<DSyntaxToken> _seperators = Enumerable.Empty<DSyntaxToken>();
+        private List<T> _nodes = new List<T>();
+        private List<DSyntaxToken> _seperators = new List<DSyntaxToken>();
 
         public DSeparatedSyntaxList(IEnumerable<T> nodes, IEnumerable<DSyntaxToken> seperators)
         {
-            _nodes = nodes;
-            _seperators = seperators;
+            _nodes = nodes.ToList();
+            _seperators = seperators.ToList();
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -79,8 +79,18 @@ namespace DSharpCodeAnalysis.Syntax
 
         public void SetParent(DSyntaxNode node)
         {
-            _nodes = _nodes.ForEach(t => t.Parent = node);
-            _seperators = _seperators.ForEach(t => t.Parent = node);
+            _nodes.ForEach(t => t.Parent = node);
+            _seperators.ForEach(t => t.Parent = node);
+        }
+
+        public void AddSeperator(DSyntaxToken seperatorToken)
+        {
+            _seperators.Add(seperatorToken);
+        }
+
+        public void Add(T node)
+        {
+            _nodes.Add(node);
         }
     }
 

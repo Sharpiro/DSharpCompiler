@@ -27,8 +27,7 @@ namespace DSharpCodeAnalysisTests
         [Fact]
         public void SimpleMethodLexTest()
         {
-            var source =
-@"int Add(int x, int y)".Replace(Environment.NewLine, "\n");
+            var source ="int Add(int x, int y)";
             var lexer = new DLexer(source);
             lexer.Lex();
 

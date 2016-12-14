@@ -68,10 +68,10 @@ namespace DSharpCodeAnalysis.Parser
                 case '\r':
                 case '\n':
                     triviaList.Add(ScanEndOfLine());
+                    if (isTrailing) return;
                     goto top;
                 case '/':
                     throw new NotImplementedException();
-                    goto top;
                 default:
                     break;
             }
@@ -84,10 +84,10 @@ namespace DSharpCodeAnalysis.Parser
             {
                 case '\r':
                     _textWindow.AdvanceChar();
-                    return DSyntaxFactory.CarriageReturnLineFeed;
+                    return DSyntaxFactory.EndOfLine("\r", _textWindow.Offset);
                 case '\n':
                     _textWindow.AdvanceChar();
-                    return DSyntaxFactory.LineFeed;
+                    return DSyntaxFactory.EndOfLine("\n", _textWindow.Offset);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(character), "Invalid newline character");
             }
@@ -107,7 +107,8 @@ namespace DSharpCodeAnalysis.Parser
                 default:
                     break;
             }
-            return DSyntaxFactory.Whitespace(string.Join(string.Empty, Enumerable.Repeat(" ", length)));
+            var whiteSpace = DSyntaxFactory.Whitespace(string.Join(string.Empty, Enumerable.Repeat(" ", length)), _textWindow.Offset);
+            return whiteSpace;
         }
 
         private void ScanNumericLiteral(ref DTokenInfo tokenInfo)
