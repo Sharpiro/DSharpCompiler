@@ -2,7 +2,6 @@
 using DSharpCodeAnalysis.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DSharpCodeAnalysis.Parser
 {
@@ -37,6 +36,8 @@ namespace DSharpCodeAnalysis.Parser
             }
             compilation = compilation.WithMembers(DSyntaxFactory.List(members));
 
+            if (_tokenOffset != _lexedTokens.Count) throw new TokenException("Compilation finished with un-parsed tokens");
+
             return compilation;
         }
 
@@ -46,7 +47,9 @@ namespace DSharpCodeAnalysis.Parser
                 return ParseTypeDeclaration();
             var returnType = ParseType();
             var identifier = ParseIdentifier();
-            return ParseMethodDeclaration(returnType, identifier);
+            var memberDeclaration = ParseMethodDeclaration(returnType, identifier);
+
+            return memberDeclaration;
         }
 
         private DTypeSyntax ParseType()
@@ -64,10 +67,42 @@ namespace DSharpCodeAnalysis.Parser
         private DMethodDeclarationSyntax ParseMethodDeclaration(DTypeSyntax returnType, DSyntaxToken identifier)
         {
             var parameterList = ParseParenthesizedParameterList();
+            DBlockSyntax body;
+            DSyntaxToken semicolonToken;
 
+            ParseBlockAndExpressionBodiesWithSemicolon(out body, out semicolonToken);
             var method = DSyntaxFactory.MethodDeclaration(returnType, identifier)
-                .WithParameterList(parameterList);
+                .WithParameterList(parameterList).WithBody(body).WithSemicolonToken(semicolonToken);
             return method;
+        }
+
+        public void ParseBlockAndExpressionBodiesWithSemicolon(out DBlockSyntax blockBody, out DSyntaxToken semicolonToken)
+        {
+            blockBody = null;
+            semicolonToken = null;
+
+            if (currentToken.SyntaxKind == DSyntaxKind.SemicolonToken)
+                semicolonToken = EatToken(DSyntaxKind.SemicolonToken);
+
+            else if (currentToken.SyntaxKind == DSyntaxKind.OpenBraceToken)
+                blockBody = ParseBlock();
+        }
+
+        public DBlockSyntax ParseBlock()
+        {
+            var openBrace = EatToken(DSyntaxKind.OpenBraceToken);
+            var statements = ParseStatements();
+            var closeBrace = EatToken(DSyntaxKind.CloseBraceToken);
+
+            var block = DSyntaxFactory.Block().WithOpenBraceToken(openBrace)
+                .WithStatements(statements).WithCloseBraceToken(closeBrace);
+
+            return block;
+        }
+
+        public DSyntaxList<DStatementSyntax> ParseStatements()
+        {
+            return DSyntaxFactory.List<DStatementSyntax>();
         }
 
         private DParameterListSyntax ParseParenthesizedParameterList()
