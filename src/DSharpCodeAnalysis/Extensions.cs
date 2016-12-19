@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace DSharpCodeAnalysis
@@ -27,6 +30,16 @@ namespace DSharpCodeAnalysis
             if (list == null || !list.Any())
                 return true;
             return false;
+        }
+
+        public static Script<T> WithDefaultOptions<T>(this Script<T> script)
+        {
+            var consoleAssembly = typeof(System.Console).GetTypeInfo().Assembly;
+            var scriptOptions = ScriptOptions.Default;
+            scriptOptions = scriptOptions.WithImports("System");
+            scriptOptions = scriptOptions.WithReferences(consoleAssembly);
+            script = script.WithOptions(scriptOptions);
+            return script;
         }
     }
 }

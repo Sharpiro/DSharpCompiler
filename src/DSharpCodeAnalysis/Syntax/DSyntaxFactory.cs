@@ -139,6 +139,8 @@ namespace DSharpCodeAnalysis.Syntax
 
         public static DSyntaxList<T> SingletonList<T>(T item) where T : DSyntaxNode
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+
             return new DSyntaxList<T>(new List<T> { item });
         }
 
@@ -277,9 +279,9 @@ namespace DSharpCodeAnalysis.Syntax
             return invocationExpression;
         }
 
-        public static DMemberAccessException MemberAccessExpression(DSyntaxKind syntaxKind, DExpressionSyntax expression, DIdentifierNameSyntax name)
+        public static DMemberAccessExpression MemberAccessExpression(DSyntaxKind syntaxKind, DExpressionSyntax expression, DIdentifierNameSyntax name)
         {
-            var invocationExpression = new DMemberAccessException(syntaxKind, expression, name);
+            var invocationExpression = new DMemberAccessExpression(syntaxKind, expression, name);
             expression.Parent = invocationExpression;
             name.Parent = invocationExpression;
             return invocationExpression;

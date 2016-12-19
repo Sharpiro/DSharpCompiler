@@ -544,7 +544,7 @@ namespace DSharpCodeAnalysis.Syntax
         }
     }
 
-    public class DMemberAccessException : DExpressionSyntax
+    public class DMemberAccessExpression : DExpressionSyntax
     {
         public DExpressionSyntax Expression { get; }
         public DIdentifierNameSyntax Name { get; set; }
@@ -552,12 +552,33 @@ namespace DSharpCodeAnalysis.Syntax
         protected override List<IDSyntax> Children => new List<IDSyntax> { Expression, OperatorToken, Name };
 
 
-        public DMemberAccessException(DSyntaxKind syntaxKind, DExpressionSyntax expression, DIdentifierNameSyntax name)
+        public DMemberAccessExpression(DSyntaxKind syntaxKind, DExpressionSyntax expression, DIdentifierNameSyntax name)
         {
             SyntaxKind = syntaxKind;
             Expression = expression;
             Name = name;
             OperatorToken = new DSyntaxToken(DSyntaxKind.DotToken) { Parent = this };
+        }
+
+        public DMemberAccessExpression WithOperator(DSyntaxToken operatorToken)
+        {
+            var newExpression = Clone();
+            newExpression.OperatorToken = operatorToken;
+            operatorToken.Parent = newExpression;
+            return newExpression;
+        }
+
+        private DMemberAccessExpression Clone()
+        {
+            var newExpression = new DMemberAccessExpression(SyntaxKind, Expression, Name);
+            newExpression.OperatorToken = OperatorToken;
+
+            Expression.Parent = newExpression;
+            Name.Parent = newExpression;
+            OperatorToken.Parent = newExpression;
+            newExpression.Parent = Parent;
+
+            return newExpression;
         }
     }
 

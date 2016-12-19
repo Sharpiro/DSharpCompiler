@@ -1,13 +1,16 @@
+using DSharpCodeAnalysis;
 using DSharpCodeAnalysis.Parser;
 using DSharpCodeAnalysis.Syntax;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace DSharpCodeAnalysisTests
@@ -21,34 +24,11 @@ namespace DSharpCodeAnalysisTests
             var lexer = new DLexer(source);
             var lexedTokens = lexer.Lex();
             var parser = new DParser(lexedTokens);
+
             var cCompilationUnit = CSharpScript.Create(source).GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
             var dCompilationUnit = parser.ParseCompilationUnit();
-
-            var cDescendantNodesAndTokens = cCompilationUnit.DescendantNodesAndTokens().ToList();
-            var dDescendantNodesAndTokens = dCompilationUnit.DescendantNodesAndTokens().ToList();
-            var childNodes = dCompilationUnit.ChildNodes().ToList();
-            var childTokens = dCompilationUnit.ChildTokens().ToList();
-            var hierarchy = dCompilationUnit.DescendantHierarchy();
-            var hierarchyJson = JsonConvert.SerializeObject(hierarchy);
             var cString = cCompilationUnit.ToString();
             var dString = dCompilationUnit.ToString();
-
-            for (var i = 0; i < cDescendantNodesAndTokens.Count; i++)
-            {
-                var cToken = cDescendantNodesAndTokens[i];
-                var dToken = dDescendantNodesAndTokens[i];
-                Assert.Equal(cToken.Span.Start, dToken.Span.Start);
-                Assert.Equal(cToken.Span.End, dToken.Span.End);
-                Assert.Equal(cToken.Span.Length, dToken.Span.Length);
-
-                Assert.Equal(cToken.FullSpan.Start, dToken.FullSpan.Start);
-                Assert.Equal(cToken.FullSpan.End, dToken.FullSpan.End);
-                Assert.Equal(cToken.FullSpan.Length, dToken.FullSpan.Length);
-            }
-
-            Assert.Equal(cCompilationUnit.Span.Start, dCompilationUnit.FullSpan.Start);
-            Assert.Equal(cCompilationUnit.Span.End, dCompilationUnit.FullSpan.End);
-            Assert.Equal(cCompilationUnit.Span.Length, dCompilationUnit.FullSpan.Length);
 
             Assert.Equal(source, cString);
             Assert.Equal(source, dString);
@@ -66,35 +46,11 @@ namespace DSharpCodeAnalysisTests
             var lexer = new DLexer(source);
             var lexedTokens = lexer.Lex();
             var parser = new DParser(lexedTokens);
+
             var cCompilationUnit = CSharpScript.Create(source).GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
             var dCompilationUnit = parser.ParseCompilationUnit();
-
-            var cDescendantNodesAndTokens = cCompilationUnit.DescendantNodesAndTokens().ToList();
-            var dDescendantNodesAndTokens = dCompilationUnit.DescendantNodesAndTokens().ToList();
-            var childNodes = dCompilationUnit.ChildNodes().ToList();
-            var childTokens = dCompilationUnit.ChildTokens().ToList();
-            var hierarchy = dCompilationUnit.DescendantHierarchy();
-            var hierarchyJson = JsonConvert.SerializeObject(hierarchy);
             var cString = cCompilationUnit.ToString();
             var dString = dCompilationUnit.ToString();
-
-            for (var i = 0; i < cDescendantNodesAndTokens.Count; i++)
-            {
-                var cToken = cDescendantNodesAndTokens[i];
-                var cTokenTrivia = cToken.GetLeadingTrivia().Concat(cToken.GetTrailingTrivia()).ToList();
-                var dToken = dDescendantNodesAndTokens[i];
-                Assert.Equal(cToken.Span.Start, dToken.Span.Start);
-                Assert.Equal(cToken.Span.End, dToken.Span.End);
-                Assert.Equal(cToken.Span.Length, dToken.Span.Length);
-
-                Assert.Equal(cToken.FullSpan.Start, dToken.FullSpan.Start);
-                Assert.Equal(cToken.FullSpan.End, dToken.FullSpan.End);
-                Assert.Equal(cToken.FullSpan.Length, dToken.FullSpan.Length);
-            }
-
-            Assert.Equal(cCompilationUnit.Span.Start, dCompilationUnit.FullSpan.Start);
-            Assert.Equal(cCompilationUnit.Span.End, dCompilationUnit.FullSpan.End);
-            Assert.Equal(cCompilationUnit.Span.Length, dCompilationUnit.FullSpan.Length);
 
             Assert.Equal(source, cString);
             Assert.Equal(source, dString);
@@ -107,36 +63,29 @@ namespace DSharpCodeAnalysisTests
             var lexer = new DLexer(source);
             var lexedTokens = lexer.Lex();
             var parser = new DParser(lexedTokens);
+
             var cCompilationUnit = CSharpScript.Create(source).GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
             var dCompilationUnit = parser.ParseCompilationUnit();
-
-            var cDescendantNodesAndTokens = cCompilationUnit.DescendantNodesAndTokens().ToList();
-            var cChildNodes = cCompilationUnit.ChildNodes().ToList();
-            var dDescendantNodesAndTokens = dCompilationUnit.DescendantNodesAndTokens().ToList();
-            var childNodes = dCompilationUnit.ChildNodes().ToList();
-            var childTokens = dCompilationUnit.ChildTokens().ToList();
-            var hierarchy = dCompilationUnit.DescendantHierarchy();
-            var hierarchyJson = JsonConvert.SerializeObject(hierarchy);
             var cString = cCompilationUnit.ToString();
             var dString = dCompilationUnit.ToString();
 
-            for (var i = 0; i < cDescendantNodesAndTokens.Count; i++)
-            {
-                var cToken = cDescendantNodesAndTokens[i];
-                var cTokenTrivia = cToken.GetLeadingTrivia().Concat(cToken.GetTrailingTrivia()).ToList();
-                var dToken = dDescendantNodesAndTokens[i];
-                Assert.Equal(cToken.Span.Start, dToken.Span.Start);
-                Assert.Equal(cToken.Span.End, dToken.Span.End);
-                Assert.Equal(cToken.Span.Length, dToken.Span.Length);
+            Assert.Equal(source, cString);
+            Assert.Equal(source, dString);
+        }
 
-                Assert.Equal(cToken.FullSpan.Start, dToken.FullSpan.Start);
-                Assert.Equal(cToken.FullSpan.End, dToken.FullSpan.End);
-                Assert.Equal(cToken.FullSpan.Length, dToken.FullSpan.Length);
-            }
+        [Fact]
+        public void InvocationExpressionParseTest()
+        {
+            var source = "System.Console.WriteLine(result);";
+            var lexer = new DLexer(source);
+            var lexedTokens = lexer.Lex();
+            var parser = new DParser(lexedTokens);
+            var script = CSharpScript.Create(source);
 
-            Assert.Equal(cCompilationUnit.Span.Start, dCompilationUnit.FullSpan.Start);
-            Assert.Equal(cCompilationUnit.Span.End, dCompilationUnit.FullSpan.End);
-            Assert.Equal(cCompilationUnit.Span.Length, dCompilationUnit.FullSpan.Length);
+            var cCompilationUnit = script.GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
+            var dCompilationUnit = parser.ParseCompilationUnit();
+            var cString = cCompilationUnit.ToString();
+            var dString = dCompilationUnit.ToString();
 
             Assert.Equal(source, cString);
             Assert.Equal(source, dString);
@@ -148,51 +97,30 @@ namespace DSharpCodeAnalysisTests
             var source =
 @"int Add(int x, int y)
 {
+    var temp = 2;
     return x + y;
 }
-var result = Add(2, 3);".Replace(Environment.NewLine, "\n");
+var result = Add(2, 3);
+var temp = 3;
+System.Console.WriteLine(result);
+return result;".Replace(Environment.NewLine, "\n");
             var lexer = new DLexer(source);
             var lexedTokens = lexer.Lex();
             var parser = new DParser(lexedTokens);
-            var script = CSharpScript.Create(source);
-            var cCompilationUnit = script.GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
-            var cDescendantNodesAndTokens = cCompilationUnit.DescendantNodesAndTokens().ToList();
-            var results = script.Compile();
+            var cScript = CSharpScript.Create<int>(source).WithDefaultOptions(); ;
+            var scriptState = cScript.RunAsync().Result;
+            var returnValue = scriptState.ReturnValue;
 
+            var cCompilationUnit = cScript.GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
             var dCompilationUnit = parser.ParseCompilationUnit();
-            var cChildNodes = cCompilationUnit.ChildNodes().ToList();
-            var dDescendantNodesAndTokens = dCompilationUnit.DescendantNodesAndTokens().ToList();
-            var childNodes = dCompilationUnit.ChildNodes().ToList();
-            var childTokens = dCompilationUnit.ChildTokens().ToList();
-            var hierarchy = dCompilationUnit.DescendantHierarchy();
-            var hierarchyJson = JsonConvert.SerializeObject(hierarchy);
             var cString = cCompilationUnit.ToString();
             var dString = dCompilationUnit.ToString();
+            var dScript = CSharpScript.Create(dString).WithDefaultOptions();
+            var issues = dScript.Compile();
 
-            var objectList = new List<object>();
-
-            for (var i = 16; i < cDescendantNodesAndTokens.Count; i++)
-            {
-                var cToken = cDescendantNodesAndTokens[i];
-                var cTokenTrivia = cToken.GetLeadingTrivia().Concat(cToken.GetTrailingTrivia()).ToList();
-                var dToken = dDescendantNodesAndTokens[i];
-                var obj = new { x = cToken.Span.Length == dToken.Span.Length };
-                objectList.Add(obj);
-                Assert.Equal(cToken.Span.Start, dToken.Span.Start);
-                Assert.Equal(cToken.Span.End, dToken.Span.End);
-                Assert.Equal(cToken.Span.Length, dToken.Span.Length);
-
-                Assert.Equal(cToken.FullSpan.Start, dToken.FullSpan.Start);
-                Assert.Equal(cToken.FullSpan.End, dToken.FullSpan.End);
-                Assert.Equal(cToken.FullSpan.Length, dToken.FullSpan.Length);
-            }
-
-            //Assert.Equal(cCompilationUnit.Span.Start, dCompilationUnit.FullSpan.Start);
-            //Assert.Equal(cCompilationUnit.Span.End, dCompilationUnit.FullSpan.End);
-            //Assert.Equal(cCompilationUnit.Span.Length, dCompilationUnit.FullSpan.Length);
-
-            //Assert.Equal(source, cString);
-            //Assert.Equal(source, dString);
+            Assert.False(issues.Any(i => i.Severity == DiagnosticSeverity.Error));
+            Assert.Equal(source, cString);
+            Assert.Equal(source, dString);
         }
     }
 }

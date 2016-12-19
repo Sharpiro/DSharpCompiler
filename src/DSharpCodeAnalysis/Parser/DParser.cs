@@ -30,7 +30,7 @@ namespace DSharpCodeAnalysis.Parser
             var compilation = DSyntaxFactory.CompilationUnit();
 
             var members = new List<DMemberDeclarationSyntax>();
-            for (var i = 0; i < 2; i++)
+            while (_tokenOffset < _lexedTokens.Count)
             {
                 members.Add(ParseMemberDeclarationOrStatement());
             }
@@ -45,6 +45,8 @@ namespace DSharpCodeAnalysis.Parser
         {
             if (currentToken.SyntaxKind == DSyntaxKind.ClassKeyword)
                 return ParseTypeDeclaration();
+            var statement = ParseStatementNoDeclaration();
+            if (statement != null) return DSyntaxFactory.GlobalStatement(statement);
             var returnType = ParseType();
             if (IsFieldDeclaration())
                 return ParseNormalFieldDeclaration(returnType);
@@ -58,6 +60,16 @@ namespace DSharpCodeAnalysis.Parser
             var field = DSyntaxFactory.FieldDeclaration(DSyntaxFactory.VariableDeclaration(returnType)
                 .WithVariables(DSyntaxFactory.SingletonSeparatedList(variable))).WithSemicolonToken(semicolonToken);
             return field;
+        }
+
+        public DStatementSyntax ParseLocalDeclarationStatement()
+        {
+            var type = ParseType();
+            var variable = ParseVariableDeclarator();
+            var declaration = DSyntaxFactory.VariableDeclaration(type).WithVariables(DSyntaxFactory.SingletonSeparatedList(variable));
+            var semicolon = EatToken(DSyntaxKind.SemicolonToken);
+            var statement = DSyntaxFactory.LocalDeclarationStatement(declaration).WithSemicolonToken(semicolon);
+            return statement;
         }
 
         public DVariableDeclaratorSyntax ParseVariableDeclarator()
@@ -141,20 +153,57 @@ namespace DSharpCodeAnalysis.Parser
 
         public DSyntaxList<DStatementSyntax> ParseStatements()
         {
-            var statement = ParseStatement();
-            return DSyntaxFactory.SingletonList(statement);
+            var statements = DSyntaxFactory.SingletonList<DStatementSyntax>();
+            while (currentToken.SyntaxKind != DSyntaxKind.CloseBraceToken)
+            {
+                var statement = ParseStatement();
+                statements.Add(statement);
+            }
+            return statements;
         }
 
         public DStatementSyntax ParseStatement()
         {
             var statement = ParseStatementNoDeclaration();
+            if (statement != null) return statement;
+
+            statement = ParseLocalDeclarationStatement();
             return statement;
         }
 
         public DStatementSyntax ParseStatementNoDeclaration()
         {
+            switch (currentToken.SyntaxKind)
+            {
+                case DSyntaxKind.IdentifierToken:
+                    return IsPossibleLocalDeclarationStatement() ? null : ParseExpressionStatement();
+                case DSyntaxKind.ReturnKeyword:
+                    return ParseReturnStatement();
+                default: return null;
+            }
+        }
 
-            return ParseReturnStatement();
+        private DExpressionStatementSyntax ParseExpressionStatement()
+        {
+            var expression = ParseExpression();
+            var semicolon = EatToken(DSyntaxKind.SemicolonToken);
+            return DSyntaxFactory.ExpressionStatement(expression).WithSemicolonToken(semicolon);
+        }
+
+        private bool IsPossibleLocalDeclarationStatement()
+        {
+            var current = currentToken;
+            var next = PeekToken();
+            return IsPossibleTypedIdentifierStart(current, next);
+        }
+
+        private static bool IsPossibleTypedIdentifierStart(DSyntaxToken current, DSyntaxToken next)
+        {
+            if (current.SyntaxKind != DSyntaxKind.IdentifierToken) return false;
+
+            if (next.SyntaxKind != DSyntaxKind.IdentifierToken) return false;
+
+            return true;
         }
 
         public DStatementSyntax ParseReturnStatement()
@@ -215,6 +264,11 @@ namespace DSharpCodeAnalysis.Parser
                 case DSyntaxKind.OpenParenToken:
                     var arguments = ParseParenthesizedArgumentList();
                     expression = DSyntaxFactory.InvocationExpression(expression).WithArgumentList(arguments);
+                    goto top;
+                case DSyntaxKind.DotToken:
+                    var dotToken = EatToken(DSyntaxKind.DotToken);
+                    expression = DSyntaxFactory.MemberAccessExpression(DSyntaxKind.SimpleMemberAccessExpression, expression, ParseIdentifierName())
+                        .WithOperator(dotToken);
                     goto top;
                 default: return expression;
             }
