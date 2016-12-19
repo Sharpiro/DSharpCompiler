@@ -11,7 +11,8 @@
         "DSharpCompiler.Core": "1.0.0-*",
         "Microsoft.AspNetCore.Mvc": "1.0.0",
         "Microsoft.AspNetCore.StaticFiles": "1.0.0",
-        "DotnetCoreTools.Core": "1.4.5"
+      "DotnetCoreTools.Core": "1.4.5",
+      "DSharpCodeAnalysis": "1.0.0-*"
     },
 
     "tools": {

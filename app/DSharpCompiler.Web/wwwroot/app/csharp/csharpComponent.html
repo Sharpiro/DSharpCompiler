@@ -1,0 +1,35 @@
+﻿<div class="row" *ngIf="errorMessage">
+    <div class="col-md-12">
+        <h3>D# Compiler</h3>
+        {{errorMessage}}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12" style="text-align:center;padding-bottom:5%">
+        <h2>D# Compiler</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="centerTextArea">
+            <Label>Source</Label>
+            <textarea class="form-control inputTextArea" [(ngModel)]="input"></textarea>
+            <div class="buttonPadding">
+                <button (click)="compile()" class="btn btn-default buttonSize">Compile</button>
+                <button (click)="getTree()" class="btn btn-default buttonSize">Get Tree</button>
+                <button (click)="reset()" class="btn btn-default buttonSize">Reset</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" style="padding-top:5%">
+    <div class="col-md-12">
+        <div class="centerTextArea">
+            <Label>Output</Label>
+            <textarea class="form-control outputTextArea disabled" readonly style="background-color:white">{{output | async}}</textarea>
+        </div>
+    </div>
+</div>

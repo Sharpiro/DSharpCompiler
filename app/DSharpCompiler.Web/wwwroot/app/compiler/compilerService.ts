@@ -33,4 +33,27 @@ export class CompilerService implements ICompilerService
             .map((response: Response) => JSON.stringify(response.json().data.output));
         return obs;
     }
+
+    public compileCSharp(source: string): Observable<string>
+    {
+        var body = { source: source };
+        var obs = this.httpService.post("/api/compiler/compilecsharp", body)
+            .catch(() => {
+                toastr.error("Compilation Error");
+                return null;
+            })
+            .map((response: Response) => JSON.stringify(response.json().data.output));
+        return obs;
+    }
+
+    public getSyntaxTree(source: string): Observable<string> {
+        var body = { source: source };
+        var obs = this.httpService.post("/api/compiler/GetSyntaxTree", body)
+            .catch(() => {
+                toastr.error("Compilation Error");
+                return null;
+            })
+            .map((response: Response) => response.json().data.output);
+        return obs;
+    }
 }

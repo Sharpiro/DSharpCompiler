@@ -101,9 +101,7 @@ namespace DSharpCodeAnalysisTests
     return x + y;
 }
 var result = Add(2, 3);
-var temp = 3;
-System.Console.WriteLine(result);
-return result;".Replace(Environment.NewLine, "\n");
+var temp = 3;".Replace(Environment.NewLine, "\n");
             var lexer = new DLexer(source);
             var lexedTokens = lexer.Lex();
             var parser = new DParser(lexedTokens);

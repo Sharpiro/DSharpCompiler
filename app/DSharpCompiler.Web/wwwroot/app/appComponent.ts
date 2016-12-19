@@ -2,7 +2,7 @@
 import {Location} from "@angular/common"
 import {RouteConfig, ROUTER_DIRECTIVES } from "@angular/router-deprecated"
 import {HTTP_PROVIDERS} from "@angular/http"
-import {DashboardComponent, CompilerService, SpinnerComponent, SpinnerService, AboutComponent} from "./appCore"
+import {CsharpComponent, DashboardComponent, CompilerService, SpinnerComponent, SpinnerService, AboutComponent} from "./appCore"
 
 @Component({
     selector: "my-app",
@@ -19,6 +19,7 @@ import {DashboardComponent, CompilerService, SpinnerComponent, SpinnerService, A
 })
 @RouteConfig([
     { path: "/dashboard", name: "Dashboard", component: DashboardComponent, useAsDefault: true },
+    { path: "/csharp", name: "CSharp", component: CsharpComponent },
     { path: "/about", name: "About", component: AboutComponent }
 ])
 export class AppComponent
