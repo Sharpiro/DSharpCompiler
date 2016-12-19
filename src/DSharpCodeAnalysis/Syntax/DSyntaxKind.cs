@@ -118,5 +118,27 @@ namespace DSharpCodeAnalysis.Syntax
 
             return _syntaxToKind[syntaxText];
         }
+
+        public static DSyntaxKind GetLiteralExpression(DSyntaxKind kind)
+        {
+            switch (kind)
+            {
+                case DSyntaxKind.NumericLiteralToken:
+                    return DSyntaxKind.NumericLiteralExpression;
+                default:
+                    return DSyntaxKind.Null;
+            }
+        }
+
+        public static bool IsPredefinedType(DSyntaxKind kind)
+        {
+            switch (kind)
+            {
+                case DSyntaxKind.IntKeyword:
+                case DSyntaxKind.VoidKeyword:
+                    return true;
+                default: return false;
+            }
+        }
     }
 }

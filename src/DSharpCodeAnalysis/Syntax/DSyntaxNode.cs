@@ -9,10 +9,9 @@ using System.Diagnostics;
 namespace DSharpCodeAnalysis.Syntax
 {
     [DebuggerDisplay("{GetDebuggerDisplay(), nq}")]
-    public class DSyntaxNode : IDSyntax
+    public abstract class DSyntaxNode : IDSyntax
     {
-        protected virtual List<IDSyntax> Children { get; set; } = Enumerable.Empty<IDSyntax>().ToList();
-
+        protected abstract List<IDSyntax> Children { get; }
         public DSyntaxKind SyntaxKind { get; set; }
         public DSyntaxNode Parent { get; set; }
         public Span Span => new Span(Position, Width);
@@ -250,8 +249,8 @@ namespace DSharpCodeAnalysis.Syntax
     public class DArgumentListSyntax : DSyntaxNode
     {
         public DSeparatedSyntaxList<DArgumentSyntax> Arguments { get; set; }
-        public DSyntaxToken OpenParenToken { get; }
-        public DSyntaxToken CloseParenToken { get; }
+        public DSyntaxToken OpenParenToken { get; set; }
+        public DSyntaxToken CloseParenToken { get; set; }
         protected override List<IDSyntax> Children
         {
             get
@@ -270,11 +269,42 @@ namespace DSharpCodeAnalysis.Syntax
             CloseParenToken = new DSyntaxToken(DSyntaxKind.CloseParenToken) { Parent = this };
             SyntaxKind = DSyntaxKind.ArgumentList;
         }
+
+        public DArgumentListSyntax WithOpenParenToken(DSyntaxToken openParenToken)
+        {
+            var newArgumentList = Clone();
+            newArgumentList.OpenParenToken = openParenToken;
+            openParenToken.Parent = newArgumentList;
+            return newArgumentList;
+        }
+
+        public DArgumentListSyntax WithCloseParenToken(DSyntaxToken closeParenToken)
+        {
+            var newArgumentList = Clone();
+            newArgumentList.CloseParenToken = closeParenToken;
+            closeParenToken.Parent = newArgumentList;
+            return newArgumentList;
+        }
+
+        private DArgumentListSyntax Clone()
+        {
+            var newArgumentList = new DArgumentListSyntax
+            {
+                Arguments = Arguments,
+                OpenParenToken = OpenParenToken,
+                CloseParenToken = CloseParenToken
+            };
+
+            Arguments.SetParent(newArgumentList);
+            OpenParenToken.Parent = newArgumentList;
+            CloseParenToken.Parent = newArgumentList;
+            return newArgumentList;
+        }
     }
 
-    public class DMemberDeclarationSyntax : DSyntaxNode
+    public abstract class DMemberDeclarationSyntax : DSyntaxNode
     {
-
+        protected override abstract List<IDSyntax> Children { get; }
     }
 
     public class DGlobalStatementSyntax : DMemberDeclarationSyntax
@@ -291,24 +321,23 @@ namespace DSharpCodeAnalysis.Syntax
         }
     }
 
-    public class DTypeSyntax : DExpressionSyntax
+    public abstract class DTypeSyntax : DExpressionSyntax
     {
-
+        protected override abstract List<IDSyntax> Children { get; }
     }
 
     public class DPredefinedTypeSyntax : DTypeSyntax
     {
         public DSyntaxToken Keyword { get; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Keyword };
+        //public override int Width => ChildNodesAndTokens().Sum(i => i.Span.Length);
 
         public DPredefinedTypeSyntax(DSyntaxToken keyword)
         {
+            //todo: update parent in factory
             keyword.Parent = this;
             Keyword = keyword;
             SyntaxKind = DSyntaxKind.PredefinedType;
-            Children = new List<IDSyntax>
-            {
-                keyword
-            };
         }
     }
 
@@ -398,9 +427,9 @@ namespace DSharpCodeAnalysis.Syntax
         }
     }
 
-    public class DStatementSyntax : DSyntaxNode
+    public abstract class DStatementSyntax : DSyntaxNode
     {
-
+        protected override abstract List<IDSyntax> Children { get; }
     }
 
     public class DExpressionStatementSyntax : DStatementSyntax
@@ -428,9 +457,9 @@ namespace DSharpCodeAnalysis.Syntax
         }
     }
 
-    public class DExpressionSyntax : DSyntaxNode
+    public abstract class DExpressionSyntax : DSyntaxNode
     {
-
+        protected override abstract List<IDSyntax> Children { get; }
     }
 
     public class DBinaryExpressionSyntax : DExpressionSyntax
@@ -439,6 +468,7 @@ namespace DSharpCodeAnalysis.Syntax
         public DSyntaxToken OperatorToken { get; set; }
         public DExpressionSyntax Right { get; set; }
         protected override List<IDSyntax> Children => new List<IDSyntax> { Left, OperatorToken, Right };
+        //public override int Width => ChildNodesAndTokens().Sum(i => i.FullSpan.Length);
 
         public DBinaryExpressionSyntax(DSyntaxKind syntaxKind, DExpressionSyntax left, DExpressionSyntax right)
         {
@@ -467,6 +497,15 @@ namespace DSharpCodeAnalysis.Syntax
         public DSyntaxToken ReturnKeyword { get; set; }
         public DSyntaxToken SemicolonToken { get; set; }
         protected override List<IDSyntax> Children => new List<IDSyntax> { ReturnKeyword, Expression, SemicolonToken };
+        //public override Span Span
+        //{
+        //    get
+        //    {
+        //        var firstToken = ChildTokens().FirstOrDefault();
+        //        var leadingTriviaLength = firstToken?.LeadingTrivia.Sum(t => t.FullSpan.Length) ?? 0;
+        //        return new Span(Position + leadingTriviaLength, Width - leadingTriviaLength);
+        //    }
+        //}
 
         public DReturnStatementSyntax(DExpressionSyntax expression)
         {
@@ -587,6 +626,7 @@ namespace DSharpCodeAnalysis.Syntax
     {
         public DSyntaxToken Identifier { get; set; }
         protected override List<IDSyntax> Children => new List<IDSyntax> { Identifier };
+        //public override int Width => ChildNodesAndTokens().Sum(i => i.Span.Length);
 
         public DIdentifierNameSyntax(DSyntaxToken identifierToken)
         {
@@ -710,9 +750,11 @@ namespace DSharpCodeAnalysis.Syntax
 
         public DMethodDeclarationSyntax WithBody(DBlockSyntax body)
         {
+            if (body == null) return this;
+
             var newMethodDeclaration = Clone();
-            body.Parent = newMethodDeclaration;
             newMethodDeclaration.Body = body;
+            body.Parent = newMethodDeclaration;
             return newMethodDeclaration;
         }
 

@@ -13,17 +13,17 @@ namespace DSharpCodeAnalysisTests
         {
             var nodes = new List<IDSyntax>
             {
-                new DSyntaxNode(),
+                new DPredefinedTypeSyntax(DSyntaxFactory.Token(DSyntaxKind.IntKeyword)),
                 DSyntaxFactory.Token(DSyntaxKind.CommaToken),
-                new DSyntaxNode(),
+                new DPredefinedTypeSyntax(DSyntaxFactory.Token(DSyntaxKind.IntKeyword)),
                 DSyntaxFactory.Token(DSyntaxKind.CommaToken),
-                new DSyntaxNode(),
+                new DPredefinedTypeSyntax(DSyntaxFactory.Token(DSyntaxKind.IntKeyword)),
                 DSyntaxFactory.Token(DSyntaxKind.CommaToken),
-                new DSyntaxNode(),
+                new DPredefinedTypeSyntax(DSyntaxFactory.Token(DSyntaxKind.IntKeyword)),
                 DSyntaxFactory.Token(DSyntaxKind.CommaToken),
-                new DSyntaxNode(),
+                new DPredefinedTypeSyntax(DSyntaxFactory.Token(DSyntaxKind.IntKeyword)),
                 DSyntaxFactory.Token(DSyntaxKind.CommaToken),
-                new DSyntaxNode(),
+                new DPredefinedTypeSyntax(DSyntaxFactory.Token(DSyntaxKind.IntKeyword)),
             };
             var list = DSyntaxFactory.SeparatedList<DSyntaxNode>(nodes);
 

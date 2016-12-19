@@ -30,7 +30,7 @@ namespace DSharpCodeAnalysis.Parser
             var compilation = DSyntaxFactory.CompilationUnit();
 
             var members = new List<DMemberDeclarationSyntax>();
-            for (var i = 0; i < 1; i++)
+            for (var i = 0; i < 2; i++)
             {
                 members.Add(ParseMemberDeclarationOrStatement());
             }
@@ -46,26 +46,65 @@ namespace DSharpCodeAnalysis.Parser
             if (currentToken.SyntaxKind == DSyntaxKind.ClassKeyword)
                 return ParseTypeDeclaration();
             var returnType = ParseType();
-            var identifier = ParseIdentifier();
-            var memberDeclaration = ParseMethodDeclaration(returnType, identifier);
+            if (IsFieldDeclaration())
+                return ParseNormalFieldDeclaration(returnType);
+            return ParseMethodDeclaration(returnType);
+        }
 
-            return memberDeclaration;
+        public DFieldDeclarationSytnax ParseNormalFieldDeclaration(DTypeSyntax returnType)
+        {
+            var variable = ParseVariableDeclarator();
+            var semicolonToken = EatToken(DSyntaxKind.SemicolonToken);
+            var field = DSyntaxFactory.FieldDeclaration(DSyntaxFactory.VariableDeclaration(returnType)
+                .WithVariables(DSyntaxFactory.SingletonSeparatedList(variable))).WithSemicolonToken(semicolonToken);
+            return field;
+        }
+
+        public DVariableDeclaratorSyntax ParseVariableDeclarator()
+        {
+            var identifier = ParseIdentifierToken();
+            switch (currentToken.SyntaxKind)
+            {
+                case DSyntaxKind.EqualsToken:
+                    var equalsToken = EatToken(DSyntaxKind.EqualsToken);
+                    var expression = ParseExpression();
+                    var equalsValueClause = DSyntaxFactory.EqualsValueClause(expression).WithEqualsToken(equalsToken);
+                    return DSyntaxFactory.VariableDeclarator(identifier).WithInitializer(equalsValueClause);
+                default:
+                    throw new ArgumentException($"Invalid switch in 'ParseVariableDeclarator': {currentToken.SyntaxKind}");
+            }
+        }
+
+        private bool IsFieldDeclaration()
+        {
+            if (currentToken.SyntaxKind != DSyntaxKind.IdentifierToken)
+                return false;
+
+            var nextToken = PeekToken();
+            switch (nextToken.SyntaxKind)
+            {
+                case DSyntaxKind.OpenParenToken:
+                    return false;
+                default: return true;
+            }
         }
 
         private DTypeSyntax ParseType()
         {
-            var typeToken = EatToken();
-            return DSyntaxFactory.PredefinedType(typeToken);
+            if (DSyntaxCache.IsPredefinedType(currentToken.SyntaxKind))
+                return DSyntaxFactory.PredefinedType(EatToken());
+            return ParseIdentifierName();
         }
 
-        private DSyntaxToken ParseIdentifier()
+        private DIdentifierNameSyntax ParseIdentifierName()
         {
             var typeToken = EatToken(DSyntaxKind.IdentifierToken);
-            return typeToken;
+            return DSyntaxFactory.IdentifierName(typeToken);
         }
 
-        private DMethodDeclarationSyntax ParseMethodDeclaration(DTypeSyntax returnType, DSyntaxToken identifier)
+        private DMethodDeclarationSyntax ParseMethodDeclaration(DTypeSyntax returnType)
         {
+            var identifier = ParseIdentifierToken();
             var parameterList = ParseParenthesizedParameterList();
             DBlockSyntax body;
             DSyntaxToken semicolonToken;
@@ -102,7 +141,115 @@ namespace DSharpCodeAnalysis.Parser
 
         public DSyntaxList<DStatementSyntax> ParseStatements()
         {
-            return DSyntaxFactory.List<DStatementSyntax>();
+            var statement = ParseStatement();
+            return DSyntaxFactory.SingletonList(statement);
+        }
+
+        public DStatementSyntax ParseStatement()
+        {
+            var statement = ParseStatementNoDeclaration();
+            return statement;
+        }
+
+        public DStatementSyntax ParseStatementNoDeclaration()
+        {
+
+            return ParseReturnStatement();
+        }
+
+        public DStatementSyntax ParseReturnStatement()
+        {
+            var returnToken = EatToken(DSyntaxKind.ReturnKeyword);
+            var expression = ParseExpression();
+            var semicolonToken = EatToken(DSyntaxKind.SemicolonToken);
+            return DSyntaxFactory.ReturnStatement(expression).WithReturnKeyword(returnToken)
+                .WithSemicolonToken(semicolonToken);
+        }
+
+        public DExpressionSyntax ParseExpression()
+        {
+            var leftOperand = ParseTerm();
+            DSyntaxKind opKind = GetBinaryExpression(currentToken.SyntaxKind);
+            if (opKind != DSyntaxKind.Null)
+            {
+                var operatorToken = EatToken();
+                leftOperand = DSyntaxFactory.BinaryExpression(opKind, leftOperand, ParseExpression())
+                    .WithOperatorToken(operatorToken);
+            }
+
+            return leftOperand;
+        }
+
+        private DSyntaxKind GetBinaryExpression(DSyntaxKind token)
+        {
+            switch (token)
+            {
+                case DSyntaxKind.PlusToken:
+                    return DSyntaxKind.AddExpression;
+                default:
+                    return DSyntaxKind.Null;
+            }
+        }
+
+        public DExpressionSyntax ParseTerm()
+        {
+            DExpressionSyntax expression = null;
+            switch (currentToken.SyntaxKind)
+            {
+                case DSyntaxKind.IdentifierToken:
+                    expression = ParseAliasQualifiedName();
+                    break;
+                case DSyntaxKind.NumericLiteralToken:
+                    expression = DSyntaxFactory.LiteralExpression(DSyntaxCache.GetLiteralExpression(currentToken.SyntaxKind), EatToken());
+                    break;
+                default: throw new ArgumentException("Invalid switch in ParseTerm()");
+            }
+            return ParsePostFixExpression(expression);
+        }
+
+        public DExpressionSyntax ParsePostFixExpression(DExpressionSyntax expression)
+        {
+            top:
+            switch (currentToken.SyntaxKind)
+            {
+                case DSyntaxKind.OpenParenToken:
+                    var arguments = ParseParenthesizedArgumentList();
+                    expression = DSyntaxFactory.InvocationExpression(expression).WithArgumentList(arguments);
+                    goto top;
+                default: return expression;
+            }
+        }
+
+        private DArgumentListSyntax ParseParenthesizedArgumentList()
+        {
+            var openToken = EatToken(DSyntaxKind.OpenParenToken);
+            var arguments = DSyntaxFactory.SeparatedList<DArgumentSyntax>();
+            if (currentToken.SyntaxKind != DSyntaxKind.CloseParenToken)
+            {
+                arguments.Add(ParseArgumentExpression());
+            }
+            while (currentToken.SyntaxKind != DSyntaxKind.CloseParenToken)
+            {
+                arguments.AddSeperator(EatToken(DSyntaxKind.CommaToken));
+                arguments.Add(ParseArgumentExpression());
+            }
+            var closeParenToken = EatToken(DSyntaxKind.CloseParenToken);
+
+            return DSyntaxFactory.ArgumentList(arguments)
+                .WithOpenParenToken(openToken).WithCloseParenToken(closeParenToken);
+        }
+
+        private DArgumentSyntax ParseArgumentExpression()
+        {
+            var expression = ParseTerm();
+            return DSyntaxFactory.Argument(expression);
+        }
+
+        public DTypeSyntax ParseAliasQualifiedName()
+        {
+            var nameSyntax = ParseIdentifierName();
+
+            return nameSyntax;
         }
 
         private DParameterListSyntax ParseParenthesizedParameterList()
@@ -137,7 +284,7 @@ namespace DSharpCodeAnalysis.Parser
         private DParameterSyntax ParseParameter()
         {
             var type = ParseType();
-            var identifier = ParseIdentifier();
+            var identifier = ParseIdentifierToken();
             var parameter = DSyntaxFactory.Parameter(identifier).WithType(type);
             return parameter;
         }
@@ -168,7 +315,7 @@ namespace DSharpCodeAnalysis.Parser
 
         private DSyntaxToken PeekToken(int n = 1)
         {
-            return _lexedTokens[n];
+            return _lexedTokens[_tokenOffset + n];
         }
 
         private DSyntaxToken EatToken()
