@@ -47,14 +47,15 @@ namespace DSharpCodeAnalysis.Parser
                 return ParseTypeDeclaration();
             var statement = ParseStatementNoDeclaration();
             if (statement != null) return DSyntaxFactory.GlobalStatement(statement);
-            var returnType = ParseType();
+
             if (IsFieldDeclaration())
-                return ParseNormalFieldDeclaration(returnType);
-            return ParseMethodDeclaration(returnType);
+                return ParseNormalFieldDeclaration();
+            return ParseMethodDeclaration();
         }
 
-        public DFieldDeclarationSytnax ParseNormalFieldDeclaration(DTypeSyntax returnType)
+        public DFieldDeclarationSytnax ParseNormalFieldDeclaration()
         {
+            var returnType = ParseType();
             var variable = ParseVariableDeclarator();
             var semicolonToken = EatToken(DSyntaxKind.SemicolonToken);
             var field = DSyntaxFactory.FieldDeclaration(DSyntaxFactory.VariableDeclaration(returnType)
@@ -114,8 +115,10 @@ namespace DSharpCodeAnalysis.Parser
             return DSyntaxFactory.IdentifierName(typeToken);
         }
 
-        private DMethodDeclarationSyntax ParseMethodDeclaration(DTypeSyntax returnType)
+        private DMethodDeclarationSyntax ParseMethodDeclaration()
         {
+            var functionKeyword = EatToken(DSyntaxKind.FunctionKeyword);
+            var returnType = ParseType();
             var identifier = ParseIdentifierToken();
             var parameterList = ParseParenthesizedParameterList();
             DBlockSyntax body;
@@ -123,7 +126,7 @@ namespace DSharpCodeAnalysis.Parser
 
             ParseBlockAndExpressionBodiesWithSemicolon(out body, out semicolonToken);
             var method = DSyntaxFactory.MethodDeclaration(returnType, identifier)
-                .WithParameterList(parameterList).WithBody(body).WithSemicolonToken(semicolonToken);
+                .WithParameterList(parameterList).WithBody(body).WithSemicolonToken(semicolonToken).WithFunctionKeyword(functionKeyword);
             return method;
         }
 

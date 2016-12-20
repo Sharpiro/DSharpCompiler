@@ -7,6 +7,9 @@ namespace DSharpCodeAnalysis.Syntax
     public enum DSyntaxKind
     {
         Null,
+
+        FunctionKeyword = 5000,
+
         OpenParenToken = 8200,
         CloseParenToken = 8201,
         PlusToken = 8203,
@@ -75,6 +78,8 @@ namespace DSharpCodeAnalysis.Syntax
     {
         private readonly IEnumerable<DSyntaxEntry> _entires = new List<DSyntaxEntry>
         {
+            new DSyntaxEntry("func", DSyntaxKind.FunctionKeyword),
+
             new DSyntaxEntry("(", DSyntaxKind.OpenParenToken),
             new DSyntaxEntry(")", DSyntaxKind.CloseParenToken),
             new DSyntaxEntry("+", DSyntaxKind.PlusToken),

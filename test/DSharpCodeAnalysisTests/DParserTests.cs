@@ -95,7 +95,7 @@ namespace DSharpCodeAnalysisTests
         public void MethodBlockParseTest()
         {
             var source =
-@"int Add(int x, int y)
+@"func int Add(int x, int y)
 {
     var temp = 2;
     return x + y;
@@ -105,19 +105,19 @@ var temp = 3;".Replace(Environment.NewLine, "\n");
             var lexer = new DLexer(source);
             var lexedTokens = lexer.Lex();
             var parser = new DParser(lexedTokens);
-            var cScript = CSharpScript.Create<int>(source).WithDefaultOptions(); ;
-            var scriptState = cScript.RunAsync().Result;
-            var returnValue = scriptState.ReturnValue;
+            //var cScript = CSharpScript.Create<int>(source).WithDefaultOptions(); ;
+            //var scriptState = cScript.RunAsync().Result;
+            //var returnValue = scriptState.ReturnValue;
 
-            var cCompilationUnit = cScript.GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
+            //var cCompilationUnit = cScript.GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
             var dCompilationUnit = parser.ParseCompilationUnit();
-            var cString = cCompilationUnit.ToString();
+            //var cString = cCompilationUnit.ToString();
             var dString = dCompilationUnit.ToString();
-            var dScript = CSharpScript.Create(dString).WithDefaultOptions();
-            var issues = dScript.Compile();
+            //var dScript = CSharpScript.Create(dString).WithDefaultOptions();
+            //var issues = dScript.Compile();
 
-            Assert.False(issues.Any(i => i.Severity == DiagnosticSeverity.Error));
-            Assert.Equal(source, cString);
+            //Assert.False(issues.Any(i => i.Severity == DiagnosticSeverity.Error));
+            //Assert.Equal(source, cString);
             Assert.Equal(source, dString);
         }
     }

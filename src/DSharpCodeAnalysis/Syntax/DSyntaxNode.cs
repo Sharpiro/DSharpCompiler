@@ -32,8 +32,6 @@ namespace DSharpCodeAnalysis.Syntax
         }
         public int FullWidth => ChildNodesAndTokens().Sum(c => c.FullSpan.Length);
 
-
-
         public IEnumerable<DSyntaxNode> ChildNodes()
         {
             var descendants = DescendantNodesAndTokens().OfType<DSyntaxNode>().ToList();
@@ -743,16 +741,18 @@ namespace DSharpCodeAnalysis.Syntax
     public class DMethodDeclarationSyntax : DMemberDeclarationSyntax
     {
         public DSyntaxTokenList Modifiers { get; set; }
+        public DSyntaxToken FunctionKeyword { get; set; }
         public DTypeSyntax ReturnType { get; set; }
         public DSyntaxToken Identifier { get; set; }
         public DParameterListSyntax ParameterList { get; set; }
         public DBlockSyntax Body { get; set; }
         public DSyntaxToken SemicolonToken { get; set; }
-        protected override List<IDSyntax> Children => new List<IDSyntax>(Modifiers) { ReturnType, Identifier, ParameterList, Body, SemicolonToken }.Where(i => i != null).ToList();
+        protected override List<IDSyntax> Children => new List<IDSyntax>(Modifiers) { FunctionKeyword, ReturnType, Identifier, ParameterList, Body, SemicolonToken }.Where(i => i != null).ToList();
 
         public DMethodDeclarationSyntax(DTypeSyntax returnType, DSyntaxToken identifierToken)
         {
             returnType.Parent = this;
+            FunctionKeyword = DSyntaxFactory.Token(DSyntaxKind.FunctionKeyword);
             ReturnType = returnType;
             identifierToken.Parent = this;
             Identifier = identifierToken;
@@ -794,6 +794,14 @@ namespace DSharpCodeAnalysis.Syntax
             parameterList.Parent = newMethodDeclaration;
             newMethodDeclaration.ParameterList = parameterList;
             return newMethodDeclaration;
+        }
+
+        public DMethodDeclarationSyntax WithFunctionKeyword(DSyntaxToken functionKeyword)
+        {
+            var newMethod = Clone();
+            functionKeyword.Parent = newMethod;
+            newMethod.FunctionKeyword = functionKeyword;
+            return newMethod;
         }
 
         private DMethodDeclarationSyntax Clone()
