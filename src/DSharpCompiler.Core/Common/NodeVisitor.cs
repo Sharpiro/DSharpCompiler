@@ -1,20 +1,33 @@
-﻿using DSharpCompiler.Core.Common.Models;
-using DSharpCompiler.Core.DSharp;
+﻿using DSharpCompiler.Core.Common.Exceptions;
+using DSharpCompiler.Core.Common.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace DSharpCompiler.Core.Common
 {
     public class NodeVisitor
     {
         private SymbolsTable _symbols;
+        private readonly TypesTable _typesTable;
+        private readonly StringBuilder _console = new StringBuilder();
 
-        public SymbolsTable VisitNodes(Node root)
+        public NodeVisitor(TypesTable typesTable)
+        {
+            _typesTable = typesTable;
+        }
+
+        public InterpretResult VisitNodes(Node root)
         {
             _symbols = new SymbolsTable();
             Visit(root);
-            return _symbols;
+            var interpretResult = new InterpretResult
+            {
+                SymbolsTable = _symbols,
+                ConsoleOutput = _console.ToString()
+            };
+            return interpretResult;
         }
 
         private object Visit(Node node)
@@ -22,43 +35,47 @@ namespace DSharpCompiler.Core.Common
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
 
-            if (node.Type == NodeType.Compound)
+            if (node.NodeType == NodeType.Compound)
             {
                 return VisitCompoundNode(node);
             }
-            if (node.Type == NodeType.Conditional)
+            else if (node.NodeType == NodeType.CustomType)
+            {
+                return VisitCustomTypeNode(node);
+            }
+            else if (node.NodeType == NodeType.Conditional)
             {
                 return VisitConditionalNode(node);
             }
-            else if (node.Type == NodeType.Assignment)
+            else if (node.NodeType == NodeType.Assignment)
             {
                 return VisitAssignmentNode(node);
             }
-            else if (node.Type == NodeType.Variable)
+            else if (node.NodeType == NodeType.Variable)
             {
                 return VisitVariableNode(node);
             }
-            else if (node.Type == NodeType.BinaryOp)
+            else if (node.NodeType == NodeType.BinaryOp)
             {
                 return VisitBinaryOpNode(node);
             }
-            else if (node.Type == NodeType.UnaryOp || node.Type == NodeType.Return)
+            else if (node.NodeType == NodeType.UnaryOp || node.NodeType == NodeType.Return)
             {
                 return VisitUnaryOpNode(node);
             }
-            else if (node.Type == NodeType.Numeric)
+            else if (node.NodeType == NodeType.Numeric)
             {
                 return VisitNumericNode(node);
             }
-            else if (node.Type == NodeType.String)
+            else if (node.NodeType == NodeType.String)
             {
                 return VisitStringNode(node);
             }
-            else if (node.Type == NodeType.Routine)
+            else if (node.NodeType == NodeType.Routine)
             {
                 return VisitRoutineNode(node);
             }
-            else if (node.Type == NodeType.Empty)
+            else if (node.NodeType == NodeType.Empty)
             {
                 return VisitEmptyNode(node);
             }
@@ -79,6 +96,16 @@ namespace DSharpCompiler.Core.Common
             }
             else
                 _symbols.Add(compoundNode.Name, new Symbol(compoundNode));
+            return null;
+        }
+
+        private int? VisitCustomTypeNode(Node node)
+        {
+            var customTypeNode = node.Cast<CustomTypeNode>();
+            foreach (CompoundNode compoundNode in customTypeNode.Children)
+            {
+                VisitCompoundNode(compoundNode);
+            }
             return null;
         }
 
@@ -103,7 +130,7 @@ namespace DSharpCompiler.Core.Common
         {
             var assignmentNode = node as BinaryNode;
             var left = assignmentNode.Left as VariableNode;
-            var variableName = left.Value;
+            var variableName = (string)left.Value;
             _symbols.Add(variableName, new Symbol(Visit(assignmentNode.Right)));
             return null;
         }
@@ -111,9 +138,9 @@ namespace DSharpCompiler.Core.Common
         private object VisitVariableNode(Node node)
         {
             var variableNode = node as VariableNode;
-            var symbol = _symbols.Get(variableNode.Value);
+            var symbol = _symbols.Get((string)variableNode.Value);
             if (symbol == null)
-                throw new NullReferenceException("tried to use a variable that was null");
+                throw new VariableNotFoundException("tried to use a variable that was null");
             if (symbol.Type == typeof(int))
             {
                 return symbol.Value;
@@ -178,14 +205,14 @@ namespace DSharpCompiler.Core.Common
 
         private int? VisitNumericNode(Node node)
         {
-            var valueNode = node as NumericNode;
-            return valueNode.Value;
+            var valueNode = node as VariableNode;
+            return Convert.ToInt32(valueNode.Value);
         }
 
         private string VisitStringNode(Node node)
         {
-            var valueNode = node as StringNode;
-            return valueNode.Value;
+            var valueNode = node as VariableNode;
+            return (string)valueNode.Value;
         }
 
         private IEnumerable<object> VisitArgumentNodes(IEnumerable<Node> nodes)
@@ -201,15 +228,25 @@ namespace DSharpCompiler.Core.Common
         private object VisitRoutineNode(Node node)
         {
             var routineNode = node as RoutineNode;
-            var symbol = _symbols.Get(routineNode.RoutineName);
+            var callingType = _typesTable.GetCallingType(routineNode.Name);
+            return callingType == null || callingType == typeof(object)
+                ? VisitDSharpRoutineNode(routineNode)
+                : VisitLibraryRoutineNode(routineNode, callingType);
+        }
+
+        private object VisitDSharpRoutineNode(RoutineNode node)
+        {
+            var symbol = _symbols.Get(node.Name);
+            if (symbol == null)
+                throw new TypeNotFoundException(node.Name);
             var compoundNode = symbol.Value as CompoundNode;
             object returnValue = null;
-            var argumentNodes = VisitArgumentNodes(routineNode.Arguments);
+            var argumentNodes = VisitArgumentNodes(node.Arguments);
             _symbols.AddNewScope();
             _symbols.AddNodes(compoundNode.Parameters, argumentNodes);
-            if (compoundNode.Type == NodeType.Conditional)
+            if (compoundNode.NodeType == NodeType.Conditional)
                 _symbols.AddParentScopes();
-            foreach (var child in compoundNode.Children.Where(c => c.Type != NodeType.Empty))
+            foreach (var child in compoundNode.Children.Where(c => c.NodeType != NodeType.Empty))
             {
                 returnValue = Visit(child);
                 if (returnValue != null)
@@ -217,6 +254,19 @@ namespace DSharpCompiler.Core.Common
             }
             _symbols.RemoveCurrentScope();
             return returnValue;
+        }
+
+        private object VisitLibraryRoutineNode(RoutineNode node, Type callingType)
+        {
+            var method = _typesTable.GetSubroutine(node.Name);
+            var argumentValues = node.Arguments.Select(a => Visit(a)).ToArray();
+            var result = method.DynamicInvoke(argumentValues);
+            if (callingType == typeof(DConsole))
+            {
+                _console.AppendLine(result.ToString());
+                return null;
+            }
+            return result;
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using DSharpCompiler.Core.Common;
-using DSharpCompiler.Core.DSharp;
 using Xunit;
-using System;
+using DSharpCompiler.Core.Common.Exceptions;
 
 namespace DSharpCompiler.Core.Tests
 {
@@ -11,22 +10,18 @@ namespace DSharpCompiler.Core.Tests
         public void SimpleIsTrueTest()
         {
             var code = @"
-                func doWork()
+                func int doWork()
                 {
                     if (2 eq 2)
                     {
                         return 1;
                     };
-                    return 0;
+                    return 2;
                 };
                 let b = doWork();";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
+            var b = dictionary.SymbolsTable.GetValue<object>("b");
             Assert.Equal(1, b);
         }
 
@@ -34,7 +29,7 @@ namespace DSharpCompiler.Core.Tests
         public void SimpleIsFalseTest()
         {
             var code = @"
-                func doWork()
+                func int doWork()
                 {
                     if (2 eq 3)
                     {
@@ -43,13 +38,9 @@ namespace DSharpCompiler.Core.Tests
                     return 0;
                 };
                 let b = doWork();";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
+            var b = dictionary.SymbolsTable.GetValue<int>("b");
             Assert.Equal(0, b);
         }
 
@@ -57,7 +48,7 @@ namespace DSharpCompiler.Core.Tests
         public void VariableTest()
         {
             var code = @"
-                func doWork(n)
+                func int doWork(int n)
                 {
                     if (n eq 2)
                     {
@@ -66,13 +57,9 @@ namespace DSharpCompiler.Core.Tests
                     return 0;
                 };
                 let b = doWork(2);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
+            var b = dictionary.SymbolsTable.GetValue<int>("b");
             Assert.Equal(1, b);
         }
 
@@ -80,7 +67,7 @@ namespace DSharpCompiler.Core.Tests
         public void RecursionTest()
         {
             var code = @"
-                func fib(n)
+                func int fib(int n)
                 {
                     if (n eq 0)
                     {
@@ -93,13 +80,9 @@ namespace DSharpCompiler.Core.Tests
                     return fib(n - 2) + fib(n - 1);
                 };
                 let b = fib(25);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
+            var b = dictionary.SymbolsTable.GetValue<int>("b");
             Assert.Equal(75025, b);
         }
 
@@ -107,21 +90,18 @@ namespace DSharpCompiler.Core.Tests
         public void BlockInTest()
         {
             var code = @"
-                func test(n)
+                func int test(int n)
                 {
                     if (n eq 9)
                     {
                         return n;
                     };
+                    return 0;
                 };
                 let b = test(9);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int?>("b");
+            var b = dictionary.SymbolsTable.GetValue<int?>("b");
             Assert.Equal(9, b);
         }
 
@@ -129,7 +109,7 @@ namespace DSharpCompiler.Core.Tests
         public void BlockOutTest()
         {
             var code = @"
-                func test(n)
+                func int test(int n)
                 {
                     if (n eq 9)
                     {
@@ -138,13 +118,9 @@ namespace DSharpCompiler.Core.Tests
                     return x;
                 };
                 let b = test(9);";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var expectedMessage = "tried to use a variable that was null";
-            var exception = Assert.Throws<NullReferenceException>(() => interpreter.Interpret(code));
+            var exception = Assert.Throws<VariableNotFoundException>(() => interpreter.Interpret(code));
             Assert.Equal(expectedMessage, exception.Message);
         }
     }

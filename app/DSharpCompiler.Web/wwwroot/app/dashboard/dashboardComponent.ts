@@ -12,19 +12,41 @@ import {CustomPipe, LowerCasePipe} from "../blocks/blocks"
 export class DashboardComponent
 {
     private defaultInput =
-`func fib(n)
+`type functions
 {
-    if (n eq 0)
+    func int add(int x, int y)
     {
-        return 0;
+        return x + y;
     };
-    if (n eq 1)
+
+    func int fib(int n)
     {
-        return 1;
+        if (n eq 0)
+        {
+            return 0;
+        };
+        if (n eq 1)
+        {
+            return 1;
+        };
+        return functions.fib(n - 2) + functions.fib(n - 1);
     };
-    return fib(n - 2) + fib(n - 1);
 };
-let b = fib(18);`;
+type moreFunctions
+{
+    func int subtract(int x, int y)
+    {
+        return x - y;
+    };
+};
+let b = functions.add(2, 6);
+let c = moreFunctions.subtract(2, 6);
+let d = b - c;
+let e = functions.fib(18);
+dConsole.printInt(b);
+dConsole.printInt(c);
+dConsole.printInt(d);
+dConsole.printInt(e);`;
     private input = this.defaultInput;
     private output: Observable<any>;
 

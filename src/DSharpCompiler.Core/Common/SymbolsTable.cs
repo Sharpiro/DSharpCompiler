@@ -48,6 +48,11 @@ namespace DSharpCompiler.Core.Common
         public Symbol Get(string index)
         {
             Symbol symbol = null;
+
+            var resultMain = _globalData.TryGetValue($"main.{index}", out symbol);
+            if (resultMain)
+                return symbol;
+
             var result = _globalData.TryGetValue(index, out symbol);
             if (result)
                 return symbol;
@@ -101,7 +106,7 @@ namespace DSharpCompiler.Core.Common
                 return;
             for (var i = 0; i < parameters.Count(); i++)
             {
-                Add(parameters[i].Value, new Symbol(arguments[i]));
+                Add((string)parameters[i].Value, new Symbol(arguments[i]));
             }
         }
 

@@ -1,5 +1,4 @@
 ﻿using DSharpCompiler.Core.Common;
-using DSharpCompiler.Core.Pascal;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
@@ -10,13 +9,9 @@ namespace DSharpCompiler.Core.Tests
         public void AddtionTest()
         {
             var code = "BEGIN a := 1+1+1 END.";
-            var pascalTokens = new PascalTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new PascalParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.GetValue<int>("a");
+            var result = dictionary.SymbolsTable.GetValue<int>("a");
             Assert.Equal(3, result);
         }
 
@@ -24,13 +19,9 @@ namespace DSharpCompiler.Core.Tests
         public void MultiplicationTest()
         {
             var code = "BEGIN a := 5*3 END.";
-            var pascalTokens = new PascalTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new PascalParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.GetValue<int>("a");
+            var result = dictionary.SymbolsTable.GetValue<int>("a");
             Assert.Equal(15, result);
         }
 
@@ -38,13 +29,9 @@ namespace DSharpCompiler.Core.Tests
         public void DivisionTest()
         {
             var code = "BEGIN a := 12/3 END.";
-            var pascalTokens = new PascalTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new PascalParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.GetValue<int>("a");
+            var result = dictionary.SymbolsTable.GetValue<int>("a");
             Assert.Equal(4, result);
         }
 
@@ -52,13 +39,9 @@ namespace DSharpCompiler.Core.Tests
         public void ContinuousOperationsTest()
         {
             var code = "BEGIN a := 9 - 5 + 3 + 11 END.";
-            var pascalTokens = new PascalTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new PascalParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.GetValue<int>("a");
+            var result = dictionary.SymbolsTable.GetValue<int>("a");
             Assert.Equal(18, result);
         }
 
@@ -66,13 +49,9 @@ namespace DSharpCompiler.Core.Tests
         public void MultiplicationAndDivisionTest()
         {
             var code = "BEGIN a := 7 * 4 / 2 * 3 END.";
-            var pascalTokens = new PascalTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new PascalParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetPascalInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var result = dictionary.GetValue<int>("a");
+            var result = dictionary.SymbolsTable.GetValue<int>("a");
             Assert.Equal(42, result);
         }
     }

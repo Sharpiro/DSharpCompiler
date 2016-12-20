@@ -1,24 +1,34 @@
 ﻿using DSharpCompiler.Core.Common;
+using DSharpCompiler.Core.Common.Exceptions;
 using DSharpCompiler.Core.Common.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace DSharpCompiler.Core.DSharp
 {
     public class DSharpParser : ITokenParser
     {
+        private readonly TypesTable _typesTable;
         private IList<Token> _tokens;
         private Token _currentToken;
         private int _currentIndex;
+
+        public DSharpParser(TypesTable typesTable)
+        {
+            _typesTable = typesTable;
+        }
 
         public Node Program(IList<Token> tokens)
         {
             _tokens = tokens;
             _currentToken = _tokens.FirstOrDefault();
             _currentIndex = 0;
-            var children = StatementList();
-            var node = new CompoundNode(children, new List<Node>()) { Name = DsharpConstants.Identifiers.EntryPoint };
+            var node = new CompoundNode(Enumerable.Empty<Node>(), new List<Node>())
+            { Name = DsharpConstants.Identifiers.EntryPoint };
+            var children = StatementList(node);
+            node.Children = children;
             return node;
         }
 
@@ -35,48 +45,89 @@ namespace DSharpCompiler.Core.DSharp
             return nodes;
         }
 
-        private Node Parameter()
+        private IEnumerable<Node> ArgumentList(Type parentType)
+        {
+            var node = Argument(parentType);
+
+            var nodes = new List<Node> { node };
+            while (_currentToken?.Value == DsharpConstants.Symbols.Comma)
+            {
+                EatToken(TokenType.Symbol);
+                nodes.Add(Argument(parentType));
+            }
+            return nodes;
+        }
+
+        private Node Argument(Type parentType)
         {
             Node node = null;
             if (_currentToken.Type == TokenType.Identifier || _currentToken.Type == TokenType.NumericConstant
                 || _currentToken.Type == TokenType.StringConstant)
-                node = Expression();
+            {
+                node = Expression(parentType);
+            }
             else
                 node = new EmptyNode();
             return node;
         }
 
-        private IEnumerable<Node> StatementList()
+        private Node Parameter()
         {
-            var node = Statement();
+            Node node = null;
+            if (_currentToken.Type == TokenType.Identifier || _currentToken.Type == TokenType.NumericConstant
+                || _currentToken.Type == TokenType.StringConstant)
+            {
+                var variableType = _typesTable.GetX(_currentToken.Value);
+                if (variableType == null)
+                    throw new ArgumentException($"The type: {_currentToken.Value} does not exist in the current context");
+
+                EatToken(TokenType.Identifier);
+                var variableNode = Variable(variableType);
+                variableNode.ValueType = variableType;
+                node = variableNode;
+            }
+            else
+                node = new EmptyNode();
+            return node;
+        }
+
+        private IEnumerable<Node> StatementList(ParentNode parentNode)
+        {
+            var node = Statement(parentNode);
 
             var nodes = new List<Node> { node };
             while (_currentToken?.Value == DsharpConstants.Symbols.SemiColan)
             {
                 EatToken(TokenType.Symbol);
-                nodes.Add(Statement());
+                nodes.Add(Statement(parentNode));
             }
-            return nodes;
+            return nodes.Where(n => n.NodeType != NodeType.Empty);
         }
 
-        private Node Statement()
+        private Node Statement(ParentNode parentNode)
         {
             Node node = null;
-            if (_currentToken?.Value == DsharpConstants.Keywords.Func)
+            if (_currentToken?.Value == DsharpConstants.Keywords.Type)
             {
-                node = CompoundStatement();
+                var compoundNode = TypeStatement();
+                node = compoundNode;
+            }
+            else if (_currentToken?.Value == DsharpConstants.Keywords.Func)
+            {
+                var compoundNode = CompoundStatement(parentNode);
+                node = compoundNode;
             }
             else if (_currentToken?.Value == DsharpConstants.Keywords.Return)
             {
-                node = ReturnStatement();
+                node = ReturnStatement(parentNode);
             }
             else if (_currentToken?.Value == DsharpConstants.Keywords.Let)
             {
-                node = AssignmentStatement();
+                node = AssignmentStatement(parentNode.ValueType);
             }
             else if (_currentToken?.Value == DsharpConstants.Keywords.If)
             {
-                node = ConditionalStatement();
+                node = ConditionalStatement(parentNode);
             }
             else if (_currentToken?.Type == TokenType.Identifier)
             {
@@ -87,90 +138,155 @@ namespace DSharpCompiler.Core.DSharp
             return node;
         }
 
-        private Node CompoundStatement()
+        private CompoundNode CompoundStatement(ParentNode parentNode)
         {
             EatToken(TokenType.Keyword);
-            var functionName = _currentToken.Value;
+            var functionReturnType = _typesTable.GetX(_currentToken.Value);
+            if (functionReturnType == null)
+                throw new ArgumentException($"The type: {functionReturnType} does not exist in the current context");
+
+            EatToken(TokenType.Identifier);
+            var functionName = $"{parentNode.Name}.{_currentToken.Value}";
             EatToken(TokenType.Identifier);
 
             EatToken(TokenType.Symbol);
             var parameters = ParameterList();
             EatToken(TokenType.Symbol);
-
             EatToken(TokenType.Symbol);
-            var statements = StatementList();
-            var node = new CompoundNode(statements, parameters) { Name = functionName };
+
+            var node = new CompoundNode(Enumerable.Empty<Node>(), parameters) { Name = functionName, ValueType = functionReturnType };
+            _typesTable.Add(node.Name, functionReturnType);
+            var statements = StatementList(node);
+
+            var returnType = GetReturnType(statements);
+            if (returnType != functionReturnType)
+                throw new TypeMismatchException($"Expected return type: {functionReturnType.Name}, but was actually: {returnType.Name}");
+
+            node.Children = statements;
             EatToken(TokenType.Symbol);
             return node;
         }
 
-        private Node ConditionalStatement()
+        private CustomTypeNode TypeStatement()
+        {
+            EatToken(TokenType.Keyword);
+            var customTypeName = _currentToken.Value;
+            EatToken(TokenType.Identifier);
+            EatToken(TokenType.Symbol);
+            var parentNode = new CustomTypeNode
+            {
+                Name = customTypeName,
+                ValueType = typeof(void),
+                NodeType = NodeType.CustomType
+            };
+            _typesTable.Add(customTypeName, typeof(object));
+            var statements = StatementList(parentNode);
+            EatToken(TokenType.Symbol);
+            if (statements.Any(s => s.NodeType != NodeType.Compound))
+                throw new ArgumentException("All memebers of a custom type must be compound functions");
+            parentNode.Children = statements;
+            //foreach (CompoundNode statement in statements)
+            //{
+            //    //var memberName = $"{customTypeName}.{statement.Name}";
+            //    //statement.Name = memberName;
+            //    //_typesTable.Add(statement.Name, statement.ValueType);
+            //}
+            return parentNode;
+        }
+
+        private Node ConditionalStatement(ParentNode parentNode)
         {
             EatToken(TokenType.Keyword);
             EatToken(TokenType.Symbol);
 
-            //condition
-            //var condition = Condition();
-            var expressionOne = Expression();
+            var expressionOne = Expression(parentNode.ValueType);
             EatToken(TokenType.Keyword);
-            var expressionTwo = Expression();
+            var expressionTwo = Expression(parentNode.ValueType);
 
             EatToken(TokenType.Symbol);
             EatToken(TokenType.Symbol);
-            var statements = StatementList();
+            var node = new CompoundNode(Enumerable.Empty<Node>(), new List<Node> { expressionOne, expressionTwo })
+            {
+                NodeType = NodeType.Conditional,
+                ValueType = parentNode.ValueType
+            };
+            var statements = StatementList(node);
             EatToken(TokenType.Symbol);
 
-            var node = new CompoundNode(statements, new List<Node> { expressionOne, expressionTwo })
-            { Type = NodeType.Conditional };
+            var returnType = GetReturnType(statements);
+            if (returnType != typeof(void) && returnType != parentNode.ValueType)
+                throw new TypeMismatchException($"Expected return type: {parentNode.ValueType.Name}, but was actually: {returnType.Name}");
+
+            node.Children = statements;
             return node;
         }
 
-        //private Node Condition()
-        //{
-        //    Node node = null;
-        //    if (_currentToken.Type == TokenType.Keyword)
-        //    {
-        //        var condition = _currentToken.Value;
-        //        EatToken(TokenType.Keyword);
-        //        node = null;
-        //    }
-        //    else
-        //        throw new InvalidOperationException("Invalid condition provided");
-        //    var expressionOne = Expression();
-        //    EatToken(TokenType.Symbol);
-        //    var expressionTwo = Expression();
-        //    return node;
-        //}
-
-        private Node AssignmentStatement()
+        private Node AssignmentStatement(Type parentType)
         {
             EatToken(TokenType.Keyword);
-            var variable = Variable();
+            var variable = Variable(typeof(void));
             var token = _currentToken;
             EatToken(TokenType.Symbol);
-            var node = new BinaryNode(variable, token, Expression()) { Type = NodeType.Assignment };
+            var node = new BinaryNode(variable, token, Expression(parentType)) { NodeType = NodeType.Assignment };
             return node;
         }
 
-        private Node ReturnStatement()
+        private Node ReturnStatement(ParentNode compoundNode)
         {
             var token = _currentToken;
             EatToken(TokenType.Keyword);
-            var node = new UnaryNode(token, Expression()) { Type = NodeType.Return };
+            var expression = Expression(compoundNode.ValueType);
+            if (expression.ValueType == null)
+                expression.ValueType = compoundNode.ValueType;
+            if (expression.ValueType != compoundNode.ValueType)
+                throw new TypeMismatchException($"Expected return type: {compoundNode.ValueType.Name}, but was actually: {expression.ValueType}");
+
+            var node = new UnaryNode(token, expression)
+            {
+                NodeType = NodeType.Return,
+                ValueType = compoundNode.ValueType
+            };
             return node;
         }
 
         private Node RoutineStatement()
         {
-            var token = _currentToken;
+            string routineName;
+            var returnType = GetRoutineType(out routineName);
+
+            EatToken(TokenType.Symbol);
+            var arguments = ArgumentList(returnType);
+            EatToken(TokenType.Symbol);
+
+            var node = new RoutineNode(routineName, arguments) { ValueType = returnType };
+            return node;
+        }
+
+        private Type GetRoutineType(out string routineName)
+        {
+            routineName = _currentToken.Value;
             EatToken(TokenType.Identifier);
 
-            EatToken(TokenType.Symbol);
-            var arguments = ParameterList();
-            EatToken(TokenType.Symbol);
+            var returnType = _typesTable.GetX(routineName);
+            if (returnType == null)
+                throw new TypeNotFoundException($"Could not find type: {routineName}");
 
-            var node = new RoutineNode(token.Value, arguments);
-            return node;
+            if (_currentToken.Value != ".")
+                return returnType;
+
+            EatToken(TokenType.Symbol);
+            var subRoutine = _currentToken.Value;
+            EatToken(TokenType.Identifier);
+
+            routineName = $"{routineName}.{subRoutine}";
+            var x = _typesTable.GetX(routineName);
+            if (x != null)
+                return x;
+
+            returnType = returnType.GetRuntimeMethods()
+                .Single(m => m.Name.Equals(subRoutine, StringComparison.OrdinalIgnoreCase)).ReturnType;
+
+            return returnType;
         }
 
         private Node Empty()
@@ -179,76 +295,82 @@ namespace DSharpCompiler.Core.DSharp
             return node;
         }
 
-        private Node Expression()
+        private Node Expression(Type parentType)
         {
-            var node = Term();
+            var node = Term(parentType);
 
             while (_currentToken != null && _currentToken.Value.In(DsharpConstants.Symbols.Plus
                 , DsharpConstants.Symbols.Minus))
             {
                 var token = _currentToken;
                 EatToken(TokenType.Symbol);
-                node = new BinaryNode(node, token, Term());
+                var x = Term(parentType);
+                if (x.ValueType != node.ValueType)
+                    throw new TypeMismatchException($"Expected return type: {x.ValueType.Name}, but was actually: {node.ValueType}");
+                node = new BinaryNode(node, token, x) { ValueType = parentType };
             }
             return node;
         }
 
-        private Node Term()
+        private Node Term(Type parentType)
         {
-            var node = Factor();
+            var node = Factor(parentType);
             while (_currentToken != null && _currentToken.Value.In(DsharpConstants.Symbols.Multiply
                 , DsharpConstants.Symbols.Divide))
             {
                 var token = _currentToken;
                 EatToken(TokenType.Symbol);
-                node = new BinaryNode(node, token, Factor());
+                node = new BinaryNode(node, token, Factor(parentType)) { ValueType = parentType };
             }
             return node;
         }
 
-        private Node Factor()
+        private Node Factor(Type parentType)
         {
             var token = _currentToken;
             Node node = null;
             if (token.Type == TokenType.NumericConstant)
             {
                 EatToken(TokenType.NumericConstant);
-                node = new NumericNode(token);
+                node = new VariableNode(token, NodeType.Numeric) { ValueType = typeof(int) };
             }
             else if (token.Type == TokenType.StringConstant)
             {
                 EatToken(TokenType.StringConstant);
-                node = new StringNode(token);
+                node = new VariableNode(token, NodeType.String) { ValueType = typeof(string) };
             }
             else if (token.Type == TokenType.Keyword)
             {
                 EatToken(TokenType.Keyword);
-                node = new BooleanNode(token);
+                node = new VariableNode(token, NodeType.Variable);
             }
             else if (token.Value.In(DsharpConstants.Symbols.Plus, DsharpConstants.Symbols.Minus))
             {
                 EatToken(TokenType.Symbol);
-                node = new UnaryNode(token, Factor());
+                node = new UnaryNode(token, Factor(parentType)) { ValueType = parentType };
             }
-            else if (token.Type == TokenType.Identifier &&
-                PeekToken()?.Value == DsharpConstants.Symbols.LeftParenthesis)
+            else if (IsRoutineNode(token))
             {
                 node = RoutineStatement();
             }
             else if (token.Value == DsharpConstants.Symbols.LeftParenthesis)
             {
                 EatToken(TokenType.Symbol);
-                node = Expression();
+                node = Expression(parentType);
                 EatToken(TokenType.Symbol);
             }
             else
-                node = Variable();
+                node = Variable(parentType);
+
             return node;
         }
 
-        private Node Variable()
+        private VariableNode Variable(Type variableType)
         {
-            var node = new VariableNode(_currentToken);
+            var node = new VariableNode(_currentToken, NodeType.Variable)
+            {
+                ValueType = variableType
+            };
             EatToken(TokenType.Identifier);
             return node;
         }
@@ -271,14 +393,36 @@ namespace DSharpCompiler.Core.DSharp
             return null;
         }
 
-        private Token PeekToken()
+        private Token PeekToken(int peekAmount = 1)
         {
             try
             {
-                return _tokens[_currentIndex + 1];
+                return _tokens[_currentIndex + peekAmount];
             }
             catch (ArgumentOutOfRangeException) { }
             return null;
+        }
+
+        private bool IsRoutineNode(Token currentToken)
+        {
+            if (currentToken.Type != TokenType.Identifier) return false;
+
+            int i;
+            for (i = 1; (currentToken = PeekToken(i))?.Value == DsharpConstants.Symbols.Period
+                || currentToken?.Type == TokenType.Identifier; i++)
+            {
+
+            }
+            return PeekToken(i)?.Value == DsharpConstants.Symbols.LeftParenthesis;
+        }
+
+        private Type GetReturnType(IEnumerable<Node> nodes)
+        {
+            var returnType = nodes.SingleOrDefault(s => s.NodeType == NodeType.Return);
+            if (returnType != null)
+                return returnType.ValueType;
+
+            return typeof(void);
         }
     }
 }

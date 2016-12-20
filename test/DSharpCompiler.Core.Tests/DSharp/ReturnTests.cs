@@ -1,5 +1,5 @@
 ﻿using DSharpCompiler.Core.Common;
-using DSharpCompiler.Core.DSharp;
+using System;
 using Xunit;
 
 namespace DSharpCompiler.Core.Tests
@@ -10,18 +10,14 @@ namespace DSharpCompiler.Core.Tests
         public void AssignFunctionTest()
         {
             var code = @"
-                func doWork()
+                func int doWork()
                 {
                     return 2;
                 };
                 let b = doWork();";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
+            var b = dictionary.SymbolsTable.GetValue<int>("b");
             Assert.Equal(2, b);
         }
 
@@ -29,46 +25,36 @@ namespace DSharpCompiler.Core.Tests
         public void ReturnBreakTest()
         {
             var code = @"
-                func doWork()
+                func int doWork()
                 {
                     return 2;
                     return 4;
                 };
                 let b = doWork();";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
-            var dictionary = interpreter.Interpret(code);
-            var b = dictionary.GetValue<int>("b");
-            Assert.Equal(2, b);
+            var interpreter = Interpreter.GetDsharpInterpreter();
+            Assert.Throws(typeof(InvalidOperationException), () => interpreter.Interpret(code));
         }
 
         [Fact]
         public void ComplexAssignTest()
         {
             var code = @"
-                func doWork()
+                func int doWork()
                 {
                     return 2 * 2 + - 3;
                 };
-                func doMoreWork()
+                func int doMoreWork()
                 {
                     return 2 / (2 + - 4);
                 };
                 let a = doWork;
                 let b = doMoreWork;
                 let c = doWork + doMoreWork;";
-            var pascalTokens = new DSharpTokens();
-            var lexer = new LexicalAnalyzer(pascalTokens);
-            var parser = new DSharpParser();
-            var visitor = new NodeVisitor();
-            var interpreter = new Interpreter(lexer, parser, visitor);
+            var interpreter = Interpreter.GetDsharpInterpreter();
             var dictionary = interpreter.Interpret(code);
-            var a = dictionary.GetValue<int>("a");
-            var b = dictionary.GetValue<int>("b");
-            var c = dictionary.GetValue<int>("c");
+            var a = dictionary.SymbolsTable.GetValue<int>("a");
+            var b = dictionary.SymbolsTable.GetValue<int>("b");
+            var c = dictionary.SymbolsTable.GetValue<int>("c");
             Assert.Equal(1, a);
             Assert.Equal(-1, b);
             Assert.Equal(0, c);

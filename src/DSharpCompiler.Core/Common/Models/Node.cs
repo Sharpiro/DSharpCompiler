@@ -1,10 +1,31 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DSharpCompiler.Core.Common.Models
 {
     public class Node
     {
-        public NodeType Type { get; set; }
+        public NodeType NodeType { get; set; }
+        public Node ParentNode { get; set; }
+        public Type ValueType { get; set; }
+
+        public TChild Cast<TChild>() where TChild : Node
+        {
+            try
+            {
+                var cast = (TChild)this;
+                return cast;
+            }
+            catch (InvalidCastException)
+            {
+                return null;
+            }
+        }
+    }
+
+    public class CustomTypeNode : ParentNode
+    {
+
     }
 
     public abstract class ParentNode : Node
@@ -20,23 +41,24 @@ namespace DSharpCompiler.Core.Common.Models
         public CompoundNode(IEnumerable<Node> children, IEnumerable<Node> parameters)
         {
             Children = children;
-            Type = NodeType.Compound;
+            NodeType = NodeType.Compound;
             Parameters = parameters;
         }
     }
 
-    //public class ConditionalNode : ParentNode
-    //{
-    //    //public Node ExpressionOne { get; set; }
-    //    //public Node ExpressionTwo { get; set; }
-    //    public IEnumerable<Node> Parameters { get; set; }
+    public class RoutineNode : Node
+    {
+        public string Name { get; set; }
 
-    //    public ConditionalNode(IEnumerable<Node> children)
-    //    {
-    //        Children = children;
-    //        Type = NodeType.Conditional;
-    //    }
-    //}
+        public IEnumerable<Node> Arguments { get; set; }
+
+        public RoutineNode(string name, IEnumerable<Node> arguments)
+        {
+            Name = name;
+            NodeType = NodeType.Routine;
+            Arguments = arguments;
+        }
+    }
 
     public class BinaryNode : Node
     {
@@ -49,7 +71,7 @@ namespace DSharpCompiler.Core.Common.Models
             Left = left;
             Token = token;
             Right = right;
-            Type = NodeType.BinaryOp;
+            NodeType = NodeType.BinaryOp;
         }
     }
 
@@ -60,73 +82,22 @@ namespace DSharpCompiler.Core.Common.Models
 
         public UnaryNode(Token operater, Node expression)
         {
-            Type = NodeType.UnaryOp;
+            NodeType = NodeType.UnaryOp;
             Token = operater;
             Expression = expression;
-        }
-    }
-
-    public class NumericNode : Node
-    {
-        public Token Token { get; set; }
-        public int Value { get; private set; }
-
-        public NumericNode(Token token)
-        {
-            Type = NodeType.Numeric;
-            Token = token;
-            Value = int.Parse(Token.Value);
-        }
-    }
-
-    public class StringNode : Node
-    {
-        public Token Token { get; set; }
-        public string Value { get; private set; }
-
-        public StringNode(Token token)
-        {
-            Type = NodeType.String;
-            Token = token;
-            Value = Token.Value;
-        }
-    }
-
-    public class BooleanNode : Node
-    {
-        public Token Token { get; set; }
-        public bool Value { get; private set; }
-
-        public BooleanNode(Token token)
-        {
-            Type = NodeType.Boolean;
-            Token = token;
-            Value = bool.Parse(token.Value);
         }
     }
 
     public class VariableNode : Node
     {
         public Token Token { get; set; }
-        public string Value { get; private set; }
+        public object Value { get; private set; }
 
-        public VariableNode(Token token)
+        public VariableNode(Token token, NodeType nodeType)
         {
-            Type = NodeType.Variable;
+            NodeType = nodeType;
             Token = token;
             Value = Token.Value;
-        }
-    }
-
-    public class RoutineNode : Node
-    {
-        public string RoutineName { get; set; }
-        public IEnumerable<Node> Arguments { get; set; }
-        public RoutineNode(string routineName, IEnumerable<Node> arguments)
-        {
-            RoutineName = routineName;
-            Type = NodeType.Routine;
-            Arguments = arguments;
         }
     }
 
@@ -134,7 +105,7 @@ namespace DSharpCompiler.Core.Common.Models
     {
         public EmptyNode()
         {
-            Type = NodeType.Empty;
+            NodeType = NodeType.Empty;
         }
     }
 
@@ -142,5 +113,6 @@ namespace DSharpCompiler.Core.Common.Models
     {
         None, BinaryOp, UnaryOp, Numeric, String, Boolean, Compound, Conditional, Variable,
         Assignment, Return, Routine, Empty,
+        CustomType,
     }
 }

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DSharpCompiler.Web.Api
 {
-    public class CompilerController
+    public class CompilerController : Controller
     {
         private readonly Interpreter _interpreter;
 
@@ -20,19 +20,13 @@ namespace DSharpCompiler.Web.Api
             _interpreter = interpreter;
         }
 
-        [HttpGet]
-        public string Get()
-        {
-            return "test string";
-        }
-
         [HttpPost]
         public object CompilePascal([FromBody]object postData)
         {
             if (postData == null)
                 throw new ArgumentNullException(nameof(postData));
             var code = JObject.FromObject(postData).SelectToken("source").Value<string>();
-            var dictionary = _interpreter.Interpret(code).Where(pair => pair.Value.GetType() == typeof(int)).ToDictionary(pair => pair.Key, y => y.Value);
+            var dictionary = _interpreter.Interpret(code).SymbolsTable.Where(pair => pair.Value.GetType() == typeof(int)).ToDictionary(pair => pair.Key, y => y.Value);
             var response = new { Data = new { Output = dictionary } };
             return response;
         }
@@ -40,16 +34,20 @@ namespace DSharpCompiler.Web.Api
         [HttpPost]
         public object CompileDSharp([FromBody]object postData)
         {
-            if (postData == null)
-                throw new ArgumentNullException(nameof(postData));
-            var code = JObject.FromObject(postData).SelectToken("source").Value<string>();
-            var dictionary = _interpreter.Interpret(code);
-            var trimmed = dictionary
-                .Where(pair => pair.Value.Value.GetType() == typeof(int) || pair.Value.Value.GetType() == typeof(string))
-                .Select(pair => new KeyValuePair<string, object>(pair.Key, pair.Value.Value))
-                .ToDictionary(pair => pair.Key, y => y.Value);
-            var response = new { Data = new { Output = trimmed } };
-            return response;
+            try
+            {
+                if (postData == null)
+                    throw new ArgumentNullException(nameof(postData));
+                var code = JObject.FromObject(postData).SelectToken("source").Value<string>();
+                var trimmed = _interpreter.Interpret(code).ConsoleOutput;
+                var response = new { Data = new { Output = trimmed } };
+                return response;
+            }
+            catch (Exception ex)
+            {
+                HttpContext.Response.StatusCode = 500;
+                return ex.Message;
+            }
         }
 
         [HttpPost]

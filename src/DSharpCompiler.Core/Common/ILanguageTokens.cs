@@ -3,7 +3,7 @@ using DSharpCompiler.Core.Common.Models;
 
 namespace DSharpCompiler.Core.Common
 {
-    public interface ILanguageTokens
+    public interface ITokenDefinitions
     {
         bool Contains(string value);
         IEnumerator<Token> GetEnumerator();
