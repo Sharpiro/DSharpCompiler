@@ -19,11 +19,11 @@ namespace DSharpCodeAnalysisTests
         public void SimpleProgramTest()
         {
             var desiredSource =
-@"int Add(int x, int y)
+@"func int add(int x, int y)
 {
     return x + y;
 }
-var result = Add(2, 3);
+let result = add(2, 3);
 System.Console.WriteLine(result);".Replace(Environment.NewLine, "\n");
 
             var script = CSharpScript.Create(desiredSource);
@@ -41,7 +41,10 @@ System.Console.WriteLine(result);".Replace(Environment.NewLine, "\n");
                                     DSyntaxKind.IntKeyword,
                                     DSyntaxFactory.TriviaList(
                                         DSyntaxFactory.Space))),
-                            DSyntaxFactory.Identifier("Add"))
+                            DSyntaxFactory.Identifier("add"))
+                            .WithFunctionKeyword(DSyntaxFactory.Token(DSyntaxFactory.TriviaList(),
+                            DSyntaxKind.FunctionKeyword,
+                            DSyntaxFactory.TriviaList(DSyntaxFactory.Space)))
                         .WithParameterList(
                             DSyntaxFactory.ParameterList(
                                 DSyntaxFactory.SeparatedList<DParameterSyntax>(
@@ -124,7 +127,7 @@ System.Console.WriteLine(result);".Replace(Environment.NewLine, "\n");
                                 DSyntaxFactory.IdentifierName(
                                     DSyntaxFactory.Identifier(
                                         DSyntaxFactory.TriviaList(),
-                                        "var",
+                                        "let",
                                         DSyntaxFactory.TriviaList(
                                             DSyntaxFactory.Space))))
                             .WithVariables(
@@ -138,7 +141,7 @@ System.Console.WriteLine(result);".Replace(Environment.NewLine, "\n");
                                     .WithInitializer(
                                         DSyntaxFactory.EqualsValueClause(
                                             DSyntaxFactory.InvocationExpression(
-                                                DSyntaxFactory.IdentifierName("Add"))
+                                                DSyntaxFactory.IdentifierName("add"))
                                             .WithArgumentList(
                                                 DSyntaxFactory.ArgumentList(
                                                     DSyntaxFactory.SeparatedList<DArgumentSyntax>(
@@ -184,29 +187,15 @@ System.Console.WriteLine(result);".Replace(Environment.NewLine, "\n");
                                             DSyntaxFactory.Argument(
                                                 DSyntaxFactory.IdentifierName("result")))))))}));
             
-            var csDescendants = csRoot.DescendantNodesAndTokens().ToList();
             var dDescendants = dRoot.DescendantNodesAndTokens().ToList();
 
-            var csNodes = csRoot.ChildNodes().ToList();
             var dNodes = dRoot.ChildNodes().ToList();
 
-            var csTokens = csRoot.ChildTokens().ToList();
             var dTokens = dRoot.ChildTokens().ToList();
 
-            var csString = csRoot.ToString();
             var dString = dRoot.ToString();
 
-            Assert.Equal(csString, csString);
-            Assert.Equal(csString, dString);
-            for (var i = 0; i < csDescendants.Count; i++)
-            {
-                var cDesc = csDescendants[i];
-                var dDesc = dDescendants[i];
-
-                Assert.True(cDesc.RawKind == (int)dDesc.SyntaxKind);
-                if (i == 0) continue;
-                Assert.NotNull(dDesc.Parent);
-            }
+            Assert.Equal(desiredSource, dString);
         }
     }
 }

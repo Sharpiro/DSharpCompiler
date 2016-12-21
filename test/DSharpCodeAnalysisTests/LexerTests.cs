@@ -15,7 +15,7 @@ namespace DSharpCodeAnalysisTests
         public void SimpleClassLexTest()
         {
             var source = 
-@"class Test
+@"type Test
 {
 
 }".Replace(Environment.NewLine, "\n");
@@ -38,7 +38,7 @@ namespace DSharpCodeAnalysisTests
         {
             //SyntaxFactory.Literal
             var source =
-@"int Add(int x, int y)
+@"func int Add(int x, int y)
 {
     return x + y;
 }

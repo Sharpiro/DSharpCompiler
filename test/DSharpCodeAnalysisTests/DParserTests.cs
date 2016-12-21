@@ -20,7 +20,7 @@ namespace DSharpCodeAnalysisTests
         [Fact]
         public void OneLineClassParseTest()
         {
-            var source = "class Program { }";
+            var source = "type Program { }";
             var lexer = new DLexer(source);
             var lexedTokens = lexer.Lex();
             var parser = new DParser(lexedTokens);
@@ -39,7 +39,7 @@ namespace DSharpCodeAnalysisTests
         public void MultiLineClassParseTest()
         {
             var source =
-@"class Program
+@"type Program
 {
 
 }".Replace(Environment.NewLine, "\n");
@@ -59,12 +59,27 @@ namespace DSharpCodeAnalysisTests
         [Fact]
         public void OneLineMethodTestParseTest()
         {
-            var source = "int Add(int x, int y);";
+            var source = "func int Add(int x, int y);";
             var lexer = new DLexer(source);
             var lexedTokens = lexer.Lex();
             var parser = new DParser(lexedTokens);
 
-            var cCompilationUnit = CSharpScript.Create(source).GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
+            var dCompilationUnit = parser.ParseCompilationUnit();
+            var dString = dCompilationUnit.ToString();
+
+            Assert.Equal(source, dString);
+        }
+
+        [Fact]
+        public void InvocationExpressionParseTest()
+        {
+            var source = "System.Console.WriteLine(result);";
+            var lexer = new DLexer(source);
+            var lexedTokens = lexer.Lex();
+            var parser = new DParser(lexedTokens);
+            var script = CSharpScript.Create(source);
+
+            var cCompilationUnit = script.GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
             var dCompilationUnit = parser.ParseCompilationUnit();
             var cString = cCompilationUnit.ToString();
             var dString = dCompilationUnit.ToString();
@@ -74,9 +89,9 @@ namespace DSharpCodeAnalysisTests
         }
 
         [Fact]
-        public void InvocationExpressionParseTest()
+        public void GlobalDeclarationParseTest()
         {
-            var source = "System.Console.WriteLine(result);";
+            var source = "let x = 2;";
             var lexer = new DLexer(source);
             var lexedTokens = lexer.Lex();
             var parser = new DParser(lexedTokens);
@@ -100,24 +115,15 @@ namespace DSharpCodeAnalysisTests
     var temp = 2;
     return x + y;
 }
-var result = Add(2, 3);
-var temp = 3;".Replace(Environment.NewLine, "\n");
+let result = Add(2, 3);
+let temp = 3;".Replace(Environment.NewLine, "\n");
             var lexer = new DLexer(source);
             var lexedTokens = lexer.Lex();
             var parser = new DParser(lexedTokens);
-            //var cScript = CSharpScript.Create<int>(source).WithDefaultOptions(); ;
-            //var scriptState = cScript.RunAsync().Result;
-            //var returnValue = scriptState.ReturnValue;
 
-            //var cCompilationUnit = cScript.GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
             var dCompilationUnit = parser.ParseCompilationUnit();
-            //var cString = cCompilationUnit.ToString();
+            var descendants = dCompilationUnit.DescendantNodesAndTokens();
             var dString = dCompilationUnit.ToString();
-            //var dScript = CSharpScript.Create(dString).WithDefaultOptions();
-            //var issues = dScript.Compile();
-
-            //Assert.False(issues.Any(i => i.Severity == DiagnosticSeverity.Error));
-            //Assert.Equal(source, cString);
             Assert.Equal(source, dString);
         }
     }

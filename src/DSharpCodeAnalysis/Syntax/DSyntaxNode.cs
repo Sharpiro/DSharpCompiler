@@ -752,7 +752,7 @@ namespace DSharpCodeAnalysis.Syntax
         public DMethodDeclarationSyntax(DTypeSyntax returnType, DSyntaxToken identifierToken)
         {
             returnType.Parent = this;
-            FunctionKeyword = DSyntaxFactory.Token(DSyntaxKind.FunctionKeyword);
+            FunctionKeyword = new DSyntaxToken(DSyntaxKind.FunctionKeyword) { Parent = this };
             ReturnType = returnType;
             identifierToken.Parent = this;
             Identifier = identifierToken;
@@ -808,16 +808,19 @@ namespace DSharpCodeAnalysis.Syntax
         {
             var newMethodDeclaration = new DMethodDeclarationSyntax(ReturnType, Identifier);
 
+            FunctionKeyword.Parent = newMethodDeclaration;
             Modifiers.SetParent(newMethodDeclaration);
             ReturnType.Parent = newMethodDeclaration;
             Identifier.Parent = newMethodDeclaration;
             ParameterList.Parent = newMethodDeclaration;
-            if (Body != null)
-                Body.Parent = newMethodDeclaration;
+            if (Body != null) Body.Parent = newMethodDeclaration;
+            if (SemicolonToken != null) SemicolonToken.Parent = newMethodDeclaration;
 
+            newMethodDeclaration.FunctionKeyword = FunctionKeyword;
             newMethodDeclaration.Modifiers = Modifiers;
             newMethodDeclaration.ParameterList = ParameterList;
             newMethodDeclaration.Body = Body;
+            newMethodDeclaration.SemicolonToken = SemicolonToken;
             newMethodDeclaration.Parent = Parent;
 
             return newMethodDeclaration;

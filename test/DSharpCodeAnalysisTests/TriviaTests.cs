@@ -17,24 +17,17 @@ namespace DSharpCodeAnalysisTests
         [Fact]
         public void OneLineClassTriviaTest()
         {
-            const string desiredSource = "class Test{}";
-            var cGeneratedClass = SyntaxFactory.ClassDeclaration("Test").WithKeyword(
-                SyntaxFactory.Token(SyntaxFactory.TriviaList(), SyntaxKind.ClassKeyword,
-                SyntaxFactory.TriviaList(SyntaxFactory.Space)));
+            const string desiredSource = "type Test{}";
 
             var dGeneratedClass = DSyntaxFactory.ClassDeclaration("Test").WithKeyword(
                 DSyntaxFactory.Token(DSyntaxFactory.TriviaList(), DSyntaxKind.ClassKeyword,
                 DSyntaxFactory.TriviaList(DSyntaxFactory.Space)));
 
 
-            var cDescendants = cGeneratedClass.DescendantNodesAndTokens().ToList();
             var dDescendants = dGeneratedClass.DescendantNodesAndTokens().ToList();
 
-
-            var cgeneratedClassString = cGeneratedClass.ToString();
             var dgeneratedClassString = dGeneratedClass.ToString();
 
-            Assert.Equal(desiredSource, cgeneratedClassString);
             Assert.Equal(desiredSource, dgeneratedClassString);
         }
 
@@ -42,11 +35,11 @@ namespace DSharpCodeAnalysisTests
         public void ClassMethodTriviaTest()
         {
             var desiredSource =
-@"class Test
+@"type Test
 {
-    void Do()
+    func void do()
     {
-        var x = 2;
+        let x = 2;
         System.Console.WriteLine(x);
     }
 }".Replace(Environment.NewLine, "\n");
@@ -74,12 +67,15 @@ namespace DSharpCodeAnalysisTests
                DSyntaxFactory.MethodDeclaration(
                    DSyntaxFactory.PredefinedType(
                        DSyntaxFactory.Token(
-                           DSyntaxFactory.TriviaList(
-                               DSyntaxFactory.Whitespace("    ")),
+                           DSyntaxFactory.TriviaList(),
                            DSyntaxKind.VoidKeyword,
                            DSyntaxFactory.TriviaList(
                                DSyntaxFactory.Space))),
-                   DSyntaxFactory.Identifier("Do"))
+                   DSyntaxFactory.Identifier("do"))
+                   .WithFunctionKeyword(DSyntaxFactory.Token(DSyntaxFactory.TriviaList(
+                               DSyntaxFactory.Whitespace("    ")),
+                            DSyntaxKind.FunctionKeyword,
+                            DSyntaxFactory.TriviaList(DSyntaxFactory.Space)))
                .WithParameterList(
                    DSyntaxFactory.ParameterList()
                    .WithCloseParenToken(
@@ -96,7 +92,7 @@ namespace DSharpCodeAnalysisTests
                                        DSyntaxFactory.Identifier(
                                            DSyntaxFactory.TriviaList(
                                                DSyntaxFactory.Whitespace("        ")),
-                                           "var",
+                                           "let",
                                            DSyntaxFactory.TriviaList(
                                                DSyntaxFactory.Space))))
                                .WithVariables(
@@ -177,7 +173,7 @@ namespace DSharpCodeAnalysisTests
         public void ReturnMethodTest()
         {
             var desiredSource =
-@"void Add(int x, int y)
+@"func void add(int x, int y)
 {
     return x + y;
 }".Replace(Environment.NewLine, "\n");
@@ -190,7 +186,10 @@ namespace DSharpCodeAnalysisTests
                                     DSyntaxKind.VoidKeyword,
                                     DSyntaxFactory.TriviaList(
                                         DSyntaxFactory.Space))),
-                            DSyntaxFactory.Identifier("Add"))
+                            DSyntaxFactory.Identifier("add"))
+                            .WithFunctionKeyword(DSyntaxFactory.Token(DSyntaxFactory.TriviaList(),
+                            DSyntaxKind.FunctionKeyword,
+                            DSyntaxFactory.TriviaList(DSyntaxFactory.Space)))
                         .WithParameterList(
                             DSyntaxFactory.ParameterList(
                                 DSyntaxFactory.SeparatedList<DParameterSyntax>(

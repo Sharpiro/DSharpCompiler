@@ -94,7 +94,7 @@ namespace DSharpCodeAnalysis.Syntax
             new DSyntaxEntry("return", DSyntaxKind.ReturnKeyword),
             new DSyntaxEntry("static", DSyntaxKind.StaticKeyword),
             new DSyntaxEntry("using", DSyntaxKind.UsingKeyword),
-            new DSyntaxEntry("class", DSyntaxKind.ClassKeyword),
+            new DSyntaxEntry("type", DSyntaxKind.ClassKeyword),
             new DSyntaxEntry("", DSyntaxKind.EndOfFileToken),
             new DSyntaxEntry("Identifier", DSyntaxKind.IdentifierToken),
             new DSyntaxEntry("0", DSyntaxKind.NumericLiteralToken),
