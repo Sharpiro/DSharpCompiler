@@ -66,11 +66,6 @@ namespace DSharpCodeAnalysis.Syntax
             return tokenString;
         }
 
-        public DSyntaxToken Clone()
-        {
-            return (DSyntaxToken)MemberwiseClone();
-        }
-
         public SyntaxHierarchyModel DescendantHierarchy()
         {
             return new SyntaxHierarchyModel
@@ -97,6 +92,12 @@ namespace DSharpCodeAnalysis.Syntax
             var newTrailing = ImmutableList.CreateRange(trailingTrivia);
             TrailingTrivia = newTrailing;
             return this;
+        }
+
+        public DSyntaxToken Clone()
+        {
+            var clone = (DSyntaxToken)MemberwiseClone();
+            return clone;
         }
 
         private string GetDebuggerDisplay()
