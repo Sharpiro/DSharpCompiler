@@ -53,28 +53,21 @@ namespace DSharpCodeAnalysis.Syntax
 
         public static DSyntaxToken Identifier(IEnumerable<DTrivia> leading, string identifier, IEnumerable<DTrivia> trailing)
         {
-            var token = new DSyntaxToken(DSyntaxKind.IdentifierToken)
-            {
-                LeadingTrivia = ImmutableList.CreateRange(leading),
-                Value = identifier,
-                TrailingTrivia = ImmutableList.CreateRange(trailing)
-            };
-            return token;
+            return Identifier(identifier)
+                .WithLeadingTrivia(ImmutableList.CreateRange(leading))
+                .WithTrailingTrivia(ImmutableList.CreateRange(trailing));
         }
 
         public static DSyntaxToken Token(DSyntaxKind syntaxKind)
         {
-            var token = new DSyntaxToken(syntaxKind);
-            return token;
+            return new DSyntaxToken(syntaxKind);
         }
 
         public static DSyntaxToken Token(IEnumerable<DTrivia> leading, DSyntaxKind syntaxKind, IEnumerable<DTrivia> trailing)
         {
-            return new DSyntaxToken(syntaxKind)
-            {
-                LeadingTrivia = ImmutableList.CreateRange(leading),
-                TrailingTrivia = ImmutableList.CreateRange(trailing)
-            };
+            return Token(syntaxKind)
+                .WithLeadingTrivia(ImmutableList.CreateRange(leading))
+                .WithTrailingTrivia(ImmutableList.CreateRange(trailing));
         }
 
         public static DPredefinedTypeSyntax PredefinedType(DSyntaxToken keyword)
@@ -189,19 +182,25 @@ namespace DSharpCodeAnalysis.Syntax
             return argumentList;
         }
 
-        public static IEnumerable<DTrivia> TriviaList()
+        public static DSyntaxTriviaList TriviaList()
         {
-            return Enumerable.Empty<DTrivia>();
+            return TriviaList(Enumerable.Empty<DTrivia>());
         }
 
-        public static IEnumerable<DTrivia> TriviaList(DTrivia trivia)
+        public static DSyntaxTriviaList TriviaList(DTrivia trivia)
         {
-            return new List<DTrivia> { trivia };
+            return TriviaList(new List<DTrivia> { trivia });
         }
 
-        public static IEnumerable<DTrivia> TriviaList(params DTrivia[] trivia)
+        public static DSyntaxTriviaList TriviaList(params DTrivia[] trivia)
         {
-            return trivia;
+
+            return TriviaList(trivia);
+        }
+
+        public static DSyntaxTriviaList TriviaList(IEnumerable<DTrivia> trivia)
+        {
+            return new DSyntaxTriviaList(trivia);
         }
 
         public static DTrivia Whitespace(string text, int position = 0)

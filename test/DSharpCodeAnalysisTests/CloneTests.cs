@@ -1,9 +1,8 @@
 ﻿using DSharpCodeAnalysis.Syntax;
-using System;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Immutable;
 using System.Reflection;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace DSharpCodeAnalysisTests
@@ -11,10 +10,22 @@ namespace DSharpCodeAnalysisTests
     public class CloneTests
     {
         [Fact]
+        public void TriviaCloneTest()
+        {
+            var trivia = DSyntaxFactory.Space;
+            var clone = trivia.Clone();
+
+            trivia.FullText = "abc";
+
+            Assert.Equal("abc", trivia.FullText);
+            Assert.Equal(" ", clone.FullText);
+        }
+
+        [Fact]
         public void SyntaxTokenCloneTest()
         {
-            var originalToken = DSyntaxFactory.Token(DSyntaxKind.ClassKeyword);
-            originalToken = originalToken.WithTrailingTrivia(DSyntaxFactory.TriviaList(DSyntaxFactory.Space));
+            var originalToken = DSyntaxFactory.Token(DSyntaxKind.ClassKeyword)
+                .WithTrailingTrivia(DSyntaxFactory.TriviaList(DSyntaxFactory.Space));
 
             var cloneToken = originalToken.Clone();
 
@@ -27,13 +38,44 @@ namespace DSharpCodeAnalysisTests
                 var originalValue = property.GetValue(originalToken);
                 var cloneValue = property.GetValue(cloneToken);
 
-                var originalhash = originalValue.GetHashCode();
-                var cloneHash = cloneValue.GetHashCode();
+                var originalhash = originalValue?.GetHashCode();
+                var cloneHash = cloneValue?.GetHashCode();
 
-                var x = originalValue.Equals(cloneValue);
-                var y = originalValue == cloneValue;
-                //var z = (DSyntaxKind)originalValue == (DSytnaxKind)cloneValue;
+
+                bool? isEqual;
+                var isValueType = property.PropertyType.GetTypeInfo().IsValueType;
+                if (isValueType)
+                    isEqual = originalValue?.Equals(cloneValue);
+                else
+                    isEqual = originalValue == cloneValue;
+
+                if (isEqual != null)
+                    Assert.True(isEqual);
+                else
+                {
+                    Assert.Null(originalValue);
+                    Assert.Null(cloneValue);
+                }
             }
+        }
+
+        [Fact]
+        public void ImmutableTest()
+        {
+            var originalToken = DSyntaxFactory.Token(DSyntaxKind.ClassKeyword)
+                .WithTrailingTrivia(DSyntaxFactory.TriviaList(DSyntaxFactory.Space));
+
+            var otherToken = DSyntaxFactory.Token(DSyntaxKind.ClassKeyword)
+                .WithTrailingTrivia(DSyntaxFactory.TriviaList(DSyntaxFactory.Space));
+
+            var list = new List<DSyntaxToken> { originalToken };
+            var immutableList = ImmutableList.CreateRange(list);
+
+            list[0].Value = "abc123xxx";
+
+            Assert.Equal("abc123xxx", list[0].ValueText);
+            Assert.NotEqual("abc123xxx", immutableList[0].ValueText);
+
         }
     }
 }

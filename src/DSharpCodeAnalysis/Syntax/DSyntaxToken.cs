@@ -24,9 +24,9 @@ namespace DSharpCodeAnalysis.Syntax
     {
         public DSyntaxKind SyntaxKind { get; }
         public DSyntaxNode Parent { get; set; }
-        public IEnumerable<DTrivia> LeadingTrivia { get; set; } = Enumerable.Empty<DTrivia>();
-        public IEnumerable<DTrivia> TrailingTrivia { get; set; } = Enumerable.Empty<DTrivia>();
-        public IEnumerable<DTrivia> AllTrivia => LeadingTrivia.Concat(TrailingTrivia);
+        public DSyntaxTriviaList LeadingTrivia { get; private set; } = DSyntaxFactory.TriviaList();
+        public DSyntaxTriviaList TrailingTrivia { get; private set; } = DSyntaxFactory.TriviaList();
+        public DSyntaxTriviaList AllTrivia => DSyntaxFactory.TriviaList(LeadingTrivia.Concat(TrailingTrivia).ToArray());
         public bool HasLeadingTrivia => LeadingTrivia.Any();
         public bool HasTrailingTrivia => TrailingTrivia.Any();
         public bool HasAnyTrivia => AllTrivia.Any();
@@ -83,20 +83,24 @@ namespace DSharpCodeAnalysis.Syntax
         public DSyntaxToken WithLeadingTrivia(IEnumerable<DTrivia> leadingTrivia)
         {
             var newLeading = ImmutableList.CreateRange(leadingTrivia);
-            LeadingTrivia = newLeading;
+            LeadingTrivia = DSyntaxFactory.TriviaList(newLeading);
             return this;
         }
 
         public DSyntaxToken WithTrailingTrivia(IEnumerable<DTrivia> trailingTrivia)
         {
             var newTrailing = ImmutableList.CreateRange(trailingTrivia);
-            TrailingTrivia = newTrailing;
+            TrailingTrivia = DSyntaxFactory.TriviaList(newTrailing);
             return this;
         }
 
         public DSyntaxToken Clone()
         {
             var clone = (DSyntaxToken)MemberwiseClone();
+            clone.LeadingTrivia = LeadingTrivia.Clone();
+            clone.TrailingTrivia = TrailingTrivia.Clone();
+            clone.Parent = null;
+
             return clone;
         }
 
@@ -149,6 +153,13 @@ namespace DSharpCodeAnalysis.Syntax
         public override string ToString()
         {
             return FullText;
+        }
+
+        public DTrivia Clone()
+        {
+            var clone = (DTrivia)MemberwiseClone();
+            clone.Token = null;
+            return clone;
         }
     }
 

@@ -130,4 +130,37 @@ namespace DSharpCodeAnalysis.Syntax
             _tokens = _tokens.ForEach(t => t.Parent = node);
         }
     }
+
+    public class DSyntaxTriviaList : IEnumerable<DTrivia>
+    {
+        private List<DTrivia> _list;
+
+        public DSyntaxTriviaList(IEnumerable<DTrivia> trivia)
+        {
+            _list = new List<DTrivia>(trivia);
+        }
+
+        public IEnumerator<DTrivia> GetEnumerator()
+        {
+            return _list.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public DSyntaxTriviaList Clone()
+        {
+            var list = new List<DTrivia>();
+
+            foreach (var item in _list)
+            {
+                var clone = item.Clone();
+                list.Add(clone);
+            }
+
+            return DSyntaxFactory.TriviaList(list);
+        }
+    }
 }
