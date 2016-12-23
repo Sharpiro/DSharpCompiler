@@ -46,6 +46,19 @@ namespace DSharpCodeAnalysis.Syntax
             }
         }
 
+        public TCurrent Cast<TCurrent>() where TCurrent : IDSyntax
+        {
+            try
+            {
+                return (TCurrent)(IDSyntax)this;
+            }
+            catch (Exception ex)
+            {
+                var message = $"An error occurred when trying to cast from {GetType().Name} to {typeof(TCurrent).Name}";
+                throw new InvalidCastException(message, ex);
+            }
+        }
+
         public DSyntaxToken(DSyntaxKind syntaxKind)
         {
             SyntaxKind = syntaxKind;
@@ -91,6 +104,12 @@ namespace DSharpCodeAnalysis.Syntax
         {
             var newTrailing = ImmutableList.CreateRange(trailingTrivia);
             TrailingTrivia = DSyntaxFactory.TriviaList(newTrailing);
+            return this;
+        }
+
+        public DSyntaxToken WithParent<T>(T parentNode) where T : DSyntaxNode
+        {
+            Parent = parentNode;
             return this;
         }
 

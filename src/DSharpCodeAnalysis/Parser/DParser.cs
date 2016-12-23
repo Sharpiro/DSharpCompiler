@@ -53,7 +53,7 @@ namespace DSharpCodeAnalysis.Parser
             return ParseMethodDeclaration();
         }
 
-        public DFieldDeclarationSytnax ParseNormalFieldDeclaration()
+        private DFieldDeclarationSytnax ParseNormalFieldDeclaration()
         {
             var returnType = ParseType();
             var variable = ParseVariableDeclarator();
@@ -63,7 +63,7 @@ namespace DSharpCodeAnalysis.Parser
             return field;
         }
 
-        public DStatementSyntax ParseLocalDeclarationStatement()
+        private DStatementSyntax ParseLocalDeclarationStatement()
         {
             var type = ParseType();
             var variable = ParseVariableDeclarator();
@@ -73,7 +73,7 @@ namespace DSharpCodeAnalysis.Parser
             return statement;
         }
 
-        public DVariableDeclaratorSyntax ParseVariableDeclarator()
+        private DVariableDeclaratorSyntax ParseVariableDeclarator()
         {
             var identifier = ParseIdentifierToken();
             switch (currentToken.SyntaxKind)
@@ -130,7 +130,7 @@ namespace DSharpCodeAnalysis.Parser
             return method;
         }
 
-        public void ParseBlockAndExpressionBodiesWithSemicolon(out DBlockSyntax blockBody, out DSyntaxToken semicolonToken)
+        private void ParseBlockAndExpressionBodiesWithSemicolon(out DBlockSyntax blockBody, out DSyntaxToken semicolonToken)
         {
             blockBody = null;
             semicolonToken = null;
@@ -142,7 +142,7 @@ namespace DSharpCodeAnalysis.Parser
                 blockBody = ParseBlock();
         }
 
-        public DBlockSyntax ParseBlock()
+        private DBlockSyntax ParseBlock()
         {
             var openBrace = EatToken(DSyntaxKind.OpenBraceToken);
             var statements = ParseStatements();
@@ -154,7 +154,7 @@ namespace DSharpCodeAnalysis.Parser
             return block;
         }
 
-        public DSyntaxList<DStatementSyntax> ParseStatements()
+        private DSyntaxList<DStatementSyntax> ParseStatements()
         {
             var statements = DSyntaxFactory.SingletonList<DStatementSyntax>();
             while (currentToken.SyntaxKind != DSyntaxKind.CloseBraceToken)
@@ -165,7 +165,7 @@ namespace DSharpCodeAnalysis.Parser
             return statements;
         }
 
-        public DStatementSyntax ParseStatement()
+        private DStatementSyntax ParseStatement()
         {
             var statement = ParseStatementNoDeclaration();
             if (statement != null) return statement;
@@ -174,7 +174,7 @@ namespace DSharpCodeAnalysis.Parser
             return statement;
         }
 
-        public DStatementSyntax ParseStatementNoDeclaration()
+        private DStatementSyntax ParseStatementNoDeclaration()
         {
             switch (currentToken.SyntaxKind)
             {
@@ -209,7 +209,7 @@ namespace DSharpCodeAnalysis.Parser
             return true;
         }
 
-        public DStatementSyntax ParseReturnStatement()
+        private DStatementSyntax ParseReturnStatement()
         {
             var returnToken = EatToken(DSyntaxKind.ReturnKeyword);
             var expression = ParseExpression();
@@ -218,7 +218,7 @@ namespace DSharpCodeAnalysis.Parser
                 .WithSemicolonToken(semicolonToken);
         }
 
-        public DExpressionSyntax ParseExpression()
+        private DExpressionSyntax ParseExpression()
         {
             var leftOperand = ParseTerm();
             DSyntaxKind opKind = GetBinaryExpression(currentToken.SyntaxKind);
@@ -243,7 +243,7 @@ namespace DSharpCodeAnalysis.Parser
             }
         }
 
-        public DExpressionSyntax ParseTerm()
+        private DExpressionSyntax ParseTerm()
         {
             DExpressionSyntax expression = null;
             switch (currentToken.SyntaxKind)
@@ -259,7 +259,7 @@ namespace DSharpCodeAnalysis.Parser
             return ParsePostFixExpression(expression);
         }
 
-        public DExpressionSyntax ParsePostFixExpression(DExpressionSyntax expression)
+        private DExpressionSyntax ParsePostFixExpression(DExpressionSyntax expression)
         {
             top:
             switch (currentToken.SyntaxKind)
@@ -302,7 +302,7 @@ namespace DSharpCodeAnalysis.Parser
             return DSyntaxFactory.Argument(expression);
         }
 
-        public DTypeSyntax ParseAliasQualifiedName()
+        private DTypeSyntax ParseAliasQualifiedName()
         {
             var nameSyntax = ParseIdentifierName();
 

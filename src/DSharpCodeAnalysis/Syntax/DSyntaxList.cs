@@ -33,6 +33,25 @@ namespace DSharpCodeAnalysis.Syntax
         {
             _list.Add(node);
         }
+
+        public void Replace(T oldNode, T newNode)
+        {
+            var index = _list.IndexOf(oldNode);
+            _list[index] = newNode;
+        }
+
+        public DSyntaxList<T> Clone()
+        {
+            var list = new List<T>();
+
+            foreach (var item in _list)
+            {
+                var clone = item.Clone<T>();
+                list.Add(clone);
+            }
+
+            return DSyntaxFactory.List(list);
+        }
     }
 
     public class DSeparatedSyntaxList<T> : IEnumerable<T> where T : DSyntaxNode
@@ -97,22 +116,42 @@ namespace DSharpCodeAnalysis.Syntax
         {
             _nodes.Add(node);
         }
+
+        public DSeparatedSyntaxList<T> Clone()
+        {
+            var newNodes = new List<T>();
+            var newSeperators = new List<DSyntaxToken>();
+
+            foreach (var item in _nodes)
+            {
+                var clone = item.Clone<T>();
+                newNodes.Add(clone);
+            }
+
+            foreach (var item in _seperators)
+            {
+                var clone = item.Clone();
+                newSeperators.Add(clone);
+            }
+
+            return DSyntaxFactory.SeparatedList(newNodes, newSeperators);
+        }
     }
 
     public class DSyntaxTokenList : IEnumerable<DSyntaxToken>
     {
-        private IEnumerable<DSyntaxToken> _tokens = Enumerable.Empty<DSyntaxToken>();
+        private List<DSyntaxToken> _tokens = new List<DSyntaxToken>();
 
         public DSyntaxTokenList()
         {
-            _tokens = Enumerable.Empty<DSyntaxToken>();
+
         }
 
         public DSyntaxTokenList(IEnumerable<DSyntaxToken> tokens)
         {
             if (tokens == null) throw new ArgumentNullException(nameof(tokens));
 
-            _tokens = tokens;
+            _tokens = tokens.ToList();
         }
 
         public IEnumerator<DSyntaxToken> GetEnumerator()
@@ -127,7 +166,19 @@ namespace DSharpCodeAnalysis.Syntax
 
         public void SetParent(DSyntaxNode node)
         {
-            _tokens = _tokens.ForEach(t => t.Parent = node);
+            _tokens.ForEach(t => t.Parent = node);
+        }
+
+        public DSyntaxTokenList Clone()
+        {
+            var newTokens = new DSyntaxToken[_tokens.Count];
+
+            for (var i = 0; i < newTokens.Length; i++)
+            {
+                newTokens[i] = _tokens[i].Clone();
+            }
+
+            return DSyntaxFactory.TokenList(newTokens);
         }
     }
 

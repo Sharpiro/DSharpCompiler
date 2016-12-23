@@ -130,6 +130,11 @@ namespace DSharpCodeAnalysis.Syntax
             return new DSeparatedSyntaxList<T>(nodes, seperators);
         }
 
+        public static DSeparatedSyntaxList<T> SeparatedList<T>(IEnumerable<T> nodes, IEnumerable<DSyntaxToken> seperators) where T : DSyntaxNode
+        {
+            return new DSeparatedSyntaxList<T>(nodes, seperators);
+        }
+
         public static DSyntaxList<T> SingletonList<T>(T item) where T : DSyntaxNode
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
@@ -194,8 +199,7 @@ namespace DSharpCodeAnalysis.Syntax
 
         public static DSyntaxTriviaList TriviaList(params DTrivia[] trivia)
         {
-
-            return TriviaList(trivia);
+            return TriviaList(trivia.AsEnumerable());
         }
 
         public static DSyntaxTriviaList TriviaList(IEnumerable<DTrivia> trivia)

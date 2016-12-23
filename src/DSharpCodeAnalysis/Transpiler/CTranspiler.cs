@@ -6,39 +6,46 @@ namespace DSharpCodeAnalysis.Transpiler
 {
     public class CTranspiler
     {
-        private readonly DCompilationUnitSyntax _compilation;
+        private readonly DCompilationUnitSyntax _originalCompilation;
+        private readonly DCompilationUnitSyntax _newCompilation;
 
         public CTranspiler(DCompilationUnitSyntax compilation)
         {
             if (compilation == null) throw new ArgumentNullException(nameof(compilation));
 
-            _compilation = compilation;
+            _originalCompilation = compilation;
+            _newCompilation = compilation.Clone<DCompilationUnitSyntax>();
         }
 
         public DCompilationUnitSyntax Transpile()
         {
             TranspileMethodDeclarations();
             TranspileVarIdentifiers();
-            return _compilation;
+            return _newCompilation;
         }
 
         private void TranspileVarIdentifiers()
         {
-            var varIdentifiers = _compilation.DescendantNodesAndTokens().OfType<DIdentifierNameSyntax>()
+            var varIdentifiers = _newCompilation.DescendantNodesAndTokens().OfType<DIdentifierNameSyntax>()
                 .SelectMany(v => v.ChildTokens()).ToList();
-            foreach (var variable in varIdentifiers)
+            foreach (var oldVariable in varIdentifiers)
             {
-                if (variable.ValueText == "let")
-                    variable.Value = "var";
+                var parent = oldVariable.Parent as DIdentifierNameSyntax;
+                if (oldVariable.ValueText != "let") continue;
+                var newVariable = oldVariable.Clone();
+                newVariable.Value = "var";
+                parent.Identifier = newVariable;
             }
         }
 
         private void TranspileMethodDeclarations()
         {
-            var methods = _compilation.DescendantNodesAndTokens().OfType<DMethodDeclarationSyntax>();
-            foreach (var method in methods)
+            var methods = _newCompilation.DescendantNodesAndTokens().OfType<DMethodDeclarationSyntax>();
+            foreach (var oldMethod in methods)
             {
-                method.WithFunctionKeyword(null);
+                var parent = oldMethod.Parent as IMemberHolder;
+                var newMethod = oldMethod.WithFunctionKeyword(null);
+                parent.Members.Replace(oldMethod, newMethod);
             }
         }
     }
