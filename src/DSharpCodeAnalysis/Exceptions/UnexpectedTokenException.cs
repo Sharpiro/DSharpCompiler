@@ -17,4 +17,15 @@ namespace DSharpCodeAnalysis.Exceptions
         {
         }
     }
+
+    public class TranspilationError : Exception
+    {
+        private const string error = 
+            "An error occurred transpiling from dsharp to csharp, " + 
+            "the output is not valid csharp";
+
+        public TranspilationError(): base(error)
+        {
+        }
+    }
 }

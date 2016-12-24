@@ -1,11 +1,12 @@
-﻿using DSharpCodeAnalysis.Parser;
+﻿using DSharpCodeAnalysis.Exceptions;
+using DSharpCodeAnalysis.Parser;
+using DSharpCodeAnalysis.Transpiler;
 using DSharpCompiler.Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -59,12 +60,35 @@ namespace DSharpCompiler.Web.Api
             var lexer = new DLexer(code);
             var tokens = lexer.Lex();
             var parser = new DParser(tokens);
-            var compilation = parser.ParseCompilationUnit();
-            var stringResult = compilation.ToString();
+            var dCompilation = parser.ParseCompilationUnit();
+            var cTranspiler = new CTranspiler(dCompilation);
+            var cCompilation = cTranspiler.Transpile();
+            var cSource = cCompilation.ToString();
 
-            var results = await CSharpScript.RunAsync(stringResult);
+            var results = await CSharpScript.RunAsync(cSource);
             var variables = results.Variables.ToDictionary(v => v.Name, v => v.Value);
             var response = new { Data = new { Output = variables } };
+            return response;
+        }
+
+        [HttpPost]
+        public async Task<object> TranspileCSharp([FromBody]object postData)
+        {
+            if (postData == null)
+                throw new ArgumentNullException(nameof(postData));
+            var code = JObject.FromObject(postData).SelectToken("source").Value<string>();
+            var lexer = new DLexer(code);
+            var tokens = lexer.Lex();
+            var parser = new DParser(tokens);
+            var dCompilation = parser.ParseCompilationUnit();
+            var cTranspiler = new CTranspiler(dCompilation);
+            var cCompilation = cTranspiler.Transpile();
+            var cSource = cCompilation.ToString();
+
+            var diagnostics = CSharpScript.Create(cSource).Compile();
+            if (diagnostics.Any(d => d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error))
+                throw new TranspilationError();
+            var response = new { Data = new { Output = cSource } };
             return response;
         }
 

@@ -31,6 +31,11 @@ let temp = 3;`;
         this.output = this.dataService.compileCSharp(this.input);
     }
 
+    private transpile(): void
+    {
+        this.output = this.dataService.transpileCSharp(this.input);
+    }
+
     private getTree(): void
     {
         this.output = this.dataService.getSyntaxTree(this.input);

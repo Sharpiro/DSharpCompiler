@@ -12,6 +12,7 @@ namespace DSharpCodeAnalysis.Syntax
 
         OpenParenToken = 8200,
         CloseParenToken = 8201,
+        MinusToken = 8202,
         PlusToken = 8203,
         EqualsToken = 8204,
         OpenBraceToken = 8205,
@@ -23,6 +24,7 @@ namespace DSharpCodeAnalysis.Syntax
         VoidKeyword = 8318,
         ReturnKeyword = 8341,
         StaticKeyword = 8347,
+        NewKeyword = 8354,
         UsingKeyword = 8373,
         ClassKeyword = 8374,
 
@@ -82,6 +84,7 @@ namespace DSharpCodeAnalysis.Syntax
 
             new DSyntaxEntry("(", DSyntaxKind.OpenParenToken),
             new DSyntaxEntry(")", DSyntaxKind.CloseParenToken),
+            new DSyntaxEntry("-", DSyntaxKind.MinusToken),
             new DSyntaxEntry("+", DSyntaxKind.PlusToken),
             new DSyntaxEntry("=", DSyntaxKind.EqualsToken),
             new DSyntaxEntry("{", DSyntaxKind.OpenBraceToken),
@@ -89,6 +92,7 @@ namespace DSharpCodeAnalysis.Syntax
             new DSyntaxEntry(";", DSyntaxKind.SemicolonToken),
             new DSyntaxEntry(",", DSyntaxKind.CommaToken),
             new DSyntaxEntry(".", DSyntaxKind.DotToken),
+            new DSyntaxEntry("new", DSyntaxKind.NewKeyword),
             new DSyntaxEntry("int", DSyntaxKind.IntKeyword),
             new DSyntaxEntry("void", DSyntaxKind.VoidKeyword),
             new DSyntaxEntry("return", DSyntaxKind.ReturnKeyword),

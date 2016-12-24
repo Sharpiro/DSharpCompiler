@@ -169,6 +169,9 @@ namespace DSharpCodeAnalysis.Parser
                 case '+':
                     tokenInfo.SyntaxKind = DSyntaxKind.PlusToken;
                     break;
+                case '-':
+                    tokenInfo.SyntaxKind = DSyntaxKind.MinusToken;
+                    break;
                 case '=':
                     tokenInfo.SyntaxKind = DSyntaxKind.EqualsToken;
                     break;

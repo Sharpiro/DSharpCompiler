@@ -63,6 +63,11 @@ namespace DSharpCodeAnalysis.Syntax
             return new DSyntaxToken(syntaxKind);
         }
 
+        public static DSyntaxToken Token(DSyntaxKind syntaxKind, object value)
+        {
+            return new DSyntaxToken(syntaxKind, value);
+        }
+
         public static DSyntaxToken Token(IEnumerable<DTrivia> leading, DSyntaxKind syntaxKind, IEnumerable<DTrivia> trailing)
         {
             return Token(syntaxKind)
@@ -252,6 +257,17 @@ namespace DSharpCodeAnalysis.Syntax
             return identifierNameSyntax;
         }
 
+        public static DQualifiedNameSyntax QualifiedName(DNameSyntax left, DSyntaxToken seperator, DIdentifierNameSyntax right)
+        {
+            var qualifiedName = new DQualifiedNameSyntax(left, seperator, right);
+
+            left.Parent = qualifiedName;
+            seperator.Parent = qualifiedName;
+            right.Parent = qualifiedName;
+
+            return qualifiedName;
+        }
+
         public static DIdentifierNameSyntax IdentifierName(string identifier)
         {
             var identifierToken = Identifier(identifier);
@@ -323,6 +339,17 @@ namespace DSharpCodeAnalysis.Syntax
             var globalStatement = new DGlobalStatementSyntax(dStatementSyntax);
             dStatementSyntax.Parent = globalStatement;
             return globalStatement;
+        }
+
+        public static DObjectCreationExpressionSyntax ObjectCreationExpression(DSyntaxToken newKeyword, DTypeSyntax type, DArgumentListSyntax argumentList)
+        {
+            var newExpression = new DObjectCreationExpressionSyntax(newKeyword, type, argumentList);
+
+            newExpression.NewKeyword.Parent = newExpression;
+            newExpression.Type.Parent = newExpression;
+            newExpression.ArgumentList.Parent = newExpression;
+
+            return newExpression;
         }
     }
 }

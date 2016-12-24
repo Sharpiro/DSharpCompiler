@@ -131,8 +131,8 @@ namespace DSharpCodeAnalysis.Syntax
             {
                 SyntaxKind = SyntaxKind.ToString(),
                 SyntaxType = nameof(DSyntaxNode),
-                Span = Span,
-                FullSpan = FullSpan
+                Width = Width,
+                FullWidth = FullWidth
             };
             foreach (var child in Children)
             {
@@ -148,8 +148,8 @@ namespace DSharpCodeAnalysis.Syntax
                         SyntaxKind = syntaxChild.SyntaxKind.ToString(),
                         SyntaxType = nameof(DSyntaxToken),
                         Children = syntaxChild.DescendantHierarchy().Children,
-                        Span = syntaxChild.Span,
-                        FullSpan = syntaxChild.FullSpan
+                        Width = syntaxChild.Width,
+                        FullWidth = syntaxChild.FullWidth
                     });
                 }
                 else if ((syntaxChild = child as DTrivia) != null)
@@ -158,8 +158,8 @@ namespace DSharpCodeAnalysis.Syntax
                     {
                         SyntaxKind = syntaxChild.SyntaxKind.ToString(),
                         SyntaxType = nameof(DSyntaxToken),
-                        Span = syntaxChild.Span,
-                        FullSpan = syntaxChild.FullSpan
+                        Width = syntaxChild.Width,
+                        FullWidth = syntaxChild.FullWidth
                     });
                 }
                 else
@@ -201,7 +201,11 @@ namespace DSharpCodeAnalysis.Syntax
 
         public override DSyntaxNode Clone()
         {
-            throw new NotImplementedException();
+            var newArgument = CloneProtected<DArgumentSyntax>(Expression.Clone());
+
+            newArgument.Expression.Parent = newArgument;
+
+            return newArgument;
         }
     }
 
@@ -318,7 +322,7 @@ namespace DSharpCodeAnalysis.Syntax
             }
         }
 
-        public DArgumentListSyntax(DSeparatedSyntaxList<DArgumentSyntax> arguments = default(DSeparatedSyntaxList<DArgumentSyntax>))
+        public DArgumentListSyntax(DSeparatedSyntaxList<DArgumentSyntax> arguments = null)
         {
             Arguments = arguments ?? DSyntaxFactory.SeparatedList<DArgumentSyntax>();
             OpenParenToken = new DSyntaxToken(DSyntaxKind.OpenParenToken) { Parent = this };
@@ -344,16 +348,15 @@ namespace DSharpCodeAnalysis.Syntax
 
         public override DSyntaxNode Clone()
         {
-            var newArgumentList = new DArgumentListSyntax
-            {
-                Arguments = Arguments,
-                OpenParenToken = OpenParenToken,
-                CloseParenToken = CloseParenToken
-            };
+            var newArgumentList = CloneProtected<DArgumentListSyntax>(Arguments.Clone());
 
-            Arguments.SetParent(newArgumentList);
-            OpenParenToken.Parent = newArgumentList;
-            CloseParenToken.Parent = newArgumentList;
+            newArgumentList.OpenParenToken = OpenParenToken.Clone();
+            newArgumentList.CloseParenToken = CloseParenToken.Clone();
+
+            newArgumentList.Arguments.SetParent(newArgumentList);
+            newArgumentList.OpenParenToken.Parent = newArgumentList;
+            newArgumentList.CloseParenToken.Parent = newArgumentList;
+
             return newArgumentList;
         }
     }
@@ -382,6 +385,10 @@ namespace DSharpCodeAnalysis.Syntax
     }
 
     public abstract class DTypeSyntax : DExpressionSyntax
+    {
+    }
+
+    public abstract class DNameSyntax : DTypeSyntax
     {
     }
 
@@ -432,7 +439,14 @@ namespace DSharpCodeAnalysis.Syntax
 
         public override DSyntaxNode Clone()
         {
-            throw new NotImplementedException();
+            var newClause = CloneProtected<DEqualsValueClauseSyntax>(Value.Clone());
+
+            newClause.EqualsToken = EqualsToken.Clone();
+
+            newClause.EqualsToken.Parent = newClause;
+            newClause.Value.Parent = newClause;
+
+            return newClause;
         }
     }
 
@@ -461,7 +475,14 @@ namespace DSharpCodeAnalysis.Syntax
 
         public override DSyntaxNode Clone()
         {
-            throw new NotImplementedException();
+            var newDeclarator = CloneProtected<DVariableDeclaratorSyntax>(Identifier.Clone());
+
+            newDeclarator.Initializer = Initializer.Clone<DEqualsValueClauseSyntax>();
+
+            newDeclarator.Identifier.Parent = newDeclarator;
+            newDeclarator.Initializer.Parent = newDeclarator;
+
+            return newDeclarator;
         }
     }
 
@@ -507,7 +528,7 @@ namespace DSharpCodeAnalysis.Syntax
 
         public override DSyntaxNode Clone()
         {
-            var newVariableDeclaration = CloneProtected<DVariableDeclarationSyntax>(Type.Clone(), Variables);
+            var newVariableDeclaration = CloneProtected<DVariableDeclarationSyntax>(Type.Clone(), Variables?.Clone());
 
             newVariableDeclaration.Type.Parent = newVariableDeclaration;
             newVariableDeclaration.Variables?.SetParent(newVariableDeclaration);
@@ -546,12 +567,50 @@ namespace DSharpCodeAnalysis.Syntax
 
         public override DSyntaxNode Clone()
         {
-            throw new NotImplementedException();
+            var expression = CloneProtected<DExpressionStatementSyntax>(Expression.Clone());
+
+            expression.SemicolonToken = SemicolonToken.Clone();
+
+            expression.Expression.Parent = expression;
+            expression.SemicolonToken.Parent = expression;
+
+            return expression;
         }
     }
 
     public abstract class DExpressionSyntax : DSyntaxNode
     {
+    }
+
+    public class DObjectCreationExpressionSyntax : DExpressionSyntax
+    {
+        public DSyntaxToken NewKeyword { get; set; }
+        public DTypeSyntax Type { get; set; }
+        public DArgumentListSyntax ArgumentList { get; set; }
+
+        protected override List<IDSyntax> Children => new List<IDSyntax> { NewKeyword, Type, ArgumentList };
+
+        public DObjectCreationExpressionSyntax(DSyntaxToken newKeyword, DTypeSyntax type, DArgumentListSyntax argumentList)
+        {
+            if (newKeyword == null) throw new ArgumentNullException(nameof(newKeyword));
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (argumentList == null) throw new ArgumentNullException(nameof(argumentList));
+
+            NewKeyword = newKeyword;
+            Type = type;
+            ArgumentList = argumentList;
+        }
+
+        public override DSyntaxNode Clone()
+        {
+            var newExpression = CloneProtected<DObjectCreationExpressionSyntax>(NewKeyword.Clone(), Type.Clone(), ArgumentList.Clone());
+
+            newExpression.ArgumentList.Parent = newExpression;
+            newExpression.NewKeyword.Parent = newExpression;
+            newExpression.Type.Parent = newExpression;
+
+            return newExpression;
+        }
     }
 
     public class DBinaryExpressionSyntax : DExpressionSyntax
@@ -699,7 +758,11 @@ namespace DSharpCodeAnalysis.Syntax
 
         public override DSyntaxNode Clone()
         {
-            throw new NotImplementedException();
+            var newExpression = CloneProtected<DLiteralExpressionSyntax>(SyntaxKind, Token.Clone());
+
+            newExpression.Token.Parent = newExpression;
+
+            return newExpression;
         }
     }
 
@@ -727,7 +790,14 @@ namespace DSharpCodeAnalysis.Syntax
 
         public override DSyntaxNode Clone()
         {
-            throw new NotImplementedException();
+            var newExpression = CloneProtected<DInvocationExpressionSyntax>(Expression.Clone());
+
+            newExpression.ArgumentList = ArgumentList.Clone<DArgumentListSyntax>();
+
+            newExpression.ArgumentList.Parent = newExpression;
+            newExpression.Expression.Parent = newExpression;
+
+            return newExpression;
         }
     }
 
@@ -768,7 +838,37 @@ namespace DSharpCodeAnalysis.Syntax
         }
     }
 
-    public class DIdentifierNameSyntax : DTypeSyntax
+    public class DQualifiedNameSyntax : DNameSyntax
+    {
+        public DNameSyntax Left { get; set; }
+        public DSyntaxToken DotToken { get; set; }
+        public DIdentifierNameSyntax Right { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { Left, DotToken, Right };
+
+        public DQualifiedNameSyntax(DNameSyntax left, DSyntaxToken dotToken, DIdentifierNameSyntax right)
+        {
+            if (left == null) throw new ArgumentNullException(nameof(left));
+            if (dotToken == null) throw new ArgumentNullException(nameof(dotToken));
+            if (right == null) throw new ArgumentNullException(nameof(right));
+
+            Left = left;
+            DotToken = dotToken;
+            Right = right;
+        }
+
+        public override DSyntaxNode Clone()
+        {
+            var newName = CloneProtected<DQualifiedNameSyntax>(Left.Clone(), DotToken.Clone(), Right.Clone());
+
+            newName.Left.Parent = newName;
+            newName.DotToken.Parent = newName;
+            newName.Right.Parent = newName;
+
+            return newName;
+        }
+    }
+
+    public class DIdentifierNameSyntax : DNameSyntax
     {
         public DSyntaxToken Identifier { get; set; }
         protected override List<IDSyntax> Children => new List<IDSyntax> { Identifier };

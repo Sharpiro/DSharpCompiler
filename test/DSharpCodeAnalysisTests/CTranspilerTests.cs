@@ -1,5 +1,6 @@
 ﻿using DSharpCodeAnalysis.Parser;
 using DSharpCodeAnalysis.Transpiler;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using Xunit;
@@ -87,6 +88,34 @@ var temp = 3;".Replace(Environment.NewLine, "\n");
 
             Assert.Equal(source, dString);
             Assert.Equal(transpiledSource, transpiledString);
+        }
+
+        [Fact]
+        public void ClassTest()
+        {
+            var source =
+@"type Adder
+{
+    func int Add(int x, int y)
+    {
+        let temp = 2;
+        return x + y;
+    }
+}
+let test = new System.Exception();
+let adder = new Adder();
+let result = adder.Add(2, 3);".Replace(Environment.NewLine, "\n");
+            var lexer = new DLexer(source);
+            var lexedTokens = lexer.Lex();
+            var parser = new DParser(lexedTokens);
+            var compilation = parser.ParseCompilationUnit();
+            var xString = compilation.ToString();
+            var transpiler = new CTranspiler(compilation);
+            var transCompilation = transpiler.Transpile();
+
+            var transpiledString = transCompilation.ToString();
+            var dString = compilation.ToString();
+            Assert.Equal(source, dString);
         }
     }
 }

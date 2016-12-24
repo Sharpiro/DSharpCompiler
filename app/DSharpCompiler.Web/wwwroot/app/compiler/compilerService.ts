@@ -41,7 +41,20 @@ export class CompilerService implements ICompilerService {
         return obs;
     }
 
-    public getSyntaxTree(source: string): Observable<string> {
+    public transpileCSharp(source: string): Observable<string>
+    {
+        var body = { source: source };
+        var obs = this.httpService.post("/api/compiler/TranspileCSharp", body)
+            .catch(() => {
+                toastr.error("Compilation Error");
+                return null;
+            })
+            .map((response: Response) => response.json().data.output);
+        return obs;
+    }
+
+    public getSyntaxTree(source: string): Observable<string>
+    {
         var body = { source: source };
         var obs = this.httpService.post("/api/compiler/GetSyntaxTree", body)
             .catch(() => {

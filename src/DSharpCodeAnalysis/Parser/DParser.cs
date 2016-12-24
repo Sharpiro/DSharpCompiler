@@ -29,16 +29,24 @@ namespace DSharpCodeAnalysis.Parser
         {
             var compilation = DSyntaxFactory.CompilationUnit();
 
-            var members = new List<DMemberDeclarationSyntax>();
-            while (_tokenOffset < _lexedTokens.Count)
-            {
-                members.Add(ParseMemberDeclarationOrStatement());
-            }
-            compilation = compilation.WithMembers(DSyntaxFactory.List(members));
+            var members = ParseMembers();
+            compilation = compilation.WithMembers(members);
 
             if (_tokenOffset != _lexedTokens.Count) throw new TokenException("Compilation finished with un-parsed tokens");
 
             return compilation;
+        }
+
+        private DSyntaxList<DMemberDeclarationSyntax> ParseMembers()
+        {
+            var members = new List<DMemberDeclarationSyntax>();
+            while (_tokenOffset < _lexedTokens.Count &&
+                currentToken.SyntaxKind != DSyntaxKind.CloseBraceToken)
+            {
+                members.Add(ParseMemberDeclarationOrStatement());
+            }
+
+            return DSyntaxFactory.List(members);
         }
 
         private DMemberDeclarationSyntax ParseMemberDeclarationOrStatement()
@@ -106,7 +114,29 @@ namespace DSharpCodeAnalysis.Parser
         {
             if (DSyntaxCache.IsPredefinedType(currentToken.SyntaxKind))
                 return DSyntaxFactory.PredefinedType(EatToken());
-            return ParseIdentifierName();
+            return ParseQualifiedName();
+        }
+
+        private DNameSyntax ParseQualifiedName()
+        {
+            DNameSyntax name = ParseIdentifierName();
+
+            top:
+            switch (currentToken.SyntaxKind)
+            {
+                case DSyntaxKind.DotToken:
+                    var seperator = EatToken(DSyntaxKind.DotToken);
+                    name = ParseQualifiedNameRight(name, seperator);
+                    goto top;
+            }
+            return name;
+        }
+
+        private DQualifiedNameSyntax ParseQualifiedNameRight(DNameSyntax left, DSyntaxToken seperator)
+        {
+            var right = ParseIdentifierName();
+
+            return DSyntaxFactory.QualifiedName(left, seperator, right);
         }
 
         private DIdentifierNameSyntax ParseIdentifierName()
@@ -254,9 +284,20 @@ namespace DSharpCodeAnalysis.Parser
                 case DSyntaxKind.NumericLiteralToken:
                     expression = DSyntaxFactory.LiteralExpression(DSyntaxCache.GetLiteralExpression(currentToken.SyntaxKind), EatToken());
                     break;
+                case DSyntaxKind.NewKeyword:
+                    expression = ParseNewExpression();
+                    break;
                 default: throw new ArgumentException("Invalid switch in ParseTerm()");
             }
             return ParsePostFixExpression(expression);
+        }
+
+        private DExpressionSyntax ParseNewExpression()
+        {
+            var newToken = EatToken(DSyntaxKind.NewKeyword);
+            var type = ParseType();
+            var argumentList = ParseParenthesizedArgumentList();
+            return DSyntaxFactory.ObjectCreationExpression(newToken, type, argumentList);
         }
 
         private DExpressionSyntax ParsePostFixExpression(DExpressionSyntax expression)
@@ -353,12 +394,14 @@ namespace DSharpCodeAnalysis.Parser
             var typeKeyword = EatToken();
             var identifier = ParseIdentifierToken();
             var openBrace = EatToken(DSyntaxKind.OpenBraceToken);
+            var members = ParseMembers();
             var closeBrace = EatToken(DSyntaxKind.CloseBraceToken);
 
             switch (typeKeyword.SyntaxKind)
             {
                 case DSyntaxKind.ClassKeyword:
-                    return DSyntaxFactory.ClassDeclaration(typeKeyword, identifier, openBrace, closeBrace);
+                    return DSyntaxFactory.ClassDeclaration(typeKeyword, identifier, openBrace, closeBrace)
+                        .WithMembers(members);
                 default: throw new ArgumentOutOfRangeException(nameof(typeKeyword.SyntaxKind));
             }
         }

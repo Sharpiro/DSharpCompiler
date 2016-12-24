@@ -14,6 +14,7 @@ namespace DSharpCodeAnalysis.Syntax
         Span FullSpan { get; }
         int Position { get; set; }
         int Width { get; }
+        int FullWidth { get; }
         DSyntaxNode Parent { get; set; }
 
         SyntaxHierarchyModel DescendantHierarchy();
@@ -87,8 +88,8 @@ namespace DSharpCodeAnalysis.Syntax
                 {
                     SyntaxKind = t.SyntaxKind.ToString(),
                     SyntaxType = nameof(DTrivia),
-                    Span = t.Span,
-                    FullSpan = t.FullSpan
+                    Width = t.Width,
+                    FullWidth = t.FullWidth
                 }).ToList()
             };
         }
@@ -151,6 +152,8 @@ namespace DSharpCodeAnalysis.Syntax
                 throw new NotImplementedException();
             }
         }
+
+        public int FullWidth => Width;
 
         public DTrivia(DSyntaxKind syntaxKind, string triviaText, int position = 0)
         {

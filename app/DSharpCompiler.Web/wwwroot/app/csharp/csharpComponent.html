@@ -7,7 +7,7 @@
 
 <div class="row">
     <div class="col-md-12" style="text-align:center;padding-bottom:5%">
-        <h2>D# Compiler</h2>
+        <h2>D# Compiler 2.0</h2>
     </div>
 </div>
 
@@ -18,6 +18,7 @@
             <textarea class="form-control inputTextArea" [(ngModel)]="input"></textarea>
             <div class="buttonPadding">
                 <button (click)="compile()" class="btn btn-default buttonSize">Compile</button>
+                <button (click)="transpile()" class="btn btn-default buttonSize">Transpile</button>
                 <button (click)="getTree()" class="btn btn-default buttonSize">Get Tree</button>
                 <button (click)="reset()" class="btn btn-default buttonSize">Reset</button>
             </div>
