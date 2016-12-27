@@ -1,4 +1,5 @@
 ﻿using DSharpCodeAnalysis.Parser;
+using DSharpCodeAnalysis.Syntax;
 using DSharpCodeAnalysis.Transpiler;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
@@ -95,11 +96,11 @@ var temp = 3;".Replace(Environment.NewLine, "\n");
         [Fact]
         public void NewTest()
         {
-            const string source = "var x = System.StringBuilder.New();";
-            const string transpiledSource = "var x = new System.StringBuilder.StringBuilder();";
+            const string cSource = "var x = new System.StringBuilder();";
+            const string dSource = "let x = System.StringBuilder.New();";
 
-            var cCompilation = CSharpScript.Create(source).GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
-            var dCompilation = DSharpScript.Create(source);
+            var cCompilation = CSharpScript.Create(cSource).GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
+            var dCompilation = DSharpScript.Create(dSource);
 
             var cDescendants = cCompilation.DescendantNodes().ToList();
             var dDescendants = dCompilation.DescendantNodesAndTokens().ToList();
@@ -109,8 +110,56 @@ var temp = 3;".Replace(Environment.NewLine, "\n");
 
             var transpiledString = transCompilation.ToString();
             var dString = dCompilation.ToString();
-            Assert.Equal(source, dString);
-            Assert.Equal(transpiledSource, transpiledString);
+            Assert.Equal(dSource, dString);
+            Assert.Equal(cSource, transpiledString);
+        }
+
+        [Fact]
+        public void RemoveIdentifierTest()
+        {
+            const string dSource = "let x = System.Whatever.StringBuilder.New();";
+            const string w = "System.Whatever.StringBuilder.New";
+            const string x = "System.Whatever.StringBuilder";
+            const string y = "System.Whatever";
+            const string z = "System";
+
+            var dCompilation = DSharpScript.Create(dSource);
+            var dDescendants = dCompilation.DescendantNodesAndTokens().ToList();
+            var invocation = dDescendants.OfType<DInvocationExpressionSyntax>().Single();
+            var topMemberAccess = (DMemberAccessExpression)invocation.Expression;
+
+            DQualifiedNameSyntax qualifiedName;
+            qualifiedName = DSyntaxFactory.QualifiedName(topMemberAccess);
+            Assert.Equal(w, qualifiedName.ToString());
+
+            qualifiedName = (DQualifiedNameSyntax)qualifiedName.RemoveLastIdentifier();
+            Assert.Equal(x, qualifiedName.ToString());
+
+            qualifiedName = (DQualifiedNameSyntax)qualifiedName.RemoveLastIdentifier();
+            Assert.Equal(y, qualifiedName.ToString());
+
+            var identifierName = qualifiedName.RemoveLastIdentifier();
+            Assert.Equal(z, identifierName.ToString());
+        }
+
+        [Fact]
+        public void FluentObjectionCreationTest()
+        {
+            const string cSource = "var x = new Exception().ToString();";
+            const string dSource = "let x = Exception.New().ToString();";
+
+            var cCompilation = CSharpScript.Create(cSource);
+            var dCompilation = DSharpScript.Create(dSource);
+
+            var cDescendants = cCompilation.GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot().DescendantNodesAndTokens().ToList();
+            var dDescendants = dCompilation.DescendantNodesAndTokens().ToList();
+
+            var transpiler = new CTranspiler(dCompilation);
+            var transCompilation = transpiler.Transpile();
+            var transString = transCompilation.ToString();
+
+            Assert.Equal(dSource, dCompilation.ToString());
+            Assert.Equal(cSource, transString);
         }
 
         [Fact]
@@ -125,9 +174,10 @@ var temp = 3;".Replace(Environment.NewLine, "\n");
         return x + y;
     }
 }
-let test = new System.Exception();
+let test = System.Exception.New();
 let adder = Adder.New();
-let result = adder.Add(2, 3);".Replace(Environment.NewLine, "\n");
+let result = adder.Add(2, 3);
+let xxx = Adder.New().Add(1, 1);".Replace(Environment.NewLine, "\n");
             var transpiledSource =
 @"class Adder
 {
@@ -139,7 +189,8 @@ let result = adder.Add(2, 3);".Replace(Environment.NewLine, "\n");
 }
 var test = new System.Exception();
 var adder = new Adder();
-var result = adder.Add(2, 3);".Replace(Environment.NewLine, "\n");
+var result = adder.Add(2, 3);
+var xxx = new Adder.Add(1, 1);".Replace(Environment.NewLine, "\n");
             var lexer = new DLexer(source);
             var lexedTokens = lexer.Lex();
             var parser = new DParser(lexedTokens);

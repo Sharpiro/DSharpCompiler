@@ -268,18 +268,17 @@ namespace DSharpCodeAnalysis.Syntax
             return qualifiedName;
         }
 
-        public static object QualifiedName(DMemberAccessExpression originalExpression)
+        public static DQualifiedNameSyntax QualifiedName(DMemberAccessExpression originalExpression)
         {
-            var x = originalExpression.Expression as DMemberAccessExpression;
-            if (x == null)
-            {
-                var temp = originalExpression.Expression as DIdentifierNameSyntax;
-                return temp;
-            }
+            DQualifiedNameSyntax qualifiedName;
+
+            var subMemberAccessExpression = originalExpression.Expression as DMemberAccessExpression;
+            if (subMemberAccessExpression == null)
+                qualifiedName = QualifiedName((DIdentifierNameSyntax)originalExpression.Expression.Clone(), Token(DSyntaxKind.DotToken), originalExpression.Name.Clone<DIdentifierNameSyntax>());
             else
-            {
-                return QualifiedName(x);
-            }
+                qualifiedName = QualifiedName(QualifiedName(subMemberAccessExpression).Clone<DNameSyntax>(), Token(DSyntaxKind.DotToken), originalExpression.Name.Clone<DIdentifierNameSyntax>());
+
+            return qualifiedName;
         }
 
         public static DIdentifierNameSyntax IdentifierName(string identifier)
@@ -318,6 +317,17 @@ namespace DSharpCodeAnalysis.Syntax
             expression.Parent = invocationExpression;
             name.Parent = invocationExpression;
             return invocationExpression;
+        }
+
+        public static DParenthesizedExpressionSyntax ParenthesizedExpression(DSyntaxToken openParenToken, DExpressionSyntax expression, DSyntaxToken closeParenToken)
+        {
+            var newExpression = new DParenthesizedExpressionSyntax(openParenToken, expression, closeParenToken);
+
+            openParenToken.Parent = newExpression;
+            expression.Parent = newExpression;
+            closeParenToken.Parent = newExpression;
+
+            return newExpression;
         }
 
         public static DSyntaxToken Literal(int value)

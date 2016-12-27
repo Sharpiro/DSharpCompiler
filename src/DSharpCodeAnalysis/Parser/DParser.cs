@@ -307,12 +307,24 @@ namespace DSharpCodeAnalysis.Parser
                 case DSyntaxKind.NewKeyword:
                     expression = ParseNewExpression();
                     break;
+                case DSyntaxKind.OpenParenToken:
+                    expression = ParseParenthesizedExpression();
+                    break;
                 default: throw new ArgumentException("Invalid switch in ParseTerm()");
             }
             return ParsePostFixExpression(expression);
         }
 
-        private DExpressionSyntax ParseNewExpression()
+        private DExpressionSyntax ParseParenthesizedExpression()
+        {
+            var openParenToken = EatToken(DSyntaxKind.OpenParenToken);
+            var expression = ParseTerm();
+            var closeParenToken = EatToken(DSyntaxKind.CloseParenToken);
+
+            return DSyntaxFactory.ParenthesizedExpression(openParenToken, expression, closeParenToken);
+        }
+
+        private DObjectCreationExpressionSyntax ParseNewExpression()
         {
             var newToken = EatToken(DSyntaxKind.NewKeyword);
             var type = ParseType();

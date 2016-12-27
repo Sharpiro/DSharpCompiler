@@ -709,7 +709,7 @@ namespace DSharpCodeAnalysis.Syntax
 
     public class DMemberAccessExpression : DExpressionSyntax
     {
-        public DExpressionSyntax Expression { get; }
+        public DExpressionSyntax Expression { get; set; }
         public DIdentifierNameSyntax Name { get; set; }
         public DSyntaxToken OperatorToken { get; set; }
         protected override List<IDSyntax> Children => new List<IDSyntax> { Expression, OperatorToken, Name };
@@ -875,6 +875,15 @@ namespace DSharpCodeAnalysis.Syntax
             Right = right;
         }
 
+        public DNameSyntax RemoveLastIdentifier()
+        {
+            var identifier = Right.Identifier.ValueText;
+            if (Right.Identifier.ValueText != identifier)
+                throw new ArgumentException($"Unable to remove Identifier '{identifier}' from end of QualifiedNameSyntax");
+
+            return Left;
+        }
+
         public override DSyntaxNode Clone()
         {
             var newName = CloneProtected<DQualifiedNameSyntax>(Left.Clone(), DotToken.Clone(), Right.Clone());
@@ -884,6 +893,36 @@ namespace DSharpCodeAnalysis.Syntax
             newName.Right.Parent = newName;
 
             return newName;
+        }
+    }
+
+    public class DParenthesizedExpressionSyntax : DExpressionSyntax
+    {
+        public DSyntaxToken OpenParenToken { get; set; }
+        public DExpressionSyntax Expression { get; set; }
+        public DSyntaxToken CloseParenToken { get; set; }
+        protected override List<IDSyntax> Children => new List<IDSyntax> { OpenParenToken, Expression, CloseParenToken };
+
+        public DParenthesizedExpressionSyntax(DSyntaxToken openParenToken, DExpressionSyntax expression, DSyntaxToken closeParenToken)
+        {
+            if (openParenToken == null) throw new ArgumentNullException(nameof(openParenToken));
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            if (closeParenToken == null) throw new ArgumentNullException(nameof(closeParenToken));
+
+            OpenParenToken = openParenToken;
+            Expression = expression;
+            CloseParenToken = closeParenToken;
+        }
+
+        public override DSyntaxNode Clone()
+        {
+            var newExpression = CloneProtected<DParenthesizedExpressionSyntax>(OpenParenToken.Clone(), Expression.Clone(), CloseParenToken.Clone());
+
+            newExpression.OpenParenToken.Parent = newExpression;
+            newExpression.Expression.Parent = newExpression;
+            newExpression.CloseParenToken.Parent = newExpression;
+
+            return newExpression;
         }
     }
 
@@ -1010,7 +1049,7 @@ namespace DSharpCodeAnalysis.Syntax
             identifierToken.Parent = this;
             Identifier = identifierToken;
             ParameterList = new DParameterListSyntax { Parent = this };
-            
+
             Modifiers = DSyntaxFactory.TokenList();
             SyntaxKind = DSyntaxKind.MethodDeclaration;
         }

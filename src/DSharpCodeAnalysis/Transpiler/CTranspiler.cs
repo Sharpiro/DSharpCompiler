@@ -39,10 +39,19 @@ namespace DSharpCodeAnalysis.Transpiler
                     var memberAccessExpression = invocationExpression.Expression as DMemberAccessExpression;
                     if (memberAccessExpression.Name.Identifier.ValueText != "New") continue;
 
-                    var newKeyword = DSyntaxFactory.Token(DSyntaxFactory.TriviaList(), DSyntaxKind.NewKeyword, DSyntaxFactory.TriviaList(DSyntaxFactory.LineFeed));
-                    //var objectCreationExpression = DSyntaxFactory.ObjectCreationExpression(newKeyword,
-                    //    DSyntaxFactory.QualifiedName(memberAccessExpression), invocationExpression.ArgumentList.Clone<DArgumentListSyntax>());
-                    //invocationExpression.Expression = objectCreationExpression;
+                    var newKeyword = DSyntaxFactory.Token(DSyntaxFactory.TriviaList(), DSyntaxKind.NewKeyword, DSyntaxFactory.TriviaList(DSyntaxFactory.Space));
+                    var qualifiedName = DSyntaxFactory.QualifiedName(memberAccessExpression);
+                    var simplifiedName = qualifiedName.RemoveLastIdentifier();
+                    var objectCreationExpression = DSyntaxFactory.ObjectCreationExpression(newKeyword,
+                        simplifiedName, invocationExpression.ArgumentList.Clone<DArgumentListSyntax>());
+
+                    var parent = invocationExpression.Parent as DEqualsValueClauseSyntax;
+                    if (parent != null)
+                        parent.Value = objectCreationExpression;
+                    var parentX = invocationExpression.Parent as DMemberAccessExpression;
+                    if (parentX != null)
+                        parentX.Expression = objectCreationExpression;
+
                 }
             }
         }

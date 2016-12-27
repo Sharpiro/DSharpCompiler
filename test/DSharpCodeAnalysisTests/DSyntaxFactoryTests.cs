@@ -1,4 +1,5 @@
 ﻿using DSharpCodeAnalysis.Parser;
+using DSharpCodeAnalysis.Syntax;
 using DSharpCodeAnalysis.Transpiler;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
@@ -15,7 +16,7 @@ namespace DSharpCodeAnalysisTests
         [Fact]
         public void QualifiedNameTest()
         {
-            var source = "var x = System.StringBuilder.New();";
+            const string source = "var x = System.Whatevers.StringBuilder.New();";
 
             var cCompilation = CSharpScript.Create(source).GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
             var dCompilation = DSharpScript.Create(source);
@@ -23,8 +24,14 @@ namespace DSharpCodeAnalysisTests
             var cDescendants = cCompilation.DescendantNodes().ToList();
             var dDescendants = dCompilation.DescendantNodesAndTokens().ToList();
 
-            var transpiler = new CTranspiler(dCompilation);
-            var transCompilation = transpiler.Transpile();
+            var memberAccessExpression = dDescendants.OfType<DMemberAccessExpression>().First();
+
+            var qualifiedName = DSyntaxFactory.QualifiedName(memberAccessExpression);
+            var qualifiedNameString = qualifiedName.ToString();
+
+            var dCompilationString = dCompilation.ToString();
+
+            Assert.Equal(source, dCompilationString);
         }
     }
 }
