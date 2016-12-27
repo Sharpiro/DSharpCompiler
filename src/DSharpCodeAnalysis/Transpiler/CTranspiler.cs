@@ -19,10 +19,48 @@ namespace DSharpCodeAnalysis.Transpiler
 
         public DCompilationUnitSyntax Transpile()
         {
+            TranspileObjectCreationExpressions();
+            TranspileModifiers();
             TranspileClassDeclarations();
             TranspileMethodDeclarations();
             TranspileVarIdentifiers();
             return _newCompilation;
+        }
+
+        private void TranspileObjectCreationExpressions()
+        {
+            var invocationExpressions = _newCompilation.DescendantNodesAndTokens().OfType<DInvocationExpressionSyntax>();
+
+            foreach (var invocationExpression in invocationExpressions)
+            {
+                var type = invocationExpression.Expression.GetType();
+                if (type == typeof(DMemberAccessExpression))
+                {
+                    var memberAccessExpression = invocationExpression.Expression as DMemberAccessExpression;
+                    if (memberAccessExpression.Name.Identifier.ValueText != "New") continue;
+
+                    var newKeyword = DSyntaxFactory.Token(DSyntaxFactory.TriviaList(), DSyntaxKind.NewKeyword, DSyntaxFactory.TriviaList(DSyntaxFactory.LineFeed));
+                    //var objectCreationExpression = DSyntaxFactory.ObjectCreationExpression(newKeyword,
+                    //    DSyntaxFactory.QualifiedName(memberAccessExpression), invocationExpression.ArgumentList.Clone<DArgumentListSyntax>());
+                    //invocationExpression.Expression = objectCreationExpression;
+                }
+            }
+        }
+
+        private void TranspileModifiers()
+        {
+            var modifers = _newCompilation.DescendantNodesAndTokens().OfType<DSyntaxToken>()
+                .Where(t => t.SyntaxKind == DSyntaxKind.PublicKeyword || t.SyntaxKind == DSyntaxKind.PrivateKeyword);
+
+            foreach (var modifer in modifers)
+            {
+                var value = modifer.SyntaxKind == DSyntaxKind.PublicKeyword ? "public" : "private";
+                var newModifer = DSyntaxFactory.Token(modifer.SyntaxKind, value)
+                    .WithParent(modifer.Parent).WithLeadingTrivia(modifer.LeadingTrivia.Clone())
+                    .WithTrailingTrivia(modifer.TrailingTrivia.Clone());
+                var parent = modifer.Parent as DMethodDeclarationSyntax;
+                parent.Modifiers.Replace(modifer, newModifer);
+            }
         }
 
         private void TranspileClassDeclarations()
@@ -38,8 +76,8 @@ namespace DSharpCodeAnalysis.Transpiler
 
                 var newDeclaration = declaration.Clone<DClassDeclarationSyntax>()
                     .WithKeyword(DSyntaxFactory.Token(DSyntaxKind.ClassKeyword, "class")
-                    .WithLeadingTrivia(declaration.Keyword.LeadingTrivia)
-                    .WithTrailingTrivia(declaration.Keyword.TrailingTrivia))
+                    .WithLeadingTrivia(declaration.Keyword.LeadingTrivia.Clone())
+                    .WithTrailingTrivia(declaration.Keyword.TrailingTrivia.Clone()))
                     .WithParent<DClassDeclarationSyntax>(declaration.Parent);
 
                 parent.Members.Replace(declaration, newDeclaration);

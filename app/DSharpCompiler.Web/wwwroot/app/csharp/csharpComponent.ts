@@ -12,13 +12,17 @@ import {CustomPipe, LowerCasePipe} from "../blocks/blocks"
 export class CsharpComponent
 {
     private defaultInput =
-`func int Add(int x, int y)
+`type Adder
 {
-    let temp = 2;
-    return x + y;
+    external func int Add(int x, int y)
+    {
+        let temp = 2;
+        return x + y;
+    }
 }
-let result = Add(2, 3);
-let temp = 3;`;
+let test = new System.Exception();
+let adder = new Adder();
+let result = adder.Add(2, 3);`;
     private input = this.defaultInput;
     private output: Observable<any>;
 

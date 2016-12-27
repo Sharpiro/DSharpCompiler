@@ -596,6 +596,7 @@ namespace DSharpCodeAnalysis.Syntax
             if (type == null) throw new ArgumentNullException(nameof(type));
             if (argumentList == null) throw new ArgumentNullException(nameof(argumentList));
 
+            SyntaxKind = DSyntaxKind.ObjectCreationExpression;
             NewKeyword = newKeyword;
             Type = type;
             ArgumentList = argumentList;
@@ -769,7 +770,7 @@ namespace DSharpCodeAnalysis.Syntax
     public class DInvocationExpressionSyntax : DExpressionSyntax
     {
         public DArgumentListSyntax ArgumentList { get; set; }
-        public DExpressionSyntax Expression { get; }
+        public DExpressionSyntax Expression { get; set; }
         protected override List<IDSyntax> Children => new List<IDSyntax> { Expression, ArgumentList };
 
         public DInvocationExpressionSyntax(DExpressionSyntax expression)
@@ -781,10 +782,27 @@ namespace DSharpCodeAnalysis.Syntax
 
         public DInvocationExpressionSyntax WithArgumentList(DArgumentListSyntax argumentList)
         {
-            var newInvocationExpression = new DInvocationExpressionSyntax(Expression);
-            Expression.Parent = newInvocationExpression;
-            argumentList.Parent = newInvocationExpression;
+            var newInvocationExpression = CloneProtected<DInvocationExpressionSyntax>(Expression.Clone());
+
             newInvocationExpression.ArgumentList = argumentList;
+
+            newInvocationExpression.Parent = Parent;
+            newInvocationExpression.Expression.Parent = newInvocationExpression;
+            newInvocationExpression.ArgumentList.Parent = newInvocationExpression;
+
+            return newInvocationExpression;
+        }
+
+        public DInvocationExpressionSyntax WithExpression(DExpressionSyntax expression)
+        {
+            var newInvocationExpression = CloneProtected<DInvocationExpressionSyntax>(expression);
+
+            newInvocationExpression.ArgumentList = ArgumentList.Clone<DArgumentListSyntax>();
+
+            newInvocationExpression.Parent = Parent;
+            newInvocationExpression.Expression.Parent = newInvocationExpression;
+            newInvocationExpression.ArgumentList.Parent = newInvocationExpression;
+
             return newInvocationExpression;
         }
 
@@ -851,6 +869,7 @@ namespace DSharpCodeAnalysis.Syntax
             if (dotToken == null) throw new ArgumentNullException(nameof(dotToken));
             if (right == null) throw new ArgumentNullException(nameof(right));
 
+            SyntaxKind = DSyntaxKind.QualifiedName;
             Left = left;
             DotToken = dotToken;
             Right = right;
@@ -991,7 +1010,8 @@ namespace DSharpCodeAnalysis.Syntax
             identifierToken.Parent = this;
             Identifier = identifierToken;
             ParameterList = new DParameterListSyntax { Parent = this };
-            Modifiers = new DSyntaxTokenList();
+            
+            Modifiers = DSyntaxFactory.TokenList();
             SyntaxKind = DSyntaxKind.MethodDeclaration;
         }
 

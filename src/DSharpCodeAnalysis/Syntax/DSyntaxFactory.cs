@@ -268,6 +268,20 @@ namespace DSharpCodeAnalysis.Syntax
             return qualifiedName;
         }
 
+        public static object QualifiedName(DMemberAccessExpression originalExpression)
+        {
+            var x = originalExpression.Expression as DMemberAccessExpression;
+            if (x == null)
+            {
+                var temp = originalExpression.Expression as DIdentifierNameSyntax;
+                return temp;
+            }
+            else
+            {
+                return QualifiedName(x);
+            }
+        }
+
         public static DIdentifierNameSyntax IdentifierName(string identifier)
         {
             var identifierToken = Identifier(identifier);

@@ -112,7 +112,7 @@ namespace DSharpCodeAnalysisTests
             var source =
 @"func int Add(int x, int y)
 {
-    var temp = 2;
+    let temp = 2;
     return x + y;
 }
 let result = Add(2, 3);
@@ -122,6 +122,22 @@ let temp = 3;".Replace(Environment.NewLine, "\n");
             var parser = new DParser(lexedTokens);
 
             var dCompilationUnit = parser.ParseCompilationUnit();
+            var descendants = dCompilationUnit.DescendantNodesAndTokens();
+            var dString = dCompilationUnit.ToString();
+            Assert.Equal(source, dString);
+        }
+
+        [Fact]
+        public void ModifiersParseTest()
+        {
+            var source =
+@"external func int Add(int x, int y)
+{
+    let temp = 2;
+    return x + y;
+}".Replace(Environment.NewLine, "\n");
+
+            var dCompilationUnit = DSharpScript.Create(source);
             var descendants = dCompilationUnit.DescendantNodesAndTokens();
             var dString = dCompilationUnit.ToString();
             Assert.Equal(source, dString);

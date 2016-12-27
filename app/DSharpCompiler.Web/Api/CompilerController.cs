@@ -72,7 +72,7 @@ namespace DSharpCompiler.Web.Api
         }
 
         [HttpPost]
-        public async Task<object> TranspileCSharp([FromBody]object postData)
+        public object TranspileCSharp([FromBody]object postData)
         {
             if (postData == null)
                 throw new ArgumentNullException(nameof(postData));

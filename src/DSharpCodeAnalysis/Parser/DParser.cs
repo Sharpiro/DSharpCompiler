@@ -147,6 +147,7 @@ namespace DSharpCodeAnalysis.Parser
 
         private DMethodDeclarationSyntax ParseMethodDeclaration()
         {
+            var modifiers = ParseModifiers();
             var functionKeyword = EatToken(DSyntaxKind.FunctionKeyword);
             var returnType = ParseType();
             var identifier = ParseIdentifierToken();
@@ -155,9 +156,28 @@ namespace DSharpCodeAnalysis.Parser
             DSyntaxToken semicolonToken;
 
             ParseBlockAndExpressionBodiesWithSemicolon(out body, out semicolonToken);
+
             var method = DSyntaxFactory.MethodDeclaration(returnType, identifier)
-                .WithParameterList(parameterList).WithBody(body).WithSemicolonToken(semicolonToken).WithFunctionKeyword(functionKeyword);
+                .WithParameterList(parameterList).WithBody(body).WithSemicolonToken(semicolonToken)
+                .WithFunctionKeyword(functionKeyword).WithModifiers(modifiers);
             return method;
+        }
+
+        private DSyntaxTokenList ParseModifiers()
+        {
+            var modifiers = new List<DSyntaxToken>();
+
+            top:
+            switch (currentToken.SyntaxKind)
+            {
+                case DSyntaxKind.PublicKeyword:
+                case DSyntaxKind.PrivateKeyword:
+                    modifiers.Add(EatToken());
+                    goto top;
+                default: break;
+            }
+
+            return DSyntaxFactory.TokenList(modifiers.ToArray());
         }
 
         private void ParseBlockAndExpressionBodiesWithSemicolon(out DBlockSyntax blockBody, out DSyntaxToken semicolonToken)

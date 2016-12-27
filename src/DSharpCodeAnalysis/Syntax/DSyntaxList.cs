@@ -169,6 +169,12 @@ namespace DSharpCodeAnalysis.Syntax
             _tokens.ForEach(t => t.Parent = node);
         }
 
+        public void Replace(DSyntaxToken oldToken, DSyntaxToken newToken)
+        {
+            var index = _tokens.IndexOf(oldToken);
+            _tokens[index] = newToken;
+        }
+
         public DSyntaxTokenList Clone()
         {
             var newTokens = new DSyntaxToken[_tokens.Count];
