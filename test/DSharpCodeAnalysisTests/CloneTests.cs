@@ -70,10 +70,7 @@ namespace DSharpCodeAnalysisTests
         {
             var source = "type Test { }";
 
-            var lexer = new DLexer(source);
-            var parser = new DParser(lexer.Lex());
-            var compilation = parser.ParseCompilationUnit();
-
+            var compilation = DSharpScript.Create(source);
             var originalNode = compilation.DescendantNodesAndTokens().OfType<DClassDeclarationSyntax>().Single();
             var cloneNode = originalNode.Clone<DClassDeclarationSyntax>();
 
@@ -151,10 +148,7 @@ let temp = 3;".Replace(Environment.NewLine, "\n");
 }
 var result = Add(2, 3);
 var temp = 3;".Replace(Environment.NewLine, "\n");
-            var lexer = new DLexer(source);
-            var lexedTokens = lexer.Lex();
-            var parser = new DParser(lexedTokens);
-            var compilation = parser.ParseCompilationUnit();
+            var compilation = DSharpScript.Create(source);
             var clone = compilation.Clone();
 
             var originalDecendants = compilation.DescendantNodesAndTokens().ToList();

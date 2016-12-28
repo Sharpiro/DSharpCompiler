@@ -131,6 +131,7 @@ namespace DSharpCodeAnalysis.Syntax
             {
                 SyntaxKind = SyntaxKind.ToString(),
                 SyntaxType = nameof(DSyntaxNode),
+                Position = Position,
                 Width = Width,
                 FullWidth = FullWidth
             };
@@ -148,6 +149,7 @@ namespace DSharpCodeAnalysis.Syntax
                         SyntaxKind = syntaxChild.SyntaxKind.ToString(),
                         SyntaxType = nameof(DSyntaxToken),
                         Children = syntaxChild.DescendantHierarchy().Children,
+                        Position = syntaxChild.Position,
                         Width = syntaxChild.Width,
                         FullWidth = syntaxChild.FullWidth
                     });
@@ -158,6 +160,7 @@ namespace DSharpCodeAnalysis.Syntax
                     {
                         SyntaxKind = syntaxChild.SyntaxKind.ToString(),
                         SyntaxType = nameof(DSyntaxToken),
+                        Position = syntaxChild.Position,
                         Width = syntaxChild.Width,
                         FullWidth = syntaxChild.FullWidth
                     });

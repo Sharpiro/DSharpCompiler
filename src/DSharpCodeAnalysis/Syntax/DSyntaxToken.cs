@@ -60,16 +60,18 @@ namespace DSharpCodeAnalysis.Syntax
             }
         }
 
-        public DSyntaxToken(DSyntaxKind syntaxKind)
+        public DSyntaxToken(DSyntaxKind syntaxKind, int position = 0)
         {
             SyntaxKind = syntaxKind;
             Value = DSyntaxFactory.SyntaxString(syntaxKind);
+            Position = position;
         }
 
-        public DSyntaxToken(DSyntaxKind syntaxKind, object value)
+        public DSyntaxToken(DSyntaxKind syntaxKind, object value, int position = 0)
         {
             SyntaxKind = syntaxKind;
             Value = value;
+            Position = position;
         }
 
         public override string ToString()

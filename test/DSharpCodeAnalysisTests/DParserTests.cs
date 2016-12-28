@@ -1,4 +1,5 @@
 using DSharpCodeAnalysis;
+using DSharpCodeAnalysis.Exceptions;
 using DSharpCodeAnalysis.Parser;
 using DSharpCodeAnalysis.Syntax;
 using Microsoft.CodeAnalysis;
@@ -21,12 +22,8 @@ namespace DSharpCodeAnalysisTests
         public void OneLineClassParseTest()
         {
             var source = "type Program { }";
-            var lexer = new DLexer(source);
-            var lexedTokens = lexer.Lex();
-            var parser = new DParser(lexedTokens);
-
+            var dCompilationUnit = DSharpScript.Create(source);
             var cCompilationUnit = CSharpScript.Create(source).GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
-            var dCompilationUnit = parser.ParseCompilationUnit();
             var cString = cCompilationUnit.ToString();
             var dString = dCompilationUnit.ToString();
 
@@ -43,12 +40,8 @@ namespace DSharpCodeAnalysisTests
 {
 
 }".Replace(Environment.NewLine, "\n");
-            var lexer = new DLexer(source);
-            var lexedTokens = lexer.Lex();
-            var parser = new DParser(lexedTokens);
-
+            var dCompilationUnit = DSharpScript.Create(source);
             var cCompilationUnit = CSharpScript.Create(source).GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
-            var dCompilationUnit = parser.ParseCompilationUnit();
             var cString = cCompilationUnit.ToString();
             var dString = dCompilationUnit.ToString();
 
@@ -60,11 +53,7 @@ namespace DSharpCodeAnalysisTests
         public void OneLineMethodTestParseTest()
         {
             var source = "func int Add(int x, int y);";
-            var lexer = new DLexer(source);
-            var lexedTokens = lexer.Lex();
-            var parser = new DParser(lexedTokens);
-
-            var dCompilationUnit = parser.ParseCompilationUnit();
+            var dCompilationUnit = DSharpScript.Create(source);
             var dString = dCompilationUnit.ToString();
 
             Assert.Equal(source, dString);
@@ -74,13 +63,9 @@ namespace DSharpCodeAnalysisTests
         public void InvocationExpressionParseTest()
         {
             var source = "System.Console.WriteLine(result);";
-            var lexer = new DLexer(source);
-            var lexedTokens = lexer.Lex();
-            var parser = new DParser(lexedTokens);
+            var dCompilationUnit = DSharpScript.Create(source);
             var script = CSharpScript.Create(source);
-
             var cCompilationUnit = script.GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
-            var dCompilationUnit = parser.ParseCompilationUnit();
             var cString = cCompilationUnit.ToString();
             var dString = dCompilationUnit.ToString();
 
@@ -92,13 +77,10 @@ namespace DSharpCodeAnalysisTests
         public void GlobalDeclarationParseTest()
         {
             var source = "let x = 2;";
-            var lexer = new DLexer(source);
-            var lexedTokens = lexer.Lex();
-            var parser = new DParser(lexedTokens);
-            var script = CSharpScript.Create(source);
+            var dCompilationUnit = DSharpScript.Create(source);
 
+            var script = CSharpScript.Create(source);
             var cCompilationUnit = script.GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
-            var dCompilationUnit = parser.ParseCompilationUnit();
             var cString = cCompilationUnit.ToString();
             var dString = dCompilationUnit.ToString();
 
@@ -117,11 +99,7 @@ namespace DSharpCodeAnalysisTests
 }
 let result = Add(2, 3);
 let temp = 3;".Replace(Environment.NewLine, "\n");
-            var lexer = new DLexer(source);
-            var lexedTokens = lexer.Lex();
-            var parser = new DParser(lexedTokens);
-
-            var dCompilationUnit = parser.ParseCompilationUnit();
+            var dCompilationUnit = DSharpScript.Create(source);
             var descendants = dCompilationUnit.DescendantNodesAndTokens();
             var dString = dCompilationUnit.ToString();
             Assert.Equal(source, dString);
@@ -151,12 +129,14 @@ let temp = 3;".Replace(Environment.NewLine, "\n");
 {
     let temp = 2;
     return x + y;
-}+".Replace(Environment.NewLine, "\n");
+}+";
 
-            var dCompilationUnit = DSharpScript.Create(source);
-            var descendants = dCompilationUnit.DescendantNodesAndTokens();
-            var dString = dCompilationUnit.ToString();
-            Assert.Equal(source, dString);
+            var script = CSharpScript.Create(source);
+            var cCompilationUnit = script.GetCompilation().SyntaxTrees.Single().GetCompilationUnitRoot();
+            var cDescendants = cCompilationUnit.DescendantNodesAndTokens().ToList();
+            var diagnostics = script.Compile();
+
+            Assert.Throws<UnexpectedTokenException>(() => DSharpScript.Create(source));
         }
     }
 }

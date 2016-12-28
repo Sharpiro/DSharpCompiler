@@ -42,25 +42,25 @@ namespace DSharpCodeAnalysis.Syntax
             return new DMethodDeclarationSyntax(returnType, identifierToken);
         }
 
-        public static DSyntaxToken Identifier(string identifier)
+        public static DSyntaxToken Identifier(string identifier, int position = 0)
         {
-            var token = new DSyntaxToken(DSyntaxKind.IdentifierToken)
+            var token = new DSyntaxToken(DSyntaxKind.IdentifierToken, position)
             {
                 Value = identifier
             };
             return token;
         }
 
-        public static DSyntaxToken Identifier(IEnumerable<DTrivia> leading, string identifier, IEnumerable<DTrivia> trailing)
+        public static DSyntaxToken Identifier(IEnumerable<DTrivia> leading, string identifier, IEnumerable<DTrivia> trailing, int position = 0)
         {
-            return Identifier(identifier)
+            return Identifier(identifier, position)
                 .WithLeadingTrivia(ImmutableList.CreateRange(leading))
                 .WithTrailingTrivia(ImmutableList.CreateRange(trailing));
         }
 
-        public static DSyntaxToken Token(DSyntaxKind syntaxKind)
+        public static DSyntaxToken Token(DSyntaxKind syntaxKind, int position = 0)
         {
-            return new DSyntaxToken(syntaxKind);
+            return new DSyntaxToken(syntaxKind, position);
         }
 
         public static DSyntaxToken Token(DSyntaxKind syntaxKind, object value)
@@ -68,9 +68,9 @@ namespace DSharpCodeAnalysis.Syntax
             return new DSyntaxToken(syntaxKind, value);
         }
 
-        public static DSyntaxToken Token(IEnumerable<DTrivia> leading, DSyntaxKind syntaxKind, IEnumerable<DTrivia> trailing)
+        public static DSyntaxToken Token(IEnumerable<DTrivia> leading, DSyntaxKind syntaxKind, IEnumerable<DTrivia> trailing, int position = 0)
         {
-            return Token(syntaxKind)
+            return Token(syntaxKind, position)
                 .WithLeadingTrivia(ImmutableList.CreateRange(leading))
                 .WithTrailingTrivia(ImmutableList.CreateRange(trailing));
         }
@@ -332,13 +332,13 @@ namespace DSharpCodeAnalysis.Syntax
 
         public static DSyntaxToken Literal(int value)
         {
-            var token = new DSyntaxToken(DSyntaxKind.NumericLiteralToken, value);
+            var token = new DSyntaxToken(DSyntaxKind.NumericLiteralToken, value: value);
             return token;
         }
 
-        public static DSyntaxToken Literal(IEnumerable<DTrivia> leading, int value, IEnumerable<DTrivia> trailing)
+        public static DSyntaxToken Literal(IEnumerable<DTrivia> leading, int value, IEnumerable<DTrivia> trailing, int position = 0)
         {
-            var token = new DSyntaxToken(DSyntaxKind.NumericLiteralToken, value);
+            var token = new DSyntaxToken(DSyntaxKind.NumericLiteralToken, value: value, position: position);
             token = token.WithLeadingTrivia(leading);
             token = token.WithTrailingTrivia(trailing);
             return token;

@@ -35,6 +35,7 @@ namespace DSharpCodeAnalysis.Parser
         {
             var tokenInfo = new DTokenInfo();
             _leadingTrivia.Clear();
+            var position = _textWindow.Offset;
             LexSyntaxTrivia(isTrailing: false, triviaList: ref _leadingTrivia);
 
             ScanSyntaxToken(ref tokenInfo);
@@ -42,18 +43,18 @@ namespace DSharpCodeAnalysis.Parser
             _trailingTrivia.Clear();
             LexSyntaxTrivia(isTrailing: true, triviaList: ref _trailingTrivia);
 
-            return CreateToken(ref tokenInfo, _leadingTrivia, _trailingTrivia);
+            return CreateToken(ref tokenInfo, _leadingTrivia, _trailingTrivia, position);
         }
 
-        private DSyntaxToken CreateToken(ref DTokenInfo tokenInfo, IEnumerable<DTrivia> leading, IEnumerable<DTrivia> trailing)
+        private DSyntaxToken CreateToken(ref DTokenInfo tokenInfo, IEnumerable<DTrivia> leading, IEnumerable<DTrivia> trailing, int position)
         {
             if (tokenInfo.SyntaxKind == DSyntaxKind.Null) throw new ArgumentNullException(nameof(tokenInfo.SyntaxKind));
 
             if (tokenInfo.SyntaxKind == DSyntaxKind.IdentifierToken)
-                return DSyntaxFactory.Identifier(leading, tokenInfo.Text, trailing);
+                return DSyntaxFactory.Identifier(leading, tokenInfo.Text, trailing, position);
             if (tokenInfo.SyntaxKind == DSyntaxKind.NumericLiteralToken)
-                return DSyntaxFactory.Literal(leading, Convert.ToInt32(tokenInfo.Text), trailing);
-            return DSyntaxFactory.Token(leading, tokenInfo.SyntaxKind, trailing);
+                return DSyntaxFactory.Literal(leading, Convert.ToInt32(tokenInfo.Text), trailing, position);
+            return DSyntaxFactory.Token(leading, tokenInfo.SyntaxKind, trailing, position);
         }
 
         private void LexSyntaxTrivia(bool isTrailing, ref List<DTrivia> triviaList)

@@ -42,8 +42,7 @@ namespace DSharpCodeAnalysisTests
 {
     return x + y;
 }
-int result = Add(2, 3);
-System.Console.WriteLine(result);".Replace(Environment.NewLine, "\n");
+let result = Add(2, 3);".Replace(Environment.NewLine, "\n");
             var lexer = new DLexer(source);
             lexer.Lex();
         }

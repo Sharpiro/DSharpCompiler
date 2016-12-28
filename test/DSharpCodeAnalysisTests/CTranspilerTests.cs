@@ -17,10 +17,7 @@ namespace DSharpCodeAnalysisTests
         {
             const string source = "let x = 2;";
             const string transpiledSource = "var x = 2;";
-            var lexer = new DLexer(source);
-            var lexedTokens = lexer.Lex();
-            var parser = new DParser(lexedTokens);
-            var compilation = parser.ParseCompilationUnit();
+            var compilation = DSharpScript.Create(source);
             var transpiler = new CTranspiler(compilation);
             var transCompilation = transpiler.Transpile();
 
@@ -45,10 +42,7 @@ namespace DSharpCodeAnalysisTests
 {
     return x + y;
 }".Replace(Environment.NewLine, "\n");
-            var lexer = new DLexer(source);
-            var lexedTokens = lexer.Lex();
-            var parser = new DParser(lexedTokens);
-            var compilation = parser.ParseCompilationUnit();
+            var compilation = DSharpScript.Create(source);
             var transpiler = new CTranspiler(compilation);
             var transCompilation = transpiler.Transpile();
 
@@ -78,10 +72,7 @@ let temp = 3;".Replace(Environment.NewLine, "\n");
 }
 var result = Add(2, 3);
 var temp = 3;".Replace(Environment.NewLine, "\n");
-            var lexer = new DLexer(source);
-            var lexedTokens = lexer.Lex();
-            var parser = new DParser(lexedTokens);
-            var compilation = parser.ParseCompilationUnit();
+            var compilation = DSharpScript.Create(source);
             var xString = compilation.ToString();
             var transpiler = new CTranspiler(compilation);
             var transCompilation = transpiler.Transpile();
@@ -191,10 +182,7 @@ var test = new System.Exception();
 var adder = new Adder();
 var result = adder.Add(2, 3);
 var xxx = new Adder().Add(1, 1);".Replace(Environment.NewLine, "\n");
-            var lexer = new DLexer(source);
-            var lexedTokens = lexer.Lex();
-            var parser = new DParser(lexedTokens);
-            var compilation = parser.ParseCompilationUnit();
+            var compilation = DSharpScript.Create(source);
             var dDescendants = compilation.DescendantNodesAndTokens().ToList();
             var xString = compilation.ToString();
             var transpiler = new CTranspiler(compilation);

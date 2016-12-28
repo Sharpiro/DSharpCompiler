@@ -7,7 +7,7 @@ namespace DSharpCodeAnalysis.Parser
         public static DCompilationUnitSyntax Create(string source)
         {
             var lexer = new DLexer(source);
-            var parser = new DParser(lexer.Lex());
+            var parser = new DParser(source, lexer.Lex());
             var compilation = parser.ParseCompilationUnit();
             return compilation;
         }

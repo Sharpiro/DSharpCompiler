@@ -9,6 +9,7 @@ namespace DSharpCodeAnalysis.Parser
     {
         private List<DSyntaxToken> _lexedTokens;
         private int _tokenOffset;
+        private readonly string _source;
 
         private DSyntaxToken currentToken
         {
@@ -18,10 +19,12 @@ namespace DSharpCodeAnalysis.Parser
             }
         }
 
-        public DParser(List<DSyntaxToken> lexedTokens)
+        public DParser(string source, List<DSyntaxToken> lexedTokens)
         {
+            if (string.IsNullOrEmpty(source)) throw new ArgumentNullException(nameof(source));
             if (lexedTokens.IsNullOrEmpty()) throw new ArgumentNullException(nameof(lexedTokens));
 
+            _source = source;
             _lexedTokens = lexedTokens;
         }
 
@@ -461,7 +464,11 @@ namespace DSharpCodeAnalysis.Parser
         {
             var cToken = currentToken;
             if (cToken.SyntaxKind != syntaxKind)
-                throw new UnexpectedTokenException(syntaxKind.ToString(), cToken.SyntaxKind.ToString());
+            {
+                var locationInfo = ParserFunctions.GetLocationFromLength(_source, cToken.Position);
+                throw new UnexpectedTokenException(syntaxKind.ToString(), cToken.SyntaxKind.ToString(),
+                    locationInfo.Item1, locationInfo.Item2, cToken.Width);
+            }
 
             _tokenOffset++;
             return cToken;
