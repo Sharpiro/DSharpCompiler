@@ -10,8 +10,8 @@ export class CompilerService implements ICompilerService {
     public compilePascal(source: string): Observable<string> {
         var body = { source: source };
         var obs = this.httpService.post("/api/compiler/compilepascal", body)
-            .catch(() => {
-                toastr.error("Compilation Error");
+            .catch(err => {
+                toastr.error(err._body);
                 return null;
             })
             .map((response: Response) => JSON.stringify(response.json().data.output));
@@ -21,7 +21,43 @@ export class CompilerService implements ICompilerService {
     public compileDSharp(source: string): Observable<string> {
         var body = { source: source };
         var obs = this.httpService.post("/api/compiler/compiledsharp", body)
-            .catch((err) => {
+            .catch(err => {
+                toastr.error(err._body);
+                return null;
+            })
+            .map((response: Response) => response.json().data.output);
+        return obs;
+    }
+
+    public compileCSharp(source: string): Observable<string>
+    {
+        var body = { source: source };
+        var obs = this.httpService.post("/api/compiler/compilecsharp", body)
+            .catch(err => {
+                toastr.error(err._body);
+                return null;
+            })
+            .map((response: Response) => JSON.stringify(response.json().data.output));
+        return obs;
+    }
+
+    public transpileCSharp(source: string): Observable<string>
+    {
+        var body = { source: source };
+        var obs = this.httpService.post("/api/compiler/TranspileCSharp", body)
+            .catch(err => {
+                toastr.error(err._body);
+                return null;
+            })
+            .map((response: Response) => response.json().data.output);
+        return obs;
+    }
+
+    public getSyntaxTree(source: string): Observable<string>
+    {
+        var body = { source: source };
+        var obs = this.httpService.post("/api/compiler/GetSyntaxTree", body)
+            .catch(err => {
                 toastr.error(err._body);
                 return null;
             })

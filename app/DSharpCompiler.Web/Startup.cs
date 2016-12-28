@@ -29,7 +29,6 @@ namespace DSharpCompiler.Web
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseDeveloperExceptionPage();
             app.UseMvc(options => options.MapRoute("defaultApi", "api/{controller}/{action}/{id?}"));
             app.UseFileServer();
         }

@@ -13,6 +13,7 @@
     <div class="collapse navbar-collapse" [ngClass]="showNavValue">
         <ul class="nav navbar-nav" (click)="toggleNav()">
             <li [ngClass]="isActive('/dashboard')"><a [routerLink]="['Dashboard']" href="">Dashboard</a></li>
+            <li [ngClass]="isActive('/csharp')"><a [routerLink]="['CSharp']" href="">DSharp 2.0</a></li>
             <li [ngClass]="isActive('/about')"><a [routerLink]="['About']" href="">About</a></li>
         </ul>
     </div>
