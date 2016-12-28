@@ -20,9 +20,10 @@ export class CsharpComponent
         return x + y;
     }
 }
-let test = new System.Exception();
-let adder = new Adder();
-let result = adder.Add(2, 3);`;
+let test = System.Exception.New();
+let adder = Adder.New();
+let result = adder.Add(2, 3);
+let xxx = Adder.New().Add(1, 1);`;
     private input = this.defaultInput;
     private output: Observable<any>;
 
