@@ -1,28 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{255646AD-1526-4940-ACF7-8B5E2DED6020}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{46592DC2-A232-4252-BA76-245FBA2B674A}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DSharpCompiler.Core", "src\DSharpCompiler.Core\DSharpCompiler.Core.xproj", "{8FB7A4D6-3231-4D6A-A3BC-3496A267071A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8043532F-507C-4AF6-894F-318B63D06781}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DSharpCompiler.Core.Tests", "test\DSharpCompiler.Core.Tests\DSharpCompiler.Core.Tests.xproj", "{9028DEFB-8401-40D0-B409-C0EEFABCC9AC}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app", "app", "{C5E9A6C0-EB11-4A03-84E5-28E99FE2A62B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DSharpCompiler.Web", "app\DSharpCompiler.Web\DSharpCompiler.Web.xproj", "{B0E435A8-6CDF-4140-AA6E-31A30FF9600A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSharpCompiler.Core", "src\DSharpCompiler.Core\DSharpCompiler.Core.csproj", "{8FB7A4D6-3231-4D6A-A3BC-3496A267071A}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DSharpCodeAnalysis", "src\DSharpCodeAnalysis\DSharpCodeAnalysis.xproj", "{4A822374-4AF2-4059-BD21-3F9F81949A7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSharpCompiler.Core.Tests", "test\DSharpCompiler.Core.Tests\DSharpCompiler.Core.Tests.csproj", "{9028DEFB-8401-40D0-B409-C0EEFABCC9AC}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DSharpCodeAnalysisTests", "test\DSharpCodeAnalysisTests\DSharpCodeAnalysisTests.xproj", "{9BEECA2A-37C7-437D-A007-1803B24F17DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSharpCompiler.Web", "app\DSharpCompiler.Web\DSharpCompiler.Web.csproj", "{B0E435A8-6CDF-4140-AA6E-31A30FF9600A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSharpCodeAnalysis", "src\DSharpCodeAnalysis\DSharpCodeAnalysis.csproj", "{4A822374-4AF2-4059-BD21-3F9F81949A7C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSharpCodeAnalysisTests", "test\DSharpCodeAnalysisTests\DSharpCodeAnalysisTests.csproj", "{9BEECA2A-37C7-437D-A007-1803B24F17DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -60,5 +57,8 @@ Global
 		{B0E435A8-6CDF-4140-AA6E-31A30FF9600A} = {C5E9A6C0-EB11-4A03-84E5-28E99FE2A62B}
 		{4A822374-4AF2-4059-BD21-3F9F81949A7C} = {255646AD-1526-4940-ACF7-8B5E2DED6020}
 		{9BEECA2A-37C7-437D-A007-1803B24F17DC} = {8043532F-507C-4AF6-894F-318B63D06781}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B3FC4110-B22D-4A1A-845D-553F4AEB0735}
 	EndGlobalSection
 EndGlobal
